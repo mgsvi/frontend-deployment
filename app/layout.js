@@ -4,6 +4,7 @@ import Sidebar from "./sidebar";
 import { Breadcrumb, Layout, Menu, theme } from "antd";
 import { Children } from "react";
 const { Header, Content, Footer, Sider } = Layout;
+import StyledComponentsRegistry from "./AntdRegistry";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,15 +16,21 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body
+        className={inter.className}
+        style={{ background: "#EBEEF3", height: "100Vh", width: "100vw" }}
+      >
+        <StyledComponentsRegistry>
           <Layout
+            hasSider
             style={{
-              minHeight: "100vh",
+              height: "100vh",
             }}
           >
-            <Sidebar />
-            <div className="max-w-full max-h-full">{children}</div>
+            <Sidebar className="max-f-screen" />
+            <div className="w-full max-w-full max-h-screen m-4">{children}</div>
           </Layout>
+        </StyledComponentsRegistry>
       </body>
     </html>
   );
