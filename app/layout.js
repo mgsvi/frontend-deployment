@@ -2,7 +2,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import Sidebar from "./sidebar";
 import { Breadcrumb, Layout, Menu, theme } from "antd";
-import { Children } from "react";
+import { Children, Suspense } from "react";
 const { Header, Content, Footer, Sider } = Layout;
 import StyledComponentsRegistry from "./AntdRegistry";
 
@@ -28,7 +28,9 @@ export default function RootLayout({ children }) {
             }}
           >
             <Sidebar className="max-f-screen" />
-            <div className="w-full max-w-full max-h-screen m-4">{children}</div>
+              <div className="w-full max-w-full max-h-screen bg-[#EBEEF3]">
+                {children}
+              </div>
           </Layout>
         </StyledComponentsRegistry>
       </body>

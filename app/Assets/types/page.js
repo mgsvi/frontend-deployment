@@ -14,7 +14,7 @@ const page = () => {
 
   return (
     <ConfigProvider theme={theme}>
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col w-full p-4">
         <h1 className="text-xl font-semi bold mb-5">Manage asset types</h1>
 
         <div className=" flex flex-row justify-between mb-4">
