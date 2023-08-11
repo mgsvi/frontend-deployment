@@ -2,6 +2,7 @@ import React from "react";
 import { Spin, Result, Table } from "antd";
 import useSWR from "swr";
 import { LoadingOutlined } from "@ant-design/icons";
+import Link from "next/link";
 
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
@@ -27,7 +28,7 @@ export default function TypeTable() {
       title: "Name",
       dataIndex: "name",
       key: "name",
-      render: (text) => <a>{text}</a>,
+      render: (text) => <Link href={`/assets/types/${text}`}>{text}</Link>,
     },
     {
       title: "Created At",

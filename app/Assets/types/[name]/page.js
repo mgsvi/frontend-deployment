@@ -1,8 +1,9 @@
 "use client";
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { EllipsisOutlined } from "@ant-design/icons";
+import { Avatar, Space, Modal } from "antd";
 import { Col, Row } from "antd";
+import useSWR from "swr";
 import {
   Button,
   Checkbox,
@@ -11,26 +12,101 @@ import {
   Select,
   Table,
   Popconfirm,
+  Divider,
+  Spin,
+  message,
 } from "antd";
 import {
   EditOutlined,
   CheckOutlined,
   SearchOutlined,
   PlusOutlined,
+  AppstoreOutlined,
   BarsOutlined,
-  UserOutlined,
+  TagsOutlined,
   NumberOutlined,
+  CalendarOutlined,
   EnvironmentOutlined,
+  PartitionOutlined,
+  CloseOutlined,
+  EllipsisOutlined,
+  DeleteOutlined,
+  LoadingOutlined,
+  EnterOutlined,
 } from "@ant-design/icons";
+import FieldsSection from "./FieldsSection";
 
 function page({ params }) {
+  const router = useRouter();
+  let originalData = {};
+  const [updatePressed, setupdatePressed] = useState(false);
+  const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
+  const [messageApi, contextHolder] = message.useMessage();
+  const [addsectionName, setAddSectionName] = useState("");
+  const [showAddSection, setshowAddSection] = useState(false);
+  const [assetTypeExists, setassetTypeExists] = useState(false);
+  const [isLoading, setisLoading] = useState(true);
   const [assetType, setassetType] = useState({
     name: params.name,
     created_by: "Ana De Armas",
-    created_at: Date.now(),
+    created_at: Math.floor(Date.now() / 1000),
     asset_zone: null,
-    fields: [],
+    fields: [
+      {
+        section_name: "SUMMARY FIELDS",
+        fields: [
+          { field_name: "Unique Id", required: true, type: "text", values: [] },
+          { field_name: "Status", required: true, type: "select", values: [] },
+          { field_name: "Site", required: false, type: "select", values: [] },
+        ],
+      },
+    ],
   });
+
+  const success = (msg) => {
+    messageApi.open({
+      type: "success",
+      content: msg,
+    });
+  };
+
+  const error = (msg) => {
+    messageApi.open({
+      type: "error",
+      content: msg,
+    });
+  };
+
+  const warning = (msg) => {
+    messageApi.open({
+      type: "warning",
+      content: msg,
+    });
+  };
+
+  useEffect(() => {
+    fetch(`https://digifield.onrender.com/assets/get-asset-type/${params.name}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data == null) {
+          setassetTypeExists(false);
+        } else {
+          console.log(data);
+          originalData = data;
+          setassetType(data);
+          setassetTypeExists(true);
+          setChecked(() => {
+            if (data.asset_zone != null) {
+              return true;
+            } else {
+              return false;
+            }
+          });
+        }
+        setisLoading(false);
+      });
+  }, []);
+
   const tableContainerStyle = {
     marginTop: "0px", // Adjust the margin top value as needed to move the table down
   };
@@ -38,34 +114,11 @@ function page({ params }) {
   const [data, setData] = useState([
     {
       key: 1,
-      name: "John Brown",
+      name: "Serial Number",
       age: 32,
       address: "New York No. 1 Lake Park",
       description:
         "My name is John Brown, I am 32 years old, living in New York No. 1 Lake Park.",
-    },
-    {
-      key: 2,
-      name: "Jim Green",
-      age: 42,
-      address: "London No. 1 Lake Park",
-      description:
-        "My name is Jim Green, I am 42 years old, living in London No. 1 Lake Park.",
-    },
-    {
-      key: 3,
-      name: "Not Expandable",
-      age: 29,
-      address: "Jiangsu No. 1 Lake Park",
-      description: "This not expandable",
-    },
-    {
-      key: 4,
-      name: "Joe Black",
-      age: 32,
-      address: "Sydney No. 1 Lake Park",
-      description:
-        "My name is Joe Black, I am 32 years old, living in Sydney No. 1 Lake Park.",
     },
   ]);
 
@@ -106,209 +159,608 @@ function page({ params }) {
     },
   ];
 
-  const [assetTypeName, setassetTypeName] = useState(params.name);
   const [isNameEditEnabled, setisNameEditEnabled] = useState(false);
 
   //Asset Zone related values and Methods
-  const [assetZone, setAssetZone] = useState(1);
+  const [assetZoneUnit, setassetZoneUnit] = useState("m");
   const [checked, setChecked] = useState(true);
 
-  const onChange = (e) => {
+  const onAssetZoneEnabledChange = (e) => {
+    let value = 0;
+    if (e.target.checked) {
+      switch (assetZoneUnit) {
+        case "m":
+          value = assetType.asset_zone;
+          break;
+        case "km":
+          value = assetType.asset_zone * 1000;
+          break;
+        case "feet":
+          value = assetType.asset_zone * 0.3048;
+          break;
+        case "cm":
+          value = assetType.asset_zone / 100;
+          break;
+        default:
+          break;
+      }
+      setassetType({ ...assetType, asset_zone: value });
+    } else {
+      setassetType({ ...assetType, asset_zone: null });
+    }
     setChecked(e.target.checked);
   };
 
-  const handleChange = (value) => {
-    console.log(`selected ${value}`);
+  const handleAssetZoneUnitChange = (value) => {
+    setassetZoneUnit(value);
   };
   //end of Asset Zone related values and Methods
 
-  //main table
-  const handleTypeChange = (value) => {
-    console.log("Selected type:", value);
-  };
-
-  const handleRequiredChange = (e) => {
-    console.log("Is Required:", e.target.checked);
-  };
-
-  //Add field modal realted values and methods
-  const [open, setOpen] = useState(false);
-
-  const showModal = () => {
-    setOpen(true);
-  };
-
-  //dal realted values and methods
-
   return (
-    <div className="flex">
-      <div className="flex flex-col w-2/3 p-3">
-        <h1 className="text-xl font-semi bold mb-8">Edit Asset type</h1>
-        <div className="flex justify-between mr-3 mb-5">
-          {isNameEditEnabled ? (
-            <div className="flex">
-              <Input
-                className="text-2xl font-semi bold mr-5"
-                value={assetTypeName}
-                onChange={(e) => {
-                  setassetTypeName(e.target.value);
+    <div className="flex w-full h-screen ">
+      {contextHolder}
+      <div className="flex flex-col w-2/3 h-screen p-3 overflow-y-auto justify-between">
+        {!isLoading ? (
+          <div className="flex flex-col w-full">
+            <div className="flex justify-between mb-8">
+              <h1 className="text-xl font-semi bold">Edit Asset type</h1>
+              <Popconfirm
+                title="Delete the asset type"
+                description="Performing this action will remove the asset type, are you sure?"
+                okText="Yes"
+                cancelText="No"
+                onConfirm={() => {
+                  fetch(
+                    `https://digifield.onrender.com/assets/delete-asset-type/${assetType.name}`,
+                    {
+                      method: "DELETE",
+                    }
+                  )
+                    .then((res) => res.json())
+                    .then((data) => {
+                      if (data.acknowledge) {
+                        success("Asset Type has been deleted");
+                        router.push("/assets/types");
+                      } else {
+                        warning(data.description);
+                      }
+                    });
                 }}
-              />
-              <button
-                onClick={() => {
-                  setisNameEditEnabled(!isNameEditEnabled);
-                }}
-                style={{ fontSize: 14, backgroundColor: "#EBEEF3" }}
               >
-                <CheckOutlined />
-              </button>
+                <button className="text-[#828282] bg-transparent hover:text-black">
+                  <EllipsisOutlined rotate={90} />
+                </button>
+              </Popconfirm>
             </div>
-          ) : (
-            <div className="flex">
-              <h1 className="text-2xl font-semi bold mr-5">{assetTypeName}</h1>
-              <button
-                onClick={() => {
-                  setisNameEditEnabled(!isNameEditEnabled);
-                }}
-                style={{ fontSize: 14, backgroundColor: "#EBEEF3" }}
-              >
-                <EditOutlined />
-              </button>
-            </div>
-          )}
-          <div>
-            <Checkbox checked={checked} onChange={onChange}>
-              <p className="mt-2 mb-2 text-sm text-slate-400 mr-3">
-                Enable inspection zone
-              </p>
-            </Checkbox>
-            <InputNumber
-              className="mr-3"
-              min={1}
-              max={1000}
-              style={{ width: 60 }}
-              defaultValue={1}
-              disabled={!checked}
-              onChange={(val) => {
-                setAssetZone(val);
-              }}
-            />
-            <Select
-              className="mr-3"
-              defaultValue="m"
-              disabled={!checked}
-              style={{ width: 70 }}
-              onChange={handleChange}
-              options={[
-                { value: "m", label: "m" },
-                { value: "cm", label: "cm" },
-                { value: "feet", label: "feet" },
-                { value: "km", label: "km" },
-              ]}
-            />
-          </div>
-        </div>
-        <div className="flex flex-col w-full">
-          <div className="w-full">
-            <Row>
-              <Col span={21}>
-                <h1 className="text-[#828282] ">SUMMARY FIELDS</h1>
-              </Col>
-              <Col span={3} align={"middle"}>
-                <h1 className="text-[#828282] right-0">Required</h1>
-              </Col>
-            </Row>
-          </div>
-
-          <div className="">
-            <Row align={"middle"}>
-              <Col span={18} className="bg-white">
-                <Input
-                  placeholder="Enter value"
-                  className=""
-                  bordered={false}
-                />
-              </Col>
-              <Col span={3} className="bg-white">
-                <div>
-                  
+            <div className="flex justify-between mr-3 m">
+              {isNameEditEnabled ? (
+                <div className="flex">
+                  <Input
+                    className="text-2xl font-semi bold mr-5"
+                    value={assetType.name}
+                    onChange={(e) => {
+                      setassetType({ ...assetType, name: e.target.value });
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      setisNameEditEnabled(!isNameEditEnabled);
+                    }}
+                    style={{ fontSize: 14, backgroundColor: "#EBEEF3" }}
+                  >
+                    <CheckOutlined />
+                  </button>
                 </div>
+              ) : (
+                <div className="flex">
+                  <h1 className="text-2xl font-semi bold mr-5">
+                    {assetType.name}
+                  </h1>
+                  <button
+                    onClick={() => {
+                      setisNameEditEnabled(!isNameEditEnabled);
+                    }}
+                    style={{ fontSize: 14, backgroundColor: "#EBEEF3" }}
+                  >
+                    <EditOutlined />
+                  </button>
+                </div>
+              )}
+              <div>
+                <Checkbox checked={checked} onChange={onAssetZoneEnabledChange}>
+                  <p className="mt-2 mb-2 text-sm text-slate-400 mr-3">
+                    Enable inspection zone
+                  </p>
+                </Checkbox>
+                <InputNumber
+                  className="mr-3"
+                  min={1}
+                  max={1000}
+                  style={{ width: 60 }}
+                  defaultValue={
+                    assetType.asset_zone != null ? assetType.asset_zone : 1
+                  }
+                  disabled={!checked}
+                  onChange={(val) => {
+                    setassetType({ ...assetType, asset_zone: val });
+                  }}
+                />
                 <Select
-                  bordered={false}
-                  defaultValue="text"
-                  onChange={handleTypeChange}
-                >
-                  <Option value="text">
-                    <span>
-                      <UserOutlined className="mr-2" />
-                      Text
-                    </span>
-                  </Option>
-                  <Option value="number">
-                    <span>
-                      <NumberOutlined className="mr-2" />
-                      Number
-                    </span>
-                  </Option>
-                  <Option value="gps">
-                    <span>
-                      <EnvironmentOutlined className="mr-2" />
-                      GPS
-                    </span>
-                  </Option>
-                </Select>
-              </Col>
-              <Col span={3} align={"middle"}>
-                <Checkbox onChange={handleRequiredChange}></Checkbox>
-              </Col>
-            </Row>
-            
+                  className="mr-3"
+                  defaultValue="m"
+                  disabled={!checked}
+                  style={{ width: 70 }}
+                  onChange={handleAssetZoneUnitChange}
+                  options={[
+                    { value: "m", label: "m" },
+                    { value: "cm", label: "cm" },
+                    { value: "feet", label: "feet" },
+                    { value: "km", label: "km" },
+                  ]}
+                />
+              </div>
+            </div>
+            <Divider />
+            <div className="flex flex-col w-full">
+              <div className=" ">
+                {assetType.fields.map((val, i) => {
+                  return (
+                    <div className="">
+                      <Row>
+                        <Col span={21} lign={"middle"}>
+                          <div className="w-full flex justify-between items-center">
+                            <h1 className="text-[#828282] mb-2 ">
+                              {val.section_name}
+                            </h1>
+                            {val.section_name != "SUMMARY FIELDS" && (
+                              <Popconfirm
+                                title="Delete the Section"
+                                description="Performing this action will also delete all its fields, are you sure?"
+                                okText="Yes"
+                                cancelText="No"
+                                onConfirm={() => {
+                                  let temp = assetType.fields.filter((item) => {
+                                    return (
+                                      item.section_name !== val.section_name
+                                    );
+                                  });
+                                  setassetType({ ...assetType, fields: temp });
+                                }}
+                              >
+                                <button className="text-[#a1a1a1] bg-transparent hover:text-black">
+                                  <DeleteOutlined />
+                                </button>
+                              </Popconfirm>
+                            )}
+                          </div>
+                        </Col>
+                        {val.section_name == "SUMMARY FIELDS" && (
+                          <Col span={3} align={"middle"}>
+                            <h1 className="text-[#828282]">Required</h1>
+                          </Col>
+                        )}
+                      </Row>
+                      {val.fields.map((field, index) => {
+                        return (
+                          <div className="w-full">
+                            <Row align={"middle"} className="mb-3 ">
+                              <Col span={21}>
+                                <div className="rounded bg-white flex justify-between items-center  ">
+                                  <Input
+                                    disabled={
+                                      val.section_name == "SUMMARY FIELDS" &&
+                                      (field.field_name == "Unique Id" ||
+                                        field.field_name == "Status" ||
+                                        field.field_name == "Site")
+                                        ? true
+                                        : false
+                                    }
+                                    className="text-[#828282] font-light"
+                                    placeholder="Enter field name"
+                                    bordered={false}
+                                    value={field.field_name}
+                                    onChange={(e) => {
+                                      let copy = { ...assetType };
+                                      copy.fields[i].fields[index].field_name =
+                                        e.target.value;
+                                      setassetType({ ...assetType, copy });
+                                    }}
+                                  />
+                                  <div className="flex justify-between w-[200px]">
+                                    <Select
+                                      defaultValue={field.type}
+                                      onChange={(e) => {
+                                        let copy = { ...assetType };
+                                        copy.fields[i].fields[index].type = e;
+                                        setassetType({ ...assetType, copy });
+                                      }}
+                                      bordered={false}
+                                    >
+                                      {/* text dropdown */}
+                                      <Option value="text">
+                                        <div className="flex justify-start">
+                                          <Space wrap>
+                                            <Avatar
+                                              size={21}
+                                              style={{
+                                                backgroundColor: "#fde3cf",
+                                                color: "#f56a00",
+                                                fontSize: "12px",
+                                              }}
+                                            >
+                                              <p className="text-sm">U</p>
+                                            </Avatar>
+                                          </Space>
+                                          <h1 className="text-[#828282] ml-2  ">
+                                            Text
+                                          </h1>
+                                        </div>
+                                      </Option>
+
+                                      {/* number dropdown */}
+                                      <Option value="number">
+                                        <div className="flex justify-start">
+                                          <Space wrap>
+                                            <Avatar
+                                              size={21}
+                                              style={{
+                                                backgroundColor: "#FFF3E5",
+                                                color: "#EB5757",
+                                                fontSize: "12px",
+                                              }}
+                                            >
+                                              <p className="text-sm">
+                                                <NumberOutlined />
+                                              </p>
+                                            </Avatar>
+                                          </Space>
+                                          <h1 className="text-[#828282] ml-2  ">
+                                            Number
+                                          </h1>
+                                        </div>
+                                      </Option>
+
+                                      <Option value="checkbox">
+                                        <div className="flex justify-start">
+                                          <Space wrap>
+                                            <Avatar
+                                              size={21}
+                                              style={{
+                                                backgroundColor: "#EFDEFF",
+                                                color: "#9B51E0",
+                                                fontSize: "12px",
+                                              }}
+                                            >
+                                              <p className="text-sm">
+                                                <AppstoreOutlined />
+                                              </p>
+                                            </Avatar>
+                                          </Space>
+                                          <h1 className="text-[#828282] ml-2  ">
+                                            Checkbox
+                                          </h1>
+                                        </div>
+                                      </Option>
+
+                                      {/* status dropdown */}
+                                      <Option value="tags">
+                                        <div className="flex justify-start">
+                                          <Space wrap>
+                                            <Avatar
+                                              size={21}
+                                              style={{
+                                                backgroundColor: "#E0F7FF",
+                                                color: "#56CCF2",
+                                                fontSize: "12px",
+                                              }}
+                                            >
+                                              <p className="text-sm">
+                                                <TagsOutlined />
+                                              </p>
+                                            </Avatar>
+                                          </Space>
+                                          <h1 className="text-[#828282] ml-2  ">
+                                            Tags
+                                          </h1>
+                                        </div>
+                                      </Option>
+
+                                      {/* Department */}
+                                      <Option value="select">
+                                        <div className="flex justify-start">
+                                          <Space wrap>
+                                            <Avatar
+                                              size={21}
+                                              style={{
+                                                backgroundColor: "#ECF4FF",
+                                                color: "#2F80ED",
+                                                fontSize: "12px",
+                                              }}
+                                            >
+                                              <p className="text-sm">
+                                                <PartitionOutlined />
+                                              </p>
+                                            </Avatar>
+                                          </Space>
+                                          <h1 className="text-[#828282] ml-2 ">
+                                            Select
+                                          </h1>
+                                        </div>
+                                      </Option>
+                                      {/* Gps dropdown */}
+                                      <Option value="gps">
+                                        <div className="flex justify-start ">
+                                          <Space wrap>
+                                            <Avatar
+                                              size={21}
+                                              style={{
+                                                backgroundColor: "#FFE9E2",
+                                                color: "#F24E1E",
+                                                fontSize: "12px",
+                                              }}
+                                            >
+                                              <p className="text-sm">
+                                                <EnvironmentOutlined />
+                                              </p>
+                                            </Avatar>
+                                          </Space>
+                                          <h1 className="text-[#828282] ml-2  ">
+                                            GPS
+                                          </h1>
+                                        </div>
+                                      </Option>
+                                      {/* date dropdown */}
+                                      <Option value="date">
+                                        <div className="flex justify-start">
+                                          <Space wrap>
+                                            <Avatar
+                                              size={21}
+                                              style={{
+                                                backgroundColor: "#D2FFE5",
+                                                color: "#219653",
+                                                fontSize: "12px",
+                                              }}
+                                            >
+                                              <p className="text-sm">
+                                                <CalendarOutlined />
+                                              </p>
+                                            </Avatar>
+                                          </Space>
+                                          <h1 className="text-[#828282] ml-2  ">
+                                            Date
+                                          </h1>
+                                        </div>
+                                      </Option>
+                                    </Select>
+                                    <Button
+                                      type="text"
+                                      disabled={
+                                        val.section_name == "SUMMARY FIELDS" &&
+                                        (field.field_name == "Unique Id" ||
+                                          field.field_name == "Status" ||
+                                          field.field_name == "Site")
+                                          ? true
+                                          : false
+                                      }
+                                      onClick={() => {
+                                        let temp = assetType.fields[
+                                          i
+                                        ].fields.filter(
+                                          (item) =>
+                                            item.field_name !==
+                                            assetType.fields[i].fields[index]
+                                              .field_name
+                                        );
+                                        let copy = { ...assetType };
+                                        copy.fields[i].fields = temp;
+                                        setassetType({ ...assetType, copy });
+                                      }}
+                                    >
+                                      <CloseOutlined />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </Col>
+                              <Col span={3} align={"middle"}>
+                                <Checkbox
+                                  disabled={
+                                    val.fields[index].field_name ==
+                                      "Unique Id" ||
+                                    val.fields[index].field_name == "Status"
+                                      ? true
+                                      : false
+                                  }
+                                  checked={
+                                    assetType.fields[i].fields[index].required
+                                  }
+                                  onChange={(e) => {
+                                    let copy = { ...assetType };
+                                    copy.fields[i].fields[index].required =
+                                      e.target.checked;
+                                    setassetType({ ...assetType, copy });
+                                  }}
+                                ></Checkbox>
+                              </Col>
+                            </Row>
+                            {(field.type == "select" ||
+                              field.type == "tags") && (
+                              <Row className="mb-3">
+                                <Col span={10}></Col>
+                                <Col span={10}>
+                                  <Select
+                                    mode="tags"
+                                    style={{ width: "100%" }}
+                                    placeholder="Enter possible option values"
+                                    onChange={(selectedOptions) => {
+                                      let copy = { ...assetType };
+
+                                      copy.fields[i].fields[index].values =
+                                        selectedOptions;
+
+                                      setassetType({ ...assetType, copy });
+                                    }}
+                                    defaultValue={field.values.map((val) => {
+                                      return { value: val, label: val };
+                                    })}
+                                    options={field.values.map((val) => {
+                                      return { value: val, label: val };
+                                    })}
+                                  />
+                                </Col>
+                                <Col span={1} align={"middle"}>
+                                  <EnterOutlined className="text-[22px] text-[#a1a1a1]" />
+                                </Col>
+                              </Row>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex">
+              <Button
+                type="primary"
+                ghost
+                icon={<PlusOutlined />}
+                className="mr-5"
+                style={{ background: "white" }}
+                onClick={() => {
+                  let temp = {
+                    field_name: "",
+                    required: false,
+                    type: "text",
+                    values: [],
+                  };
+                  let copy = assetType;
+                  copy.fields[copy.fields.length - 1].fields.push(temp);
+                  setassetType({ ...assetType, copy });
+                }}
+              >
+                Add custom field
+              </Button>
+              <Button
+                type="primary"
+                ghost
+                icon={<BarsOutlined />}
+                style={{ background: "white" }}
+                onClick={() => {
+                  setshowAddSection(true);
+                }}
+              >
+                Add section
+              </Button>
+            </div>
           </div>
-        </div>
-        <div className="flex">
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Spin indicator={antIcon} />
+          </div>
+        )}
+        <div className="flex w-full justify-end mt-3">
           <Button
+            loading={updatePressed}
+            disabled={isLoading}
             type="primary"
-            ghost
-            icon={<PlusOutlined />}
-            className="mr-5"
-            style={{ background: "white" }}
-            onClick={showModal}
-          >
-            Add custom field
-          </Button>
-          <Button
-            type="primary"
-            ghost
-            icon={<BarsOutlined />}
-            style={{ background: "white" }}
-          >
-            Add section
-          </Button>
-        </div>
-      </div>
-      <div className="flex flex-col w-1/3 bg-white p-3 h-screen">
-        <h1 className="text-lg bold mb-4">Add existing fields</h1>
-        <h4 className="text-[13px] text-[#828282] mb-7">
-          Reuse existing fields that have been added to other types to keep your
-          assets details consistent
-        </h4>
-        <Input
-          placeholder="search"
-          prefix={<SearchOutlined style={{ color: "#828282" }} />}
-        />
-        <div style={tableContainerStyle}>
-          <Table
-            columns={columns}
-            expandable={{
-              expandedRowRender: (record) => (
-                <p style={{ margin: 1 }}>{record.description}</p>
-              ),
+            className="mb-3 mr-2"
+            onClick={() => {
+              setupdatePressed(true);
+              console.log(JSON.stringify(assetType));
+              if (assetTypeExists) {
+                fetch(
+                  `https://digifield.onrender.com/assets/update-asset-type/${params.name}`,
+                  {
+                    method: "PUT",
+                    mode: "cors",
+                    cache: "no-cache",
+                    headers: {
+                      "Content-Type": "application/json",
+                      accept: "application/json",
+                    },
+                    body: JSON.stringify(assetType),
+                  }
+                )
+                  .then((res) => res.json())
+                  .then((data) => {
+                    console.log(data);
+                    setupdatePressed(false);
+                    if (data.acknowledge) {
+                      success("Asset Type has been updated");
+                    } else {
+                      warning(data.description);
+                    }
+                  });
+              } else {
+                fetch(
+                  "https://digifield.onrender.com/assets/create-asset-type",
+                  {
+                    method: "POST",
+                    mode: "cors",
+                    cache: "no-cache",
+                    headers: {
+                      "Content-Type": "application/json",
+                      accept: "application/json",
+                    },
+                    body: JSON.stringify(assetType),
+                  }
+                )
+                  .then((res) => res.json())
+                  .then((data) => {
+                    console.log(data);
+                    setupdatePressed(false);
+                    if (data.acknowledge) {
+                      success("Asset Type has been updated");
+                    } else {
+                      warning(data.description);
+                    }
+                  });
+              }
             }}
-            dataSource={data}
-            showHeader={false}
-          />
+          >
+            Update
+          </Button>
+          <Button
+            disabled={isLoading}
+            className="mb-3 mr-3"
+            onClick={() => {
+              router.push("/assets/types");
+            }}
+          >
+            Cancel
+          </Button>
         </div>
       </div>
+      <div className="flex flex-col w-1/3 bg-[#F8F9FC] p-3 ">
+        <FieldsSection setassetType={setassetType} />
+      </div>
+      <Modal
+        title="Add Section"
+        visible={showAddSection}
+        onOk={() => {
+          let temp = { ...assetType };
+          temp = temp.fields.push({
+            section_name: addsectionName.toUpperCase(),
+            fields: [],
+          });
+          setassetType({ ...assetType, temp });
+          setshowAddSection(false);
+          setAddSectionName("");
+        }}
+        onCancel={() => {
+          setAddSectionName("");
+          setshowAddSection(false);
+        }}
+      >
+        <Input
+          placeholder="Enter section name"
+          value={addsectionName}
+          onChange={(e) => {
+            setAddSectionName(e.target.value);
+          }}
+        />
+      </Modal>
     </div>
   );
 }
