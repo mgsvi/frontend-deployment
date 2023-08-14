@@ -7,7 +7,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import TypeTable from "./Table";
 import { useRouter } from "next/navigation";
 
-const page = () => {
+const Page = () => {
   const router = useRouter();
   const [modal2Open, setModal2Open] = useState(false);
   const [assetTypeName, setassetTypeName] = useState("");
@@ -59,4 +59,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;

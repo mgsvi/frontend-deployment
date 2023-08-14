@@ -35,7 +35,7 @@ import {
 } from "@ant-design/icons";
 import FieldsSection from "./FieldsSection";
 
-function page({ params }) {
+function Page({ params }) {
   const router = useRouter();
   let originalData = {};
   const [updatePressed, setupdatePressed] = useState(false);
@@ -713,4 +713,4 @@ function page({ params }) {
     </div>
   );
 }
-export default page;
+export default Page;

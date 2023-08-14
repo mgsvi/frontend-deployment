@@ -1,6 +1,7 @@
 import React from 'react'
+import Page from '../assets/page'
 
-const page = () => {
+const Page = () => {
   return (
     <div>
       settings
@@ -8,4 +9,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page

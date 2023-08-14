@@ -6,7 +6,7 @@ import { Button, Space, ConfigProvider, Tag, Input, Modal } from "antd";
 import theme from "../themeConfig";
 import { SearchOutlined } from "@ant-design/icons";
 
-const page = () => {
+const Page = () => {
   const [modal2Open, setModal2Open] = useState(false);
 
   return (
@@ -40,4 +40,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default Page;
