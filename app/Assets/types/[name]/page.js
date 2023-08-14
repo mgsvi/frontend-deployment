@@ -3,7 +3,6 @@ import { React, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar, Space, Modal } from "antd";
 import { Col, Row } from "antd";
-import useSWR from "swr";
 import {
   Button,
   Checkbox,
@@ -107,63 +106,13 @@ function page({ params }) {
       });
   }, []);
 
-  const tableContainerStyle = {
-    marginTop: "0px", // Adjust the margin top value as needed to move the table down
-  };
-  //table data ant design
-  const [data, setData] = useState([
-    {
-      key: 1,
-      name: "Serial Number",
-      age: 32,
-      address: "New York No. 1 Lake Park",
-      description:
-        "My name is John Brown, I am 32 years old, living in New York No. 1 Lake Park.",
-    },
-  ]);
 
-  const handleDelete = (key) => {
-    const newData = data.filter((item) => item.key !== key);
-    setData(newData);
-  };
-
-  const columns = [
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "Age",
-      dataIndex: "age",
-      key: "age",
-    },
-    {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
-    },
-    Table.EXPAND_COLUMN,
-    {
-      title: "operation",
-      dataIndex: "operation",
-      render: (_, record) =>
-        data.length >= 1 ? (
-          <Popconfirm
-            title="Sure to delete?"
-            onConfirm={() => handleDelete(record.key)}
-          >
-            <EllipsisOutlined rotate={90} />
-          </Popconfirm>
-        ) : null,
-    },
-  ];
 
   const [isNameEditEnabled, setisNameEditEnabled] = useState(false);
 
   //Asset Zone related values and Methods
   const [assetZoneUnit, setassetZoneUnit] = useState("m");
-  const [checked, setChecked] = useState(true);
+  const [checked, setChecked] = useState(assetType.asset_zone == null ? false : true);
 
   const onAssetZoneEnabledChange = (e) => {
     let value = 0;
@@ -278,7 +227,7 @@ function page({ params }) {
                   max={1000}
                   style={{ width: 60 }}
                   defaultValue={
-                    assetType.asset_zone != null ? assetType.asset_zone : 1
+                    assetType.asset_zone
                   }
                   disabled={!checked}
                   onChange={(val) => {
