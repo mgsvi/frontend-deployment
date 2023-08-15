@@ -22,17 +22,21 @@ const Page = () => {
               style={{ color: "#828282" }}
             />
           </div>
-          <Link href="/assets/types">
-            {" "}
-            <Button>Manage types</Button>
-            <Button
-              type="primary"
-              className="ml-5"
-              onClick={() => setModal2Open(true)}
-            >
-              Add asset
-            </Button>
-          </Link>
+          <div>
+            <Link href="/assets/types">
+              {" "}
+              <Button>Manage types</Button>
+            </Link>
+            <Link href="/assets/create">
+              <Button
+                type="primary"
+                className="ml-5"
+                onClick={() => setModal2Open(true)}
+              >
+                Add asset
+              </Button>
+            </Link>
+          </div>
         </div>
         <div className="w-full"></div>
       </div>
