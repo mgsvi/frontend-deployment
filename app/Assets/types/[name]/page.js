@@ -9,7 +9,6 @@ import {
   Input,
   InputNumber,
   Select,
-  Table,
   Popconfirm,
   Divider,
   Spin,
@@ -18,7 +17,6 @@ import {
 import {
   EditOutlined,
   CheckOutlined,
-  SearchOutlined,
   PlusOutlined,
   AppstoreOutlined,
   BarsOutlined,
@@ -109,6 +107,7 @@ function Page({ params }) {
 
 
   const [isNameEditEnabled, setisNameEditEnabled] = useState(false);
+  const [isDateField, setisDateField] = useState(false); 
 
   //Asset Zone related values and Methods
   const [assetZoneUnit, setassetZoneUnit] = useState("m");
@@ -369,6 +368,7 @@ function Page({ params }) {
                                         </div>
                                       </Option>
 
+                                      {/* checkbox dropdown */}
                                       <Option value="checkbox">
                                         <div className="flex justify-start">
                                           <Space wrap>
@@ -436,6 +436,7 @@ function Page({ params }) {
                                           </h1>
                                         </div>
                                       </Option>
+
                                       {/* Gps dropdown */}
                                       <Option value="gps">
                                         <div className="flex justify-start ">
@@ -458,6 +459,7 @@ function Page({ params }) {
                                           </h1>
                                         </div>
                                       </Option>
+
                                       {/* date dropdown */}
                                       <Option value="date">
                                         <div className="flex justify-start">
@@ -637,6 +639,7 @@ function Page({ params }) {
                     setupdatePressed(false);
                     if (data.acknowledge) {
                       success("Asset Type has been updated");
+                      router.push(`/assets/types/${assetType.name}`)
                     } else {
                       warning(data.description);
                     }
@@ -661,6 +664,7 @@ function Page({ params }) {
                     setupdatePressed(false);
                     if (data.acknowledge) {
                       success("Asset Type has been updated");
+                      setassetTypeExists(true)
                     } else {
                       warning(data.description);
                     }

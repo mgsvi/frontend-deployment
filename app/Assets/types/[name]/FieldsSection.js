@@ -10,6 +10,7 @@ import {
   Button,
   Popconfirm,
   message,
+  Result
 } from "antd";
 import useSWR from "swr";
 import {

@@ -11,6 +11,9 @@ const Page = () => {
   const router = useRouter();
   const [modal2Open, setModal2Open] = useState(false);
   const [assetTypeName, setassetTypeName] = useState("");
+  const [searchQuery, setsearchQuery] = useState("")
+  
+
 
   return (
     <ConfigProvider theme={theme}>
@@ -20,9 +23,13 @@ const Page = () => {
         <div className=" flex flex-row justify-between mb-4">
           <div className="flex">
             <Input
+            value={searchQuery}
               placeholder="Search"
               prefix={<SearchOutlined />}
               style={{ color: "#828282" }}
+              onChange={e=>{
+                setsearchQuery(e.target.value)
+              }}
             />
           </div>
 
@@ -52,7 +59,7 @@ const Page = () => {
           </Modal>
         </div>
         <div className="w-full">
-          <TypeTable />
+          <TypeTable searchQuery={searchQuery}/>
         </div>
       </div>
     </ConfigProvider>
