@@ -16,7 +16,6 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      
       <body
         className={inter.className}
         style={{ background: "#EBEEF3", height: "100Vh", width: "100vw" }}
@@ -26,12 +25,11 @@ export default function RootLayout({ children }) {
             hasSider
             style={{
               height: "100vh",
+              overflow: "hidden",
             }}
           >
-            <Sidebar className="max-f-screen" />
-            <div className="w-full max-w-full max-h-screen bg-[#EBEEF3]">
-              {children}
-            </div>
+            <Sidebar />
+            <div className="w-full bg-[#EBEEF3] overflow-auto">{children}</div>
           </Layout>
         </StyledComponentsRegistry>
       </body>

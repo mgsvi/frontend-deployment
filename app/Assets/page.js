@@ -7,6 +7,7 @@ import theme from "../themeConfig";
 import { LoadingOutlined } from "@ant-design/icons";
 import { PlusOutlined } from "@ant-design/icons";
 import AssetTable from "./AssetTable";
+import MapView from "../MapView";
 import { Card, Col, Row } from 'antd';
 import useSWR from "swr";
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
@@ -19,15 +20,19 @@ const items = [
     key: "1",
     label: `Table view`,
     children: (
-      <div className="">
-        <AssetTable />{" "}
+      <div className="h-full">
+        <AssetTable />
       </div>
     ),
   },
   {
     key: "2",
     label: `Map view`,
-    children: `Content of Tab Pane 2`,
+    children: (
+      <div className="">
+        <MapView/>{" "}
+      </div>
+    ),
   },
   {
     key: "3",
@@ -47,9 +52,9 @@ const Page = () => {
 
   return (
     <ConfigProvider theme={theme}>
-      <div className="flex flex-col h-screen w-full p-4">
+      <div className="flex flex-col h-full w-full p-4">
       
-      <div className=" flex flex-row  mb-4 w-ful justify-between">
+      <div className=" flex flex-row  mb-4 w-full justify-between">
           <h1 className="text-xl font-semi font-semibold mb-5">Manage assets</h1>
           <div className="flex flex-row justify-end">
             <Link href="/assets/types">
@@ -87,7 +92,7 @@ const Page = () => {
   </Row>
         </div>
         
-        <div className="w-full h-screen">
+        <div className="w-full h-full">
           <Tabs
             tabBarStyle={{ "border-bottom": " 1px solid #ced3de" }}
             items={items}

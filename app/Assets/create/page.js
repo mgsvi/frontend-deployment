@@ -1,6 +1,14 @@
 "use client";
 import { React, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
+
+import 'leaflet-geosearch/assets/css/leaflet.css';
+import "leaflet-defaulticon-compatibility";
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
+import 'leaflet/dist/leaflet.css';
 import dayjs from "dayjs";
 import {
   Button,
@@ -22,6 +30,15 @@ const { Option } = Select;
 const { Dragger } = Upload;
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
+
+//gps function to update position
+function UpdateMapPosition({ setLatLng }) {
+  const map = useMap();
+  map.on("click", function(e) {
+    setLatLng(e.latlng);
+  });
+  return null;
+}
 
 const props = {
   name: "file",
@@ -62,6 +79,7 @@ export default function AssetCreate() {
   const [createPressed, setcreatePressed] = useState(false);
   const [assetCreated, setassetCreated] = useState(false);
   const [assetType, setassetType] = useState(null);
+  const [latLng, setLatLng] = useState(null);
   const [assetValues, setassetValues] = useState({});
   const { data, mutate, error, isLoading } = useSWR(
     "https://digifield.onrender.com/assets/get-all-asset-types/",
@@ -206,6 +224,7 @@ export default function AssetCreate() {
             }}
           />
         );
+
       case "select":
         return (
           <Select
@@ -220,11 +239,70 @@ export default function AssetCreate() {
             })}
           </Select>
         );
-      case "gps":
-        return(
-          <Select>
-            </Select>
-        );
+        case "gps":
+          
+          return (
+            <div>
+              
+              { latLng && 
+                <div>
+                  Selected Latitude: {latLng.lat}, Longitude: {latLng.lng}
+                 
+                </div>
+              }
+              <div style={{ display: "flex", justifyContent: "space-between" }} className="mb-5">
+        <div style={{ flex: 1, marginRight: "10px" }}>
+          <label htmlFor="latitude">Latitude:</label>
+          <input
+            type="number"
+            id="latitude"
+            name="latitude"
+          //  value={latLng.lat}
+           onChange={(val) => setLatLng([val, latLng.lng])}
+            style={{
+              padding: "4px",
+              border: "1px solid grey",
+              borderRadius: "5px", 
+              width: "100%",
+            }}
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label htmlFor="longitude">Longitude:</label>
+          <input
+            type="number"
+            id="longitude"
+            name="longitude"
+          //  value={latLng.lng}
+           onChange={(val) => setLatLng([latLng.lat, val])}
+            style={{
+              padding: "4px",
+              border: "1px solid grey",
+              borderRadius: "5px", 
+              width: "100%",
+            }}
+          />
+        </div>
+        <Button type="primary" className="">
+          Update
+        </Button>
+      </div>
+              <MapContainer                
+                center={[12.99097225692328,  80.17281532287599]}
+                zoom={13}
+                style={{ width: '100%', height: '300px' }}
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                <Marker position={latLng != null ? [latLng.lat, latLng.lng]: [12.99097225692328,  80.17281532287599]}></Marker>
+                <UpdateMapPosition setLatLng={setLatLng} />
+              </MapContainer>
+            </div>
+          );
+
+        
 
       case "date":
         return (

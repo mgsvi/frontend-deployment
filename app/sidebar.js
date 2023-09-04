@@ -33,7 +33,10 @@ const App = () => {
       collapsible
       collapsed={collapsed}
       onCollapse={(value) => setCollapsed(value)}
-      style={{ backgroundColor: "#002C4F" }} // Set the background color of the sidebar
+      style={{
+        backgroundColor: "#002C4F",
+      }}
+      // Set the background color of the sidebar
     >
       <div className="demo-logo-vertical" />
       <Image src="/sidebariconexpanded.png" width={500} height={500} />
