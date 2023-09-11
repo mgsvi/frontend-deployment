@@ -1,5 +1,5 @@
 import { React, useState, useEffect } from "react";
-import { Table, Input, Button, Result } from "antd";
+import { Table, Input, Button, Result, Select } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -15,6 +15,7 @@ const AssetTable = () => {
   const router = useRouter();
   const [departmentFilter, setdepartmentFilter] = useState([]);
   const [typefilter, settypefilter] = useState([]);
+  const [selectedColumn, setSelectedColumn] = useState(["asset_id", "asset_name", "department", "type"]);
   const [searchQuery, setsearchQuery] = useState("");
   const { data, error, isLoading } = useSWR(
     "https://digifield.onrender.com/assets/get-all-assets",
@@ -22,29 +23,6 @@ const AssetTable = () => {
     { refreshInterval: 1000 }
   );
 
-  const columns = [
-    {
-      title: "Asset name",
-      dataIndex: "asset_name",
-    },
-    {
-      title: "Asset Id",
-      dataIndex: "asset_id",
-      // sorter: (a, b) => a.age - b.age,
-    },
-    {
-      title: "Department",
-      dataIndex: "department",
-      filters: departmentFilter,
-      onFilter: (value, record) => record.department.startsWith(value),
-    },
-    {
-      title: "Type",
-      dataIndex: "type",
-      filters: typefilter,
-      onFilter: (value, record) => record.type.startsWith(value),
-    },
-  ];
 
   useEffect(() => {
     fetch("https://digifield.onrender.com/assets/get-all-assets")
@@ -73,6 +51,36 @@ const AssetTable = () => {
       });
   }, [data]);
 
+  let columns = [
+    {
+      title: "Asset name",
+      dataIndex: "asset_name",
+    },
+    {
+      title: "Asset Id",
+      dataIndex: "asset_id",
+    },
+    {
+      title: "Department",
+      dataIndex: "department",
+      filters: departmentFilter,
+      onFilter: (value, record) => record.department.startsWith(value),
+    },
+    {
+      title: "Type",
+      dataIndex: "type",
+      filters: typefilter,
+      onFilter: (value, record) => record.type.startsWith(value),
+    },
+  ]
+  const [filteredColumns, setFilteredColumns] = useState(columns)
+
+  useEffect(() => {
+    let temp = columns.filter((col) => selectedColumn.includes(col.dataIndex));
+    setFilteredColumns(temp)
+  }, [selectedColumn])
+  
+
   if (error)
     return (
       <div>
@@ -95,16 +103,31 @@ const AssetTable = () => {
       className="flex flex-col"
       style={{ height: "calc(100vh - 48px - 131px - 48px - 32px)" }}
     >
-      <div className="flex mb-3 w-[300px]">
+      <div className="flex mb-3 w-[400px]">
         <Input
           value={searchQuery}
           placeholder="Search"
           prefix={<SearchOutlined />}
-          style={{ color: "#828282" }}
+          style={{ color: "#828282", marginLeft: 10, marginRight:10 }}
           onChange={(e) => {
             setsearchQuery(e.target.value);
           }}
         />
+        <Select
+         mode="multiple"
+          defaultValue={["asset_id", "asset_name", "department", "type"]}
+          value={selectedColumn}
+          maxTagCount={"responsive"}
+          style={{width: "100%"}}
+          onChange={(value) => setSelectedColumn(value)}
+          
+        > 
+        
+          <Select.Option value="asset_name">Asset Name</Select.Option>
+          <Select.Option value="asset_id">Asset ID</Select.Option>
+          <Select.Option value="department">Department</Select.Option>
+          <Select.Option value="type">Type</Select.Option>
+        </Select>
       </div>
 
       <div
@@ -120,7 +143,7 @@ const AssetTable = () => {
               }, // click row
             };
           }}
-          columns={columns}
+          columns={filteredColumns}
           dataSource={data.filter((val) => {
             return (
               searchQuery == "" ||

@@ -154,6 +154,13 @@ export default function AssetCreate() {
         }
       });
   };
+useEffect(() => {
+  form.setFieldsValue({
+    Location: latLng
+  })
+
+  
+}, [latLng])
 
   if (error)
     return (
@@ -218,12 +225,11 @@ export default function AssetCreate() {
               setassetValues({ ...assetValues, [field.field_name]: val });
               form.setFieldsValue({ [field.field_name]: val });
             }}
-            options={() => {
-              return field.values.map((val) => {
-                return { lebel: val, value: val };
-              });
-            }}
-          />
+          
+          > {field.values.map((val, i) => {
+            return <Option value={val}>{val}</Option>;
+          })}</Select>
+          
         );
 
       case "select":
@@ -259,9 +265,15 @@ export default function AssetCreate() {
                   value={latLng.lat}
                   onChange={(e) => {
                     if (e.target.value === "") {
-                      setLatLng({ ...latLng, lat: 12.99097225692328 });
+                      setLatLng({ ...latLng, lat: null });
+                      form.setFieldsValue({
+                        [field.field_name]: null
+                      })
                     } else {
                       setLatLng({ ...latLng, lat: parseFloat(e.target.value) });
+                      form.setFieldsValue({
+                        [field.field_name]: latLng
+                      })
                     }
                     form.setFieldsValue({ [field.field_name]: latLng});
                   }}
@@ -278,17 +290,22 @@ export default function AssetCreate() {
                   value={latLng.lng}
                   onChange={(e) => {
                     if (e.target.value === "") {
-                      setLatLng({ ...latLng, lng: 80.17281532287599 });
+                      setLatLng({ ...latLng, lng: null });
+                      form.setFieldsValue({
+                        [field.field_name]: null
+                      })
                     } else {
                       setLatLng({ ...latLng, lng: parseFloat(e.target.value) });
+                      form.setFieldsValue({
+                        [field.field_name]: latLng
+                      })
                     }
-                    form.setFieldsValue({ [field.field_name]: latLng});
                   }}
                 />
               </div>
             </div>
             <MapContainer
-              center={[latLng.lat, latLng.lng]}
+              center={[12.99097225692328, 80.17281532287599]}
               zoom={13}
               style={{ width: "100%", height: "300px" }}
             >
@@ -298,7 +315,7 @@ export default function AssetCreate() {
               />
               <Marker
                 position={
-                  latLng != null
+                  latLng.lat != null && latLng.lng !=null
                     ? [latLng.lat, latLng.lng]
                     : [12.99097225692328, 80.17281532287599]
                 }

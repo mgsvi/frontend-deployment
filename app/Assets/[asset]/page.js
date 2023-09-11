@@ -17,9 +17,16 @@ import { DownOutlined } from "@ant-design/icons";
 import { message, Space } from "antd";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
+import "leaflet/dist/leaflet.css";
+import "leaflet-defaulticon-compatibility";
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 
 function ViewAsset({ params }) {
   const [showMore, setShowMore] = useState(false);
+  const [deleteAsset, setdeleteAsset] = useState(null);
+  const [locationAvailable, setlocationAvailable] = useState(false);
+  const [location, setlocation] = useState([]);
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
   const { data, mutate, error, isLoading } = useSWR(
     "https://digifield.onrender.com/assets/get-all-asset-types/",
@@ -36,14 +43,48 @@ function ViewAsset({ params }) {
         if (data != null) {
           setassetValues(data);
         }
+        if (data.type_fields.Location) {
+          setlocationAvailable(true);
+          setlocation(data.type_fields.Location);
+          console.log("hey");
+          console.log(location.lat, location.lng);
+          console.log("hello");
+        }
       });
   }, [data]);
+
+  const [messageApi, contextHolder] = message.useMessage();
+  const success = () => {
+    messageApi.open({
+      type: "success",
+      content: "This is a success message",
+    });
+  };
+  const err = () => {
+    messageApi.open({
+      type: "error",
+      content: "This is an error message",
+    });
+  };
+  const warning = () => {
+    messageApi.open({
+      type: "warning",
+      content: "This is a warning message",
+    });
+  };
+
+
   const router = useRouter();
   const onClick = ({ key }) => {
-   if(key == 2) {
-    router.push(`/assets/${params.asset}/edit`)
-   }
+    if (key == 2) {
+      router.push(`/assets/${params.asset}/edit`);
+    }
+    if (key == 1) {
+      setdeleteAsset(params.asset);
+      console.log(params.asset);
+    }
   };
+
   const menu = (
     <Menu onClick={onClick}>
       <Menu.Item key="2">Edit</Menu.Item>
@@ -81,11 +122,37 @@ function ViewAsset({ params }) {
     <div className="h-screen w-full flex flex-col px-32 pt-10 gap-4 overflow-y-auto">
       <div class="flex justify-between">
         <h1 class="text-xl font-semibold">{assetValues.asset_name}</h1>
-
-        <Dropdown overlay={menu} onClick={menu}>
+        <div class="flex-grow"></div>
+        <Dropdown overlay={menu} onClick={menu} >
           <EllipsisOutlined rotate={90} />
         </Dropdown>
+
+        <Popconfirm
+          title="Delete the asset "
+          description="Performing this action will remove the asset , are you sure?"
+          okText="Yes"
+          open={deleteAsset}
+          cancelText="No"
+          onConfirm={() => {
+            fetch(
+              `https://digifield.onrender.com/assets/delete-asset/${assetValues.asset_id}`,
+              {
+                method: "DELETE",
+              }
+            )
+              .then((res) => res.json())
+              .then((data) => {
+                if (data.acknowledge) {
+                  success("Asset has been deleted");
+                  router.push("/assets");
+                } else {
+                  warning(data.description);
+                }
+              });
+          }}
+        ></Popconfirm>
       </div>
+
       <div className="h-full w-full ">
         <Row justify="space-between">
           <Col span={15}>
@@ -120,13 +187,36 @@ function ViewAsset({ params }) {
                 <div className="align left">
                   {showMore ? (
                     <div className="flex flex-col gap-3">
+                      {console.log(assetValues.type_fields)}
                       {Object.entries(assetValues.type_fields).map(
-                        ([key, value]) => (
-                          <div key={key}>
-                            <p>{key}</p>
-                            <p className="text-black">{value}</p>
-                          </div>
-                        )
+                        ([key, value]) => {
+                          if (
+                            key === "Location" &&
+                            typeof value === "object" &&
+                            value !== null
+                          ) {
+                            return (
+                              <div key={key}>
+                                <p>{key}</p>
+                                <div>
+                                  <p className="text-black">
+                                    Latitude: {value.lat}
+                                  </p>
+                                  <p className="text-black">
+                                    Longitude: {value.lng}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          }
+
+                          return (
+                            <div key={key}>
+                              <p>{key}</p>
+                              <p className="text-black">{value}</p>
+                            </div>
+                          );
+                        }
                       )}
                     </div>
                   ) : (
@@ -144,11 +234,23 @@ function ViewAsset({ params }) {
               </div>
             </div>
           </Col>
-          <Col span={8} className="bg-white rounded max-h-fit">
-            <div className="flex justify-center align-middle p-3">
-              <Image src="/map.png" width={340} height={200} />
-            </div>
+          {locationAvailable && (
+          <Col span={8} className="bg-white rounded max-h-fit">            
+              <div className="flex justify-center align-middle p-3">
+                <MapContainer
+                  center={[location.lat, location.lng]}
+                  zoom={13}
+                  style={{ width: "100%", height: "220px" }}
+                >               
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  <Marker position={[location.lat, location.lng]}></Marker>
+                </MapContainer>
+              </div>
           </Col>
+          )}
         </Row>
       </div>
       <div className="h-full w-full">

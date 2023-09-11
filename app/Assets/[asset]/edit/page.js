@@ -28,13 +28,7 @@ const { Dragger } = Upload;
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 //gps function to update position
-function UpdateMapPosition({ setLatLng }) {
-  const map = useMap();
-  map.on("click", function (e) {
-    setLatLng(e.latlng);
-  });
-  return null;
-}
+
 
 const props = {
   name: "file",
@@ -82,13 +76,21 @@ export default function AssetEdit({ params }) {
     lat: 12.99097225692328,
     lng: 80.17281532287599,
   });
-  let initialValues = {};
 
   const { data, mutate, error, isLoading } = useSWR(
     "https://digifield.onrender.com/assets/get-all-asset-types/",
     fetcher,
     { refreshInterval: 10000 }
   );
+  function UpdateMapPosition({ setLatLng, field }) {
+    const map = useMap();
+    map.on("click", function (e) {
+      let temp = { ...assetValues };
+      temp.type_fields[field.field_name] = e.latlng;
+      setassetValues({ ...assetValues, temp });
+    });
+    return null;
+  }
 
   const getKeyName = (key) => {
     if (key === "asset_name") {
@@ -103,7 +105,8 @@ export default function AssetEdit({ params }) {
       return "type_field";
     }
   };
-
+ 
+  
   useEffect(() => {
     fetch(
       `https://digifield.onrender.com/assets/get-assets-by-id/${params.asset}`
@@ -118,12 +121,6 @@ export default function AssetEdit({ params }) {
             .then((res) => res.json())
             .then((typeOfAsset) => {
               setassetType(typeOfAsset);
-              initialValues = {
-                asset_name: data.asset_name,
-                assetType: data.type,
-                department: data.type,
-                "Unique Id": data.asset_id,
-              };
               form.setFieldsValue({
                 asset_name: data.asset_name,
                 assetType: data.type,
@@ -133,13 +130,11 @@ export default function AssetEdit({ params }) {
               for (let i of Object.keys(data.type_fields)) {
                 if (i == "Unique Id") {
                 } else {
-                  initialValues.i = [data.type_fields.i];
                   form.setFieldsValue({
-                    [i]: [data.type_fields.i],
+                    [i]: data.type_fields[i],
                   });
                 }
               }
-              console.log(form.values);
             });
         }
       });
@@ -165,6 +160,8 @@ export default function AssetEdit({ params }) {
       content: msg,
     });
   };
+
+
 
   const onFinish = (values) => {
     setUpdatePressed(true);
@@ -382,8 +379,11 @@ export default function AssetEdit({ params }) {
                   type="number"
                   id="latitude"
                   name="latitude"
-                  value={latLng.lat}
+                  value={assetValues.type_fields[field.field_name].lat}
                   onChange={(e) => {
+                    let temp = { ...assetValues };
+                    temp.type_fields[field.field_name].lat = e.target.value;
+                    setassetValues({ ...assetValues, temp });
                     if (e.target.value === "") {
                       setLatLng({ ...latLng, lat: 12.99097225692328 });
                     } else {
@@ -404,8 +404,11 @@ export default function AssetEdit({ params }) {
                   type="number"
                   id="longitude"
                   name="longitude"
-                  value={latLng.lng}
+                  value={assetValues.type_fields[field.field_name].lng}
                   onChange={(e) => {
+                    let temp = { ...assetValues };
+                    temp.type_fields[field.field_name].lng = e.target.value;
+                    setassetValues({ ...assetValues, temp });
                     if (e.target.value === "") {
                       setLatLng({ ...latLng, lng: 80.17281532287599 });
                     } else {
@@ -417,7 +420,11 @@ export default function AssetEdit({ params }) {
               </div>
             </div>
             <MapContainer
-              center={[latLng.lat, latLng.lng]}
+              center={
+                assetValues.type_fields[field.field_name].lat != null && assetValues.type_fields[field.field_name].lng != null
+                  ? [assetValues.type_fields[field.field_name].lat, assetValues.type_fields[field.field_name].lng]
+                  : [12.99097225692328, 80.17281532287599]
+              }
               zoom={13}
               style={{ width: "100%", height: "300px" }}
             >
@@ -427,15 +434,12 @@ export default function AssetEdit({ params }) {
               />
               <Marker
                 position={
-                  latLng != null
-                    ? [latLng.lat, latLng.lng]
+                  assetValues.type_fields[field.field_name].lat != null && assetValues.type_fields[field.field_name].lng != null
+                    ? [assetValues.type_fields[field.field_name].lat, assetValues.type_fields[field.field_name].lng]
                     : [12.99097225692328, 80.17281532287599]
                 }
               ></Marker>
               <UpdateMapPosition
-                latLng={latLng}
-                setLatLng={setLatLng}
-                form={form}
                 field={field}
               />
             </MapContainer>
@@ -484,7 +488,6 @@ export default function AssetEdit({ params }) {
         <div className="w-2/3 h-full flex flex-col overflow-y-auto mr-3">
           <Form
             form={form}
-            initialValue={initialValues}
             name="control-hooks"
             onFinishFailed={(values) => {
               console.log(values);
