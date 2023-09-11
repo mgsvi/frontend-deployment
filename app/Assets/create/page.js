@@ -1,14 +1,12 @@
 "use client";
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
-
-import 'leaflet-geosearch/assets/css/leaflet.css';
+import "leaflet-geosearch/assets/css/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
-import 'leaflet/dist/leaflet.css';
+import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
+import "leaflet/dist/leaflet.css";
 import dayjs from "dayjs";
 import {
   Button,
@@ -34,7 +32,7 @@ const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 //gps function to update position
 function UpdateMapPosition({ setLatLng }) {
   const map = useMap();
-  map.on("click", function(e) {
+  map.on("click", function (e) {
     setLatLng(e.latlng);
   });
   return null;
@@ -79,7 +77,10 @@ export default function AssetCreate() {
   const [createPressed, setcreatePressed] = useState(false);
   const [assetCreated, setassetCreated] = useState(false);
   const [assetType, setassetType] = useState(null);
-  const [latLng, setLatLng] = useState(null);
+  const [latLng, setLatLng] = useState({
+    lat: 12.99097225692328,
+    lng: 80.17281532287599,
+  });
   const [assetValues, setassetValues] = useState({});
   const { data, mutate, error, isLoading } = useSWR(
     "https://digifield.onrender.com/assets/get-all-asset-types/",
@@ -111,8 +112,8 @@ export default function AssetCreate() {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
   const [form] = Form.useForm();
-  const onFinish = (values) => {
-    setcreatePressed(true)
+  const onFinishEvent = (values) => {
+    setcreatePressed(true);
     let temp = {};
     let asset = {};
     console.log(values);
@@ -239,70 +240,73 @@ export default function AssetCreate() {
             })}
           </Select>
         );
-        case "gps":
-          
-          return (
-            <div>
-              
-              { latLng && 
-                <div>
-                  Selected Latitude: {latLng.lat}, Longitude: {latLng.lng}
-                 
-                </div>
-              }
-              <div style={{ display: "flex", justifyContent: "space-between" }} className="mb-5">
-        <div style={{ flex: 1, marginRight: "10px" }}>
-          <label htmlFor="latitude">Latitude:</label>
-          <input
-            type="number"
-            id="latitude"
-            name="latitude"
-          //  value={latLng.lat}
-           onChange={(val) => setLatLng([val, latLng.lng])}
-            style={{
-              padding: "4px",
-              border: "1px solid grey",
-              borderRadius: "5px", 
-              width: "100%",
-            }}
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <label htmlFor="longitude">Longitude:</label>
-          <input
-            type="number"
-            id="longitude"
-            name="longitude"
-          //  value={latLng.lng}
-           onChange={(val) => setLatLng([latLng.lat, val])}
-            style={{
-              padding: "4px",
-              border: "1px solid grey",
-              borderRadius: "5px", 
-              width: "100%",
-            }}
-          />
-        </div>
-        <Button type="primary" className="">
-          Update
-        </Button>
-      </div>
-              <MapContainer                
-                center={[12.99097225692328,  80.17281532287599]}
-                zoom={13}
-                style={{ width: '100%', height: '300px' }}
-              >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
-                <Marker position={latLng != null ? [latLng.lat, latLng.lng]: [12.99097225692328,  80.17281532287599]}></Marker>
-                <UpdateMapPosition setLatLng={setLatLng} />
-              </MapContainer>
-            </div>
-          );
 
-        
+      case "gps":
+        return (
+          <div>
+            <div
+              style={{ display: "flex", justifyContent: "space-between" }}
+              className="mb-5"
+            >
+              <div style={{ flex: 1, marginRight: "10px" }}>
+                <label htmlFor="latitude" className="mb-2 text-[#333] font-light">
+                  Latitude:
+                </label>
+                <Input
+                  type="number"
+                  id="latitude"
+                  name="latitude"
+                  value={latLng.lat}
+                  onChange={(e) => {
+                    if (e.target.value === "") {
+                      setLatLng({ ...latLng, lat: 12.99097225692328 });
+                    } else {
+                      setLatLng({ ...latLng, lat: parseFloat(e.target.value) });
+                    }
+                    form.setFieldsValue({ [field.field_name]: latLng});
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label htmlFor="longitude" className="text-[#333] font-light mb-2">
+                  Longitude:
+                </label>
+                <Input
+                  type="number"
+                  id="longitude"
+                  name="longitude"
+                  value={latLng.lng}
+                  onChange={(e) => {
+                    if (e.target.value === "") {
+                      setLatLng({ ...latLng, lng: 80.17281532287599 });
+                    } else {
+                      setLatLng({ ...latLng, lng: parseFloat(e.target.value) });
+                    }
+                    form.setFieldsValue({ [field.field_name]: latLng});
+                  }}
+                />
+              </div>
+            </div>
+            <MapContainer
+              center={[latLng.lat, latLng.lng]}
+              zoom={13}
+              style={{ width: "100%", height: "300px" }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              <Marker
+                position={
+                  latLng != null
+                    ? [latLng.lat, latLng.lng]
+                    : [12.99097225692328, 80.17281532287599]
+                }
+              ></Marker>
+              <UpdateMapPosition setLatLng={setLatLng} />
+            </MapContainer>
+          </div>
+        );
 
       case "date":
         return (
@@ -323,10 +327,10 @@ export default function AssetCreate() {
       <h1 className="text-xl font-semi bold mb-5">Create New Asset</h1>
       <div className="bg-white w-full h-full flex p-10">
         <div className="w-2/3 h-full flex flex-col overflow-y-auto mr-3">
-          <form
+          <Form
             form={form}
             name="control-hooks"
-            onFinish={onFinish}
+            onFinish={onFinishEvent}
             style={{
               maxWidth: 600,
             }}
@@ -350,7 +354,6 @@ export default function AssetCreate() {
                     form.setFieldsValue({ asset_name: e.target.value });
                   }}
                 />
-                
               </div>
             </Form.Item>
             {/* Department */}
@@ -378,7 +381,6 @@ export default function AssetCreate() {
                     return <Option value={type.name}>{type.name}</Option>;
                   })}
                 </Select>
-              
               </div>
             </Form.Item>
 
@@ -482,14 +484,14 @@ export default function AssetCreate() {
                 <div id="myqrcode">
                   <QRCode
                     className="hidden"
-                    value={assetCreated ? form.getFieldsValue('Unique Id') : ""}
+                    value={assetCreated ? form.getFieldsValue("Unique Id") : ""}
                     bgColor="#fff"
                     style={{
                       marginBottom: 16,
                     }}
                   />
                   <Button
-                  className=" mr-3 mt-3 mb-3"
+                    className=" mr-3 mt-3 mb-3"
                     disabled={!assetCreated}
                     type="primary"
                     onClick={downloadQRCode}
@@ -499,7 +501,7 @@ export default function AssetCreate() {
                 </div>
               </Form.Item>
             </div>
-          </form>
+          </Form>
         </div>
         {/* image and file upload */}
         <div className="w-1/3">
@@ -508,7 +510,6 @@ export default function AssetCreate() {
               <p>Add Images</p>
             </div>
 
-
             <Dragger {...props}>
               <p className="ant-upload-drag-icon ">
                 <FileImageOutlined style={{ color: "#828282" }} />
@@ -516,7 +517,6 @@ export default function AssetCreate() {
               <p className="ant-upload-text"></p>
               <p className="ant-upload-hint p-3">Drag image here or browse</p>
             </Dragger>
-            
           </div>
           <div className="flex flex-col w-full mt-2">
             <div className="mb-2">

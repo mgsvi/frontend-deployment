@@ -39,7 +39,7 @@ const App = () => {
       // Set the background color of the sidebar
     >
       <div className="demo-logo-vertical" />
-      <Image src="/sidebariconexpanded.png" width={500} height={500} />
+      <Image src="/sidebariconexpanded.png" alt="side-bar" width={500} height={500} />
       <Menu
         theme="dark"
         mode="inline"

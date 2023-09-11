@@ -7,7 +7,7 @@ import theme from "../themeConfig";
 import { LoadingOutlined } from "@ant-design/icons";
 import { PlusOutlined } from "@ant-design/icons";
 import AssetTable from "./AssetTable";
-import MapView from "../MapView";
+import MapView from "../Mapview";
 import { Card, Col, Row } from 'antd';
 import useSWR from "swr";
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;

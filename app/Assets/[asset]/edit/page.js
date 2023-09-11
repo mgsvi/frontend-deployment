@@ -16,12 +16,25 @@ import {
   QRCode,
 } from "antd";
 import useSWR from "swr";
+import "leaflet-defaulticon-compatibility";
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
+import "leaflet/dist/leaflet.css";
+import "leaflet-geosearch/assets/css/leaflet.css";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { FileImageOutlined, LoadingOutlined } from "@ant-design/icons";
 
 const { Option } = Select;
 const { Dragger } = Upload;
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
+//gps function to update position
+function UpdateMapPosition({ setLatLng }) {
+  const map = useMap();
+  map.on("click", function (e) {
+    setLatLng(e.latlng);
+  });
+  return null;
+}
 
 const props = {
   name: "file",
@@ -56,6 +69,8 @@ const downloadQRCode = () => {
   }
 };
 
+//const[locations, setlocation] = useState{[]}
+
 export default function AssetEdit({ params }) {
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
@@ -63,7 +78,11 @@ export default function AssetEdit({ params }) {
   const [assetType, setassetType] = useState(null);
   const [assetValues, setassetValues] = useState({});
   const [form] = Form.useForm();
-  let initialValues = {}
+  const [latLng, setLatLng] = useState({
+    lat: 12.99097225692328,
+    lng: 80.17281532287599,
+  });
+  let initialValues = {};
 
   const { data, mutate, error, isLoading } = useSWR(
     "https://digifield.onrender.com/assets/get-all-asset-types/",
@@ -104,7 +123,7 @@ export default function AssetEdit({ params }) {
                 assetType: data.type,
                 department: data.type,
                 "Unique Id": data.asset_id,
-              }
+              };
               form.setFieldsValue({
                 asset_name: data.asset_name,
                 assetType: data.type,
@@ -114,13 +133,13 @@ export default function AssetEdit({ params }) {
               for (let i of Object.keys(data.type_fields)) {
                 if (i == "Unique Id") {
                 } else {
-                  initialValues.i = [data.type_fields.i]
+                  initialValues.i = [data.type_fields.i];
                   form.setFieldsValue({
                     [i]: [data.type_fields.i],
                   });
                 }
               }
-              console.log(form.values)
+              console.log(form.values);
             });
         }
       });
@@ -165,7 +184,7 @@ export default function AssetEdit({ params }) {
       .then((res) => res.json())
       .then((data) => {
         setUpdatePressed(false);
-        console.log(form.getFieldValue("Status"))
+        console.log(form.getFieldValue("Status"));
         if (data.acknowledge) {
           success("Asset has been updated");
         } else {
@@ -293,7 +312,7 @@ export default function AssetEdit({ params }) {
                 : assetValues.type_fields[field.field_name]
             }
             onChange={(e) => {
-              form.setFieldsValue({ [field.field_name]: e});
+              form.setFieldsValue({ [field.field_name]: e });
               if (getKeyName(field.field_name) == "type_field") {
                 let temp = {
                   ...assetValues.type_fields,
@@ -325,7 +344,7 @@ export default function AssetEdit({ params }) {
                 : assetValues.type_fields[field.field_name]
             }
             onChange={(e) => {
-              form.setFieldsValue({ [field.field_name]: e});
+              form.setFieldsValue({ [field.field_name]: e });
               if (getKeyName(field.field_name) == "type_field") {
                 let temp = {
                   ...assetValues.type_fields,
@@ -346,6 +365,82 @@ export default function AssetEdit({ params }) {
           </Select>
         );
       case "gps":
+        return (
+          <div>
+            <div
+              style={{ display: "flex", justifyContent: "space-between" }}
+              className="mb-5"
+            >
+              <div style={{ flex: 1, marginRight: "10px" }}>
+                <label
+                  htmlFor="latitude"
+                  className="mb-2 text-[#333] font-light"
+                >
+                  Latitude:
+                </label>
+                <Input
+                  type="number"
+                  id="latitude"
+                  name="latitude"
+                  value={latLng.lat}
+                  onChange={(e) => {
+                    if (e.target.value === "") {
+                      setLatLng({ ...latLng, lat: 12.99097225692328 });
+                    } else {
+                      setLatLng({ ...latLng, lat: parseFloat(e.target.value) });
+                    }
+                    form.setFieldsValue({ [field.field_name]: latLng });
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label
+                  htmlFor="longitude"
+                  className="text-[#333] font-light mb-2"
+                >
+                  Longitude:
+                </label>
+                <Input
+                  type="number"
+                  id="longitude"
+                  name="longitude"
+                  value={latLng.lng}
+                  onChange={(e) => {
+                    if (e.target.value === "") {
+                      setLatLng({ ...latLng, lng: 80.17281532287599 });
+                    } else {
+                      setLatLng({ ...latLng, lng: parseFloat(e.target.value) });
+                    }
+                    form.setFieldsValue({ [field.field_name]: latLng });
+                  }}
+                />
+              </div>
+            </div>
+            <MapContainer
+              center={[latLng.lat, latLng.lng]}
+              zoom={13}
+              style={{ width: "100%", height: "300px" }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              <Marker
+                position={
+                  latLng != null
+                    ? [latLng.lat, latLng.lng]
+                    : [12.99097225692328, 80.17281532287599]
+                }
+              ></Marker>
+              <UpdateMapPosition
+                latLng={latLng}
+                setLatLng={setLatLng}
+                form={form}
+                field={field}
+              />
+            </MapContainer>
+          </div>
+        );
       case "date":
         return (
           <DatePicker
@@ -373,7 +468,7 @@ export default function AssetEdit({ params }) {
                 setassetValues({
                   ...assetValues,
                   [field.field_name]: date != null ? date.unix() : null,
-              });
+                });
               }
             }}
           />
@@ -391,8 +486,8 @@ export default function AssetEdit({ params }) {
             form={form}
             initialValue={initialValues}
             name="control-hooks"
-            onFinishFailed={(values)=>{
-              console.log(values)
+            onFinishFailed={(values) => {
+              console.log(values);
             }}
             onFinish={onFinish}
             style={{
@@ -407,7 +502,7 @@ export default function AssetEdit({ params }) {
                 <Input
                   placeholder="Enter Asset Name"
                   value={assetValues.asset_name}
-                  required 
+                  required
                   onChange={(e) => {
                     setassetValues({
                       ...assetValues,
