@@ -1,10 +1,9 @@
 import { React, useState, useEffect } from "react";
-import { Table, Input, Button, Result, Select } from "antd";
+import { Table, Input, Button, Result, Select, Checkbox, Dropdown, Menu } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import Loading from "../loading";
-import Link from "next/link";
 
 const onChange = (pagination, filters, sorter, extra) => {
   console.log("params", pagination, filters, sorter, extra);
@@ -128,6 +127,19 @@ const AssetTable = () => {
           <Select.Option value="department">Department</Select.Option>
           <Select.Option value="type">Type</Select.Option>
         </Select>
+
+{/* <Checkbox.Group
+    value={selectedColumn}
+    onChange={(checkedValues) => setSelectedColumn(checkedValues)}
+    maxTagCount={"responsive"}
+          style={{width: "100%"}}
+>
+    <Checkbox value="asset_name">Asset Name</Checkbox>
+    <Checkbox value="asset_id">Asset ID</Checkbox>
+    <Checkbox value="department">Department</Checkbox>
+    <Checkbox value="type">Type</Checkbox>
+</Checkbox.Group> */}
+
       </div>
 
       <div

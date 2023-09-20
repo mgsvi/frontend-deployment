@@ -6,7 +6,7 @@ import { Button, ConfigProvider, Tabs, Card, Col, Row } from "antd";
 import theme from "../themeConfig";
 import { LoadingOutlined } from "@ant-design/icons";
 import IssueTable from "./IssueTable";
-import Mapview from "../Mapview";
+import Mapview from "./Mapview";
 import useSWR from "swr";
 
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
@@ -34,10 +34,11 @@ const Page = () => {
         <div className="flex flex-row mb-4 w-full justify-between">
           <h1 className="text-xl font-semi font-semibold mb-5">Issues</h1>
           <div className="flex flex-row justify-end">
-            <Link href="/assets/types">
-              <Button>Manage Categories</Button>
+          <Link href="/issues/categories">
+              {" "}
+              <Button>Manage categories</Button>
             </Link>
-            <Link href="/assets/create">
+            <Link href="/issues/categories">
               <Button
                 type="primary"
                 className="ml-5"

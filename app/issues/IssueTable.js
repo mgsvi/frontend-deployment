@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Divider, Table, Modal } from "antd";
+import { Divider, Table } from "antd";
 import useSWR from "swr";
 import Loading from "../loading";
 import IssueDrawer from "./IssueDrawer";
@@ -18,6 +18,14 @@ const columns = [
   {
     title: "Reported on",
     dataIndex: "reported_time",
+    render: (text) => {
+      const reportedTime = new Date(text);
+      const formattedDate = `${reportedTime.getMonth() + 1}/${reportedTime.getDate()}/${reportedTime.getFullYear()}`;
+      const hours = reportedTime.getHours();
+      const amPm = hours >= 12 ? "PM" : "AM";
+      const formattedTime = `${hours % 12 || 12}:${String(reportedTime.getMinutes()).padStart(2, '0')}:${String(reportedTime.getSeconds()).padStart(2, '0')} ${amPm}`;
+      return `${formattedDate} ${formattedTime}`;
+    },
   },
   {
     title: "Reported By",
@@ -63,20 +71,19 @@ const App = () => {
       })
     : [];
 
-    const openDrawer = (record) => {
-      setSelectedRow(record);
-      setShowDrawer(true);
-    };
-    const closeDrawer = () => {
-      setShowDrawer(false);
-      setSelectedRow(null);
-    };
-
+  const openDrawer = (record) => {
+    setSelectedRow(record);
+    setShowDrawer(true);
+  };
+  
+  const closeDrawer = () => {
+    setShowDrawer(false);
+    setSelectedRow(null);
+  };
 
   return (
     <div>
       <Divider />
-
       <Table
         rowSelection={{
           type: selectionType,
@@ -85,8 +92,7 @@ const App = () => {
         onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {
-              console.log(record)
-              openDrawer(record)
+              openDrawer(record);
             },
           };
         }}
