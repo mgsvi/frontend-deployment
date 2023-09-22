@@ -1,3 +1,4 @@
+"use client"
 import { React, useState, useEffect } from "react";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";

@@ -11,6 +11,7 @@ import dayjs from "dayjs";
 import {
   Button,
   Form,
+  Result,
   Input,
   Select,
   Upload,
@@ -23,6 +24,7 @@ import {
 } from "antd";
 import useSWR from "swr";
 import { FileImageOutlined, LoadingOutlined } from "@ant-design/icons";
+import { useForm } from "antd/es/form/Form";
 
 const { Option } = Select;
 const { Dragger } = Upload;
@@ -37,26 +39,6 @@ function UpdateMapPosition({ setLatLng }) {
   });
   return null;
 }
-
-const props = {
-  name: "file",
-  multiple: true,
-  action: "https://www.mocky.io/v2/5cc8019d300000980a055e76",
-  onChange(info) {
-    const { status } = info.file;
-    if (status !== "uploading") {
-      console.log(info.file, info.fileList);
-    }
-    if (status === "done") {
-      message.success(`${info.file.name} file uploaded successfully.`);
-    } else if (status === "error") {
-      message.error(`${info.file.name} file upload failed.`);
-    }
-  },
-  onDrop(e) {
-    console.log("Dropped files", e.dataTransfer.files);
-  },
-};
 
 const downloadQRCode = () => {
   const canvas = document.getElementById("myqrcode")?.querySelector("canvas");
@@ -87,6 +69,12 @@ export default function AssetCreate() {
     fetcher,
     { refreshInterval: 10000 }
   );
+  const uniqueId = self.crypto.randomUUID();
+  const [form] = Form.useForm();
+  form.setFieldsValue({ "Unique Id": uniqueId });
+  let asset = {};
+  asset.images = [];
+  asset.docs = [];
 
   const success = (msg) => {
     messageApi.open({
@@ -108,14 +96,91 @@ export default function AssetCreate() {
       content: msg,
     });
   };
-  function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-  const [form] = Form.useForm();
+
+  const imageProps = {
+    name: "file",
+    multiple: true,
+    action: `http://localhost:8001/media/uploadfile/assets/${uniqueId}/`,
+    beforeUpload: (file) => {
+      let allowedExtension = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/gif",
+        "image/bmp",
+      ];
+      const isIMG = allowedExtension.includes(file.type);
+      if (!isIMG) {
+        message.error(`${file.name} is not an image`);
+      }
+      return isIMG || Upload.LIST_IGNORE;
+    },
+    onChange(info) {
+      const { status } = info.file;
+      if (status !== "uploading") {
+        console.log(info.file, info.fileList);
+      }
+      if (status === "done") {
+        asset.images.push(info.file.response.url);
+        message.success(`${info.file.name} file uploaded successfully.`);
+      } else if (status === "error") {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+      if (status === "removed") {
+        console.log(info.file.name);
+        fetch(
+          `http://localhost:8001/media/delete/assets/${uniqueId}/${info.file.name}`,
+          { method: "DELETE" }
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+          });
+      }
+    },
+    onDrop(e) {
+      fetch(`http://localhost:8001/media/delete/assets/${uniqueId}/`, {
+        method: "DELETE",
+      });
+      console.log("Dropped files", e.dataTransfer);
+    },
+  };
+
+  const docProps = {
+    name: "file",
+    multiple: true,
+    action: `http://localhost:8001/media/uploadfile/assets/${uniqueId}`,
+    onChange(info) {
+      const { status } = info.file;
+      if (status !== "uploading") {
+        console.log(info.file, info.fileList);
+      }
+      if (status === "removed") {
+        console.log(info.file.name);
+        fetch(
+          `http://localhost:8001/media/delete/assets/${uniqueId}/${info.file.name}`,
+          { method: "DELETE" }
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+          });
+      }
+      if (status === "done") {
+        message.success(`${info.file.name} file uploaded successfully.`);
+        asset.docs.push(info.file.response.url);
+      } else if (status === "error") {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+    },
+    onDrop(e) {
+      console.log("Dropped files", e.dataTransfer.files);
+    },
+  };
+
   const onFinishEvent = (values) => {
     setcreatePressed(true);
     let temp = {};
-    let asset = {};
     console.log(values);
     for (let key in values) {
       if (key === "asset_name") {
@@ -130,9 +195,7 @@ export default function AssetCreate() {
         temp[`${key}`] = values[key];
       }
     }
-    console.log(temp);
     asset.type_fields = temp;
-    console.log(asset);
     fetch("https://digifield.onrender.com/assets/create-asset", {
       method: "POST",
       mode: "cors",
@@ -154,20 +217,19 @@ export default function AssetCreate() {
         }
       });
   };
-useEffect(() => {
-  form.setFieldsValue({
-    Location: latLng
-  })
 
-  
-}, [latLng])
+  useEffect(() => {
+    form.setFieldsValue({
+      Location: latLng,
+    });
+  }, [latLng]);
 
   if (error)
     return (
       <div>
         <Result
           status="warning"
-          title="There are some problems with Loading the fields."
+          title="There are some problems with Loading the page."
         />
       </div>
     );
@@ -184,6 +246,8 @@ useEffect(() => {
       case "text":
         return (
           <Input
+            defaultValue={field.field_name == "Unique Id" ? uniqueId : ""}
+            disabled={field.field_name == "Unique Id"}
             onChange={(e) => {
               form.setFieldsValue({ [field.field_name]: e.target.value });
             }}
@@ -225,11 +289,12 @@ useEffect(() => {
               setassetValues({ ...assetValues, [field.field_name]: val });
               form.setFieldsValue({ [field.field_name]: val });
             }}
-          
-          > {field.values.map((val, i) => {
-            return <Option value={val}>{val}</Option>;
-          })}</Select>
-          
+          >
+            {" "}
+            {field.values.map((val, i) => {
+              return <Option value={val}>{val}</Option>;
+            })}
+          </Select>
         );
 
       case "select":
@@ -255,7 +320,10 @@ useEffect(() => {
               className="mb-5"
             >
               <div style={{ flex: 1, marginRight: "10px" }}>
-                <label htmlFor="latitude" className="mb-2 text-[#333] font-light">
+                <label
+                  htmlFor="latitude"
+                  className="mb-2 text-[#333] font-light"
+                >
                   Latitude:
                 </label>
                 <Input
@@ -267,20 +335,23 @@ useEffect(() => {
                     if (e.target.value === "") {
                       setLatLng({ ...latLng, lat: null });
                       form.setFieldsValue({
-                        [field.field_name]: null
-                      })
+                        [field.field_name]: null,
+                      });
                     } else {
                       setLatLng({ ...latLng, lat: parseFloat(e.target.value) });
                       form.setFieldsValue({
-                        [field.field_name]: latLng
-                      })
+                        [field.field_name]: latLng,
+                      });
                     }
-                    form.setFieldsValue({ [field.field_name]: latLng});
+                    form.setFieldsValue({ [field.field_name]: latLng });
                   }}
                 />
               </div>
               <div style={{ flex: 1 }}>
-                <label htmlFor="longitude" className="text-[#333] font-light mb-2">
+                <label
+                  htmlFor="longitude"
+                  className="text-[#333] font-light mb-2"
+                >
                   Longitude:
                 </label>
                 <Input
@@ -292,13 +363,13 @@ useEffect(() => {
                     if (e.target.value === "") {
                       setLatLng({ ...latLng, lng: null });
                       form.setFieldsValue({
-                        [field.field_name]: null
-                      })
+                        [field.field_name]: null,
+                      });
                     } else {
                       setLatLng({ ...latLng, lng: parseFloat(e.target.value) });
                       form.setFieldsValue({
-                        [field.field_name]: latLng
-                      })
+                        [field.field_name]: latLng,
+                      });
                     }
                   }}
                 />
@@ -315,7 +386,7 @@ useEffect(() => {
               />
               <Marker
                 position={
-                  latLng.lat != null && latLng.lng !=null
+                  latLng.lat != null && latLng.lng != null
                     ? [latLng.lat, latLng.lng]
                     : [12.99097225692328, 80.17281532287599]
                 }
@@ -488,12 +559,18 @@ useEffect(() => {
                     type="primary"
                     ghost
                     onClick={() => {
+                      assetCreated
+                        ? fetch(
+                            `http://0.0.0.0:8001/media/delete-all/assets/${uniqueId}`,
+                            { method: "DELEETE" }
+                          )
+                        : null;
                       router.push("/assets");
                     }}
                     style={{ background: "white" }}
                     className="mr-3 mt-3 mb-3"
                   >
-                    Cancel
+                    {assetCreated ? "Go Back" : "Cancel"}
                   </Button>
                 </Form.Item>
               </div>
@@ -527,7 +604,7 @@ useEffect(() => {
               <p>Add Images</p>
             </div>
 
-            <Dragger {...props}>
+            <Dragger {...imageProps}>
               <p className="ant-upload-drag-icon ">
                 <FileImageOutlined style={{ color: "#828282" }} />
               </p>
@@ -539,7 +616,7 @@ useEffect(() => {
             <div className="mb-2">
               <p>Add document</p>
             </div>
-            <Dragger {...props}>
+            <Dragger {...docProps}>
               <p className="ant-upload-drag-icon ">
                 <FileImageOutlined style={{ color: "#828282" }} />
               </p>

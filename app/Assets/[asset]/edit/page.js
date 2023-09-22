@@ -14,6 +14,7 @@ import {
   DatePicker,
   InputNumber,
   QRCode,
+  Result,
 } from "antd";
 import useSWR from "swr";
 import "leaflet-defaulticon-compatibility";
@@ -22,33 +23,13 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-geosearch/assets/css/leaflet.css";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { FileImageOutlined, LoadingOutlined } from "@ant-design/icons";
+import { Donegal_One } from "next/font/google";
 
 const { Option } = Select;
 const { Dragger } = Upload;
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 //gps function to update position
-
-
-const props = {
-  name: "file",
-  multiple: true,
-  action: "https://www.mocky.io/v2/5cc8019d300000980a055e76",
-  onChange(info) {
-    const { status } = info.file;
-    if (status !== "uploading") {
-      console.log(info.file, info.fileList);
-    }
-    if (status === "done") {
-      message.success(`${info.file.name} file uploaded successfully.`);
-    } else if (status === "error") {
-      message.error(`${info.file.name} file upload failed.`);
-    }
-  },
-  onDrop(e) {
-    console.log("Dropped files", e.dataTransfer.files);
-  },
-};
 
 const downloadQRCode = () => {
   const canvas = document.getElementById("myqrcode")?.querySelector("canvas");
@@ -76,12 +57,14 @@ export default function AssetEdit({ params }) {
     lat: 12.99097225692328,
     lng: 80.17281532287599,
   });
-
   const { data, mutate, error, isLoading } = useSWR(
     "https://digifield.onrender.com/assets/get-all-asset-types/",
     fetcher,
     { refreshInterval: 10000 }
   );
+  const [imageList, setimageList] = useState([]);
+  const [docList, setdocList] = useState([]);
+
   function UpdateMapPosition({ setLatLng, field }) {
     const map = useMap();
     map.on("click", function (e) {
@@ -91,6 +74,85 @@ export default function AssetEdit({ params }) {
     });
     return null;
   }
+
+  const imageProps = {
+    name: "file",
+    multiple: true,
+    action: `http://localhost:8001/media/uploadfile/assets/${params.asset}`,
+    beforeUpload: (file) => {
+      let allowedExtension = ['image/jpeg', 'image/jpg', 'image/png','image/gif','image/bmp'];
+      const isIMG = allowedExtension.includes(file.type);
+      if (!isIMG) {
+        message.error(`${file.name} is not an image`);
+      }
+      return isIMG || Upload.LIST_IGNORE;
+    },
+    onChange(info) {
+      let newFileList = [...info.fileList];
+      const { status } = info.file;
+      if (status !== "uploading") {
+        console.log(info.file, info.fileList);
+      }
+      if (status === "done") {
+        let newAssetValues = {...assetValues}
+        newAssetValues.images.push(info.file.response.url)
+        setassetValues(newAssetValues)
+        message.success(`${info.file.name} file uploaded successfully.`);
+      } else if (status === "error") {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+      if (status === "removed") {
+        let newImages = assetValues.images.filter((img) => img.split("/")[5] != info.file.name);
+        let copy = { ...assetValues };
+        copy.images = newImages;
+        setassetValues(copy);
+        console.log(data);
+      }
+      setimageList(newFileList);
+    },
+    onDrop(e) {
+      console.log("Dropped files", e.dataTransfer);
+    },
+  };
+
+  const docProps = {
+    name: "file",
+    multiple: true,
+    action: `http://localhost:8001/media/uploadfile/assets/${params.asset}`,
+    onChange(info) {
+      let newFileList = [...info.fileList];
+      newFileList = newFileList.map((file) => {
+        if (file.response) {
+          console.log(file.response);
+          file.url = file.response.url;
+        }
+        return file;
+      });
+      const { status } = info.file;
+      if (status !== "uploading") {
+        console.log(info.file, info.fileList);
+      }
+      if (status === "removed") {
+        let newDocs = assetValues.docs.filter((doc) => doc.split("/")[5] != info.file.name);
+        let copy = { ...assetValues };
+        copy.docs = newDocs;
+        setassetValues(copy);
+        console.log(data);
+      }
+      if (status === "done") {
+        message.success(`${info.file.name} file uploaded successfully.`);
+        let newAssetValues = {...assetValues}
+        newAssetValues.docs.push(info.file.response.url)
+        setassetValues(newAssetValues)
+      } else if (status === "error") {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+      setdocList(newFileList);
+    },
+    onDrop(e) {
+      console.log("Dropped files", e.dataTransfer.files);
+    },
+  };
 
   const getKeyName = (key) => {
     if (key === "asset_name") {
@@ -105,8 +167,7 @@ export default function AssetEdit({ params }) {
       return "type_field";
     }
   };
- 
-  
+
   useEffect(() => {
     fetch(
       `https://digifield.onrender.com/assets/get-assets-by-id/${params.asset}`
@@ -136,9 +197,25 @@ export default function AssetEdit({ params }) {
                 }
               }
             });
+          let images = data.images.map((i) => {
+            return {
+              name: i.split("/")[5],
+              status: "done",
+              url: i,
+            };
+          });
+          setimageList(images);
+          let docs = data.docs.map((i) => {
+            return {
+              name: i.split("/")[5],
+              status: "done",
+              url: i,
+            };
+          });
+          setdocList(docs);
         }
       });
-  }, [data]);
+  }, []);
 
   const success = (msg) => {
     messageApi.open({
@@ -160,8 +237,6 @@ export default function AssetEdit({ params }) {
       content: msg,
     });
   };
-
-
 
   const onFinish = (values) => {
     setUpdatePressed(true);
@@ -213,7 +288,7 @@ export default function AssetEdit({ params }) {
         return (
           <Input
             required={field.required}
-            disabled={field.field_name == "Unique Id" ? true : false}
+            disabled={field.field_name == "Unique Id"}
             value={
               getKeyName(field.field_name) != "type_field"
                 ? assetValues[getKeyName(field.field_name)]
@@ -421,8 +496,12 @@ export default function AssetEdit({ params }) {
             </div>
             <MapContainer
               center={
-                assetValues.type_fields[field.field_name].lat != null && assetValues.type_fields[field.field_name].lng != null
-                  ? [assetValues.type_fields[field.field_name].lat, assetValues.type_fields[field.field_name].lng]
+                assetValues.type_fields[field.field_name].lat != null &&
+                assetValues.type_fields[field.field_name].lng != null
+                  ? [
+                      assetValues.type_fields[field.field_name].lat,
+                      assetValues.type_fields[field.field_name].lng,
+                    ]
                   : [12.99097225692328, 80.17281532287599]
               }
               zoom={13}
@@ -434,14 +513,16 @@ export default function AssetEdit({ params }) {
               />
               <Marker
                 position={
-                  assetValues.type_fields[field.field_name].lat != null && assetValues.type_fields[field.field_name].lng != null
-                    ? [assetValues.type_fields[field.field_name].lat, assetValues.type_fields[field.field_name].lng]
+                  assetValues.type_fields[field.field_name].lat != null &&
+                  assetValues.type_fields[field.field_name].lng != null
+                    ? [
+                        assetValues.type_fields[field.field_name].lat,
+                        assetValues.type_fields[field.field_name].lng,
+                      ]
                     : [12.99097225692328, 80.17281532287599]
                 }
               ></Marker>
-              <UpdateMapPosition
-                field={field}
-              />
+              <UpdateMapPosition field={field} />
             </MapContainer>
           </div>
         );
@@ -660,7 +741,7 @@ export default function AssetEdit({ params }) {
               <p>Add Images</p>
             </div>
 
-            <Dragger {...props}>
+            <Dragger {...imageProps} fileList={imageList}>
               <p className="ant-upload-drag-icon ">
                 <FileImageOutlined style={{ color: "#828282" }} />
               </p>
@@ -672,7 +753,7 @@ export default function AssetEdit({ params }) {
             <div className="mb-2">
               <p>Add document</p>
             </div>
-            <Dragger {...props}>
+            <Dragger {...docProps} fileList={docList}>
               <p className="ant-upload-drag-icon ">
                 <FileImageOutlined style={{ color: "#828282" }} />
               </p>

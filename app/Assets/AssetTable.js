@@ -102,12 +102,12 @@ const AssetTable = () => {
       className="flex flex-col"
       style={{ height: "calc(100vh - 48px - 131px - 48px - 32px)" }}
     >
-      <div className="flex mb-3 w-[400px]">
+      <div className="flex mb-3 w-full">
         <Input
           value={searchQuery}
           placeholder="Search"
           prefix={<SearchOutlined />}
-          style={{ color: "#828282", marginLeft: 10, marginRight:10 }}
+          style={{ color: "#828282", marginLeft: 10, marginRight:10, width: "300px" }}
           onChange={(e) => {
             setsearchQuery(e.target.value);
           }}
@@ -117,7 +117,7 @@ const AssetTable = () => {
           defaultValue={["asset_id", "asset_name", "department", "type"]}
           value={selectedColumn}
           maxTagCount={"responsive"}
-          style={{width: "100%"}}
+          className="w-[300px]"
           onChange={(value) => setSelectedColumn(value)}
           
         > 
@@ -127,18 +127,6 @@ const AssetTable = () => {
           <Select.Option value="department">Department</Select.Option>
           <Select.Option value="type">Type</Select.Option>
         </Select>
-
-{/* <Checkbox.Group
-    value={selectedColumn}
-    onChange={(checkedValues) => setSelectedColumn(checkedValues)}
-    maxTagCount={"responsive"}
-          style={{width: "100%"}}
->
-    <Checkbox value="asset_name">Asset Name</Checkbox>
-    <Checkbox value="asset_id">Asset ID</Checkbox>
-    <Checkbox value="department">Department</Checkbox>
-    <Checkbox value="type">Type</Checkbox>
-</Checkbox.Group> */}
 
       </div>
 
@@ -166,6 +154,7 @@ const AssetTable = () => {
             );
           })}
           onChange={onChange}
+          size="small"
           sticky
           // scroll={{ y: 500}}
         />

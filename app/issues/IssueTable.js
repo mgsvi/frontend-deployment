@@ -14,10 +14,12 @@ const columns = [
   {
     title: "Priority",
     dataIndex: "priority",
+    width : 140
   },
   {
     title: "Reported on",
     dataIndex: "reported_time",
+    
     render: (text) => {
       const reportedTime = new Date(text);
       const formattedDate = `${reportedTime.getMonth() + 1}/${reportedTime.getDate()}/${reportedTime.getFullYear()}`;
@@ -26,10 +28,12 @@ const columns = [
       const formattedTime = `${hours % 12 || 12}:${String(reportedTime.getMinutes()).padStart(2, '0')}:${String(reportedTime.getSeconds()).padStart(2, '0')} ${amPm}`;
       return `${formattedDate} ${formattedTime}`;
     },
+    width: 120
   },
   {
     title: "Reported By",
     dataIndex: "reported_by",
+    width:180
   },
   {
     title: "Issue Description",
@@ -38,10 +42,12 @@ const columns = [
   {
     title: "Status",
     dataIndex: "status",
+    width: 120
   },
   {
     title: "Assigned to",
     dataIndex: "assigned_to",
+    width:180
   },
 ];
 
@@ -99,6 +105,7 @@ const App = () => {
         columns={columns}
         dataSource={filteredData}
         onChange={onChange}
+        size = "small"
         sticky
       />
 
