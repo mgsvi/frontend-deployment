@@ -20,11 +20,6 @@ function CategoryCreate() {
   
   const [formData, setFormData] = useState([]);
   const [activeKey, setactiveKey] = useState("1");
-  
-  if(updatecategory=== "true"){
-    
-  }
-
   const updateDetailsData = (data) => {
     setFormData({ ...formData, questions: data.questions, name: data.name });
   };
@@ -34,6 +29,33 @@ function CategoryCreate() {
   };
   
   console.log(formData);
+  if(formData.updatecategory){
+    const category = {
+      name: formData.name,
+      questions: formData.questions,
+    };
+    fetch("https://digifield.onrender.com/assets/create-asset", {
+      method: "POST",
+      mode: "cors",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json",
+        accept: "application/json",
+      },
+      body: JSON.stringify(category),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.acknowledge) {
+          success("Asset has been created");
+          setassetCreated(true);
+        } else {
+          warning(data.description);
+        }
+      });
+  }
+
+ 
   const items = [
     {
       key: "1",
