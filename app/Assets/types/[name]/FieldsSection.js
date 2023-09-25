@@ -1,7 +1,6 @@
 import { React, useState, useEffect } from "react";
 import {
   Input,
-  Table,
   Row,
   Col,
   Spin,
