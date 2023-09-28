@@ -30,7 +30,6 @@ function ViewAsset({ params }) {
   const [locationAvailable, setlocationAvailable] = useState(false);
   const [location, setlocation] = useState([]);
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
-
   const [assetValues, setassetValues] = useState(null);
   useEffect(() => {
     fetch(
@@ -41,13 +40,12 @@ function ViewAsset({ params }) {
         if (data != null) {
           setassetValues(data);
         }
-        if (data.type_fields.Location) {
+        if (data?.type_fields?.Location) {
           setlocationAvailable(true);
           setlocation(data.type_fields.Location);
         }
-      });
+        });
   }, []);
-
   const [messageApi, contextHolder] = message.useMessage();
   const success = () => {
     messageApi.open({
@@ -67,7 +65,6 @@ function ViewAsset({ params }) {
       content: "This is a warning message",
     });
   };
-
   const router = useRouter();
   const onClick = ({ key }) => {
     if (key == 2) {
@@ -78,7 +75,6 @@ function ViewAsset({ params }) {
       console.log(params.asset);
     }
   };
-
   const menu = (
     <Menu onClick={onClick}>
       <Menu.Item key="2">Edit</Menu.Item>
@@ -111,7 +107,6 @@ function ViewAsset({ params }) {
       children: `Content of Tab Pane 4`,
     },
   ];
-
   if (assetValues == null) {
     return (
       <div className="w-full h-screen flex flex-col justify-center align-middle">
@@ -129,7 +124,6 @@ function ViewAsset({ params }) {
         <Dropdown overlay={menu} onClick={menu}>
           <EllipsisOutlined rotate={90} />
         </Dropdown>
-
         <Popconfirm
           title="Delete the asset "
           description="Performing this action will remove the asset , are you sure?"
@@ -155,7 +149,6 @@ function ViewAsset({ params }) {
           }}
         ></Popconfirm>
       </div>
-
       <div className="h-full w-full ">
         <Row justify="space-between">
           <Col span={15}>
@@ -212,7 +205,6 @@ function ViewAsset({ params }) {
                               </div>
                             );
                           }
-
                           return (
                             <div key={key}>
                               <p>{key}</p>
@@ -314,5 +306,4 @@ function ViewAsset({ params }) {
     </div>
   );
 }
-
 export default ViewAsset;

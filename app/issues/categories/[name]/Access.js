@@ -1,11 +1,12 @@
 import { React, useState } from "react";
 import { Input, Divider, Button, Form, Space } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-
+import { useRouter } from "next/navigation";
 
 
 function Access({ onDataUpdate }) {
   const [accessData, setAccessData] = useState({});
+  const router = useRouter();
   const [updatecategory, setupdatecategory] = useState(false);
   console.log(updatecategory);
   const onFinish = () => {
@@ -53,6 +54,9 @@ function Access({ onDataUpdate }) {
         ghost
         className="mr-5 w-[20%] mt-5"
         style={{ background: "white" }}
+        onClick={() => {
+          router.push("/issues/categories");
+        }}
       >
         Cancel
       </Button>

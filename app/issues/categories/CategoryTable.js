@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Divider, Table } from "antd";
 import useSWR from "swr";
+import { useRouter } from "next/navigation";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
@@ -23,10 +24,9 @@ const columns = [
   },
 ];
 
-const CategoryTable = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRow, setSelectedRow] = useState(null);
-  const [showDrawer, setShowDrawer] = useState(false);
+const CategoryTable = ({searchQuery}) => {
+  
+  const router = useRouter();
   const [dataSource, setDataSource] = useState([]);
   const { data, error, isLoading } = useSWR(
     "https://digifield.onrender.com/issues/get-all-issue-categories",
@@ -77,7 +77,7 @@ const CategoryTable = () => {
         onRow={(record, rowIndex) => {
           return {
             onClick: (event) => {
-              openDrawer(record);
+              router.push(`/issues/categories/${record.name}`);
             },
           };
         }}

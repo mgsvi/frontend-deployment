@@ -77,7 +77,7 @@ export default function TypeTable({ searchQuery }) {
           return {
             onClick: (event) => {
               router.push(`/assets/types/${record.name}`);
-            }, // click row
+            },
           };
         }}
       />

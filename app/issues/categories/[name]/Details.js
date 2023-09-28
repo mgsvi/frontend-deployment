@@ -2,11 +2,11 @@ import { React, useState } from "react";
 import { Input, Divider, Button, Form, Space } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
-function Details({ onDataUpdate , moveToTab}) {
+function Details({ onDataUpdate , moveToTab, name}) {
   
-  const [name, setname] = useState("")
-  const [questions, setquestions] = useState([])
 
+  const [questions, setquestions] = useState([])
+  
 
   return (
     <div className="w-[700px]">
@@ -25,7 +25,7 @@ function Details({ onDataUpdate , moveToTab}) {
               <h2 className="mb-2 text-[#333]  font-light">
                 Category Name<span className="text-red-600">*</span>
               </h2>
-              <Input placeholder="Enter Category Name" onChange={(e) => {setname(e.target.value)}} />
+              <Input value={name} onChange={(e) => {setname(e.target.value)}} />
             </div>
           </Form.Item>
         </div>

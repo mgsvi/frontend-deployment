@@ -25,8 +25,8 @@ const Page = () => {
               placeholder="Search"
               prefix={<SearchOutlined />}
               style={{ color: "#828282" }}
-              onChange={(e) => {
-                setsearchQuery(e.target.value);
+              onChange={e=>{
+                setsearchQuery(e.target.value)
               }}
             />
           </div>
