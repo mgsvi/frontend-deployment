@@ -16,6 +16,8 @@ import {
 } from "@ant-design/icons";
 import Image from "next/image";
 import { Layout, Menu, theme } from "antd";
+import { signOut } from "next-auth/react";
+
 const { Header, Sider, Content } = Layout;
 
 const App = () => {
@@ -39,7 +41,12 @@ const App = () => {
       // Set the background color of the sidebar
     >
       <div className="demo-logo-vertical" />
-      <Image src="/sidebariconexpanded.png" alt="side-bar" width={500} height={500} />
+      <Image
+        src="/sidebariconexpanded.png"
+        alt="side-bar"
+        width={500}
+        height={500}
+      />
       <Menu
         theme="dark"
         mode="inline"
@@ -112,6 +119,9 @@ const App = () => {
           key="9"
           icon={<LogoutOutlined />}
           style={{ position: "absolute", bottom: 50 }}
+          onClick={() => {
+            signOut();
+          }}
         >
           Logout
         </Menu.Item>
