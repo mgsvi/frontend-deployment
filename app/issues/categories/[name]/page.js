@@ -5,11 +5,14 @@ import useSWR from "swr";
 import Details from "./Details";
 import Access from "./Access";
 import { useRouter } from "next/navigation";
+import { EllipsisOutlined } from "@ant-design/icons";
+import { Menu, Dropdown, Popconfirm, message } from "antd";
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 function CategoryCreate({params}) {
   const name=params.name
   const router = useRouter();
+  const [messageApi, contextHolder] = message.useMessage();
   const { data, mutate, error, isLoading } = useSWR(
     "https://digifield.onrender.com/assets/get-all-asset-types/",
     fetcher,
@@ -18,12 +21,24 @@ function CategoryCreate({params}) {
   const onChange = (key) => {
     console.log(key);
   };
+  const onClick = ({ key }) => {
+    if (key == 1) {
+      setdeleteAsset(params.asset);
+      console.log(params.asset);
+    }
+  };
 
   const [formData, setFormData] = useState([]);
   const [activeKey, setactiveKey] = useState("1");
   const updateDetailsData = (data) => {
     setFormData({ ...formData, questions: data.questions, name: data.name });
   };
+ 
+  const menu = (
+    <Menu onClick={onClick}>
+      <Menu.Item key="1">Delete</Menu.Item>
+    </Menu>
+  );
 
   const updateAccessData = (data) => {
     setFormData({ ...formData, updatecategory: true });
@@ -70,6 +85,21 @@ function CategoryCreate({params}) {
       });
   };
 
+  const success = (msg) => {
+    messageApi.open({
+      type: "success",
+      content: msg,
+    });
+  };
+
+  const warning = (msg) => {
+    messageApi.open({
+      type: "warning",
+      content: msg,
+    });
+  };
+
+
   useEffect(() => {
     if (formData.updatecategory) {
       console.log(formData.updatecategory+"new")
@@ -100,10 +130,37 @@ function CategoryCreate({params}) {
   return (
     <div className="flex flex-col">
       <div className="px-10 pt-10 ">
-        <div>
+        <div className="flex justify-between">
           <h1 className="text-xl font-semi font-medium">
             Create issue category{" "}
           </h1>
+          <Popconfirm
+                title="Delete the asset type"
+                description="Performing this action will remove the Issue category type, are you sure?"
+                okText="Yes"
+                cancelText="No"
+                onConfirm={() => {
+                  fetch(
+                    `https://digifield.onrender.com/issues/delete-issue_category/${name}`,
+                    {
+                      method: "DELETE",
+                    }
+                  )
+                    .then((res) => res.json())
+                    .then((data) => {
+                      if (data.acknowledge) {
+                        success("Issue Category has been deleted");
+                        router.push("/issues/categories");
+                      } else {
+                        warning(data.description);
+                      }
+                    });
+                }}
+              >
+                <button className="text-[#040303] bg-transparent hover:text-black text-lg">
+                  <EllipsisOutlined rotate={90} />
+                </button>
+              </Popconfirm>
         </div>
         <div className="pt-5">
           <Tabs

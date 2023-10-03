@@ -17,19 +17,19 @@ function Access({ onDataUpdate }) {
   return (
     <div className="w-[700px]">
       <div className="bg-white p-6 rounded-lg  ">
-        <p className="mb-2 text-[#333]  ">
+        <p className="mb-2 text-[#333] text-sm ">
           {" "}
           Access to Reported Issues<span className="text-red-600"></span>
         </p>
-        <p className="mb-2 text-[#333]  ">
+        <p className="mb-2 text-[#333] text-sm">
           {" "}
           Give Access to the following people while reporting observation
           <span className="text-red-600"></span>
         </p>
         <Divider />
         <div className="flex flex-row justify-between">
-          <p>When reported by</p>
-          <p>"Observation" will be visible to</p>
+          <p className="text-sm">When reported by</p>
+          <p className="text-sm">"Observation" will be visible to"</p>
         </div>
         <Divider />
         <Divider />
@@ -46,8 +46,8 @@ function Access({ onDataUpdate }) {
       <Button type="primary" className="mr-5 w-[20%] mt-5" onClick={()=>{
           onDataUpdate({updatecategory : true})
           setupdatecategory(true)
-
-        }}>Save and Apply</Button>
+          router.push("/issues/categories");
+      }}>Save and Apply</Button>
 
       <Button
         type="primary"

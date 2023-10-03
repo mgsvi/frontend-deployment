@@ -28,11 +28,9 @@ const items = [
 const temp = [
   "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png",
   "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png",
-  
 ];
 
 const IssueDrawer = ({ open, onClose, selectedRow }) => {
- 
   const reportedTime = new Date(selectedRow.reported_time);
   const formattedDate = `${
     reportedTime.getMonth() + 1
@@ -55,8 +53,8 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
       width="50%"
       placement="right"
     >
-      <div className="flex flex-row h-screen w-full">
-        <div className="flex flex-col bg-white w-[45%] pr-5">
+      <div className="flex fixedflex-row h-screen overflow-hidden">
+        <div className="flex flex-col bg-white overflow-y-auto w-[45%] pr-5">
           <div>
             <div className="flex flex-row">
               <div>
@@ -121,7 +119,9 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
               <h1>Media,Links and docs</h1>
               <div className="bg-white rounded p-3 h-[200px] overflow-hidden">
                 <Carousel
-                  prevArrow={<Button className="carousel-arrow">Previous</Button>}
+                  prevArrow={
+                    <Button className="carousel-arrow">Previous</Button>
+                  }
                   nextArrow={<Button className="carousel-arrow">Next</Button>}
                 >
                   {temp.map((i, index) => {
@@ -137,9 +137,8 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
             <Divider />
           </div>
         </div>
-        <div className="bg-[#E9EDF6] w-[55%]">
-          <h1>Chat will be displayed here</h1>
-          {/* <Chat /> */}
+        <div className="bg-[#E9EDF6] w-[55%] h-full overflow-y-auto">
+          <Chat />
         </div>
       </div>
     </Drawer>

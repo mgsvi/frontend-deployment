@@ -166,7 +166,7 @@ useEffect(() => {
           onRow={(record, rowIndex) => {
             return {
               onClick: (event) => {
-                router.push(`/assets/categories/${record.name}`);
+                router.push(`/assets/${record.asset_id}`);
               },
             };
           }}

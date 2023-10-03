@@ -1,5 +1,4 @@
 "use client";
-
 import { React, useState } from "react";
 import Link from "next/link";
 import { Button, ConfigProvider, Tabs, Card, Col, Row } from "antd";
@@ -66,7 +65,7 @@ const Page = () => {
               </Col>
               <Col span={4}>
                 <Card title="High Priority Open" bordered={true}>
-                  3
+                  1
                 </Card>
               </Col>
             </Row>
