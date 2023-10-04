@@ -23,7 +23,11 @@ import {
   QRCode,
 } from "antd";
 import useSWR from "swr";
-import { FileImageOutlined, LoadingOutlined } from "@ant-design/icons";
+import {
+  FileImageOutlined,
+  LoadingOutlined,
+  LeftOutlined,
+} from "@ant-design/icons";
 import { useForm } from "antd/es/form/Form";
 
 const { Option } = Select;
@@ -59,10 +63,13 @@ export default function AssetCreate() {
   const [createPressed, setcreatePressed] = useState(false);
   const [assetCreated, setassetCreated] = useState(false);
   const [assetType, setassetType] = useState(null);
+  const [mode, setMode] = useState(false);
   const [latLng, setLatLng] = useState({
     lat: 12.99097225692328,
     lng: 80.17281532287599,
   });
+  const [images, setimages] = useState([]);
+  const [docs, setdocs] = useState([]);
   const [assetValues, setassetValues] = useState({});
   const { data, mutate, error, isLoading } = useSWR(
     "https://digifield.onrender.com/assets/get-all-asset-types/",
@@ -72,9 +79,6 @@ export default function AssetCreate() {
   const uniqueId = self.crypto.randomUUID();
   const [form] = Form.useForm();
   form.setFieldsValue({ "Unique Id": uniqueId });
-  let asset = {};
-  asset.images = [];
-  asset.docs = [];
 
   const success = (msg) => {
     messageApi.open({
@@ -121,13 +125,15 @@ export default function AssetCreate() {
         console.log(info.file, info.fileList);
       }
       if (status === "done") {
-        asset.images.push(info.file.response.url);
+        console.log(info.file.response.url);
+        setimages([...images, info.file.response.url]);
         message.success(`${info.file.name} file uploaded successfully.`);
       } else if (status === "error") {
         message.error(`${info.file.name} file upload failed.`);
       }
       if (status === "removed") {
         console.log(info.file.name);
+        setimages(images.filter((img) => img.split("/")[5] != info.file.name));
         fetch(
           `http://localhost:8001/media/delete/assets/${uniqueId}/${info.file.name}`,
           { method: "DELETE" }
@@ -139,9 +145,6 @@ export default function AssetCreate() {
       }
     },
     onDrop(e) {
-      fetch(`http://localhost:8001/media/delete/assets/${uniqueId}/`, {
-        method: "DELETE",
-      });
       console.log("Dropped files", e.dataTransfer);
     },
   };
@@ -157,6 +160,8 @@ export default function AssetCreate() {
       }
       if (status === "removed") {
         console.log(info.file.name);
+        setdocs(docs.filter((doc) => doc.split("/")[5] != info.file.name));
+
         fetch(
           `http://localhost:8001/media/delete/assets/${uniqueId}/${info.file.name}`,
           { method: "DELETE" }
@@ -167,8 +172,10 @@ export default function AssetCreate() {
           });
       }
       if (status === "done") {
+        console.log(info.file.response.url);
         message.success(`${info.file.name} file uploaded successfully.`);
-        asset.docs.push(info.file.response.url);
+        setdocs((prev) => [...docs, info.file.response.url]);
+        console.log(docs);
       } else if (status === "error") {
         message.error(`${info.file.name} file upload failed.`);
       }
@@ -180,6 +187,7 @@ export default function AssetCreate() {
 
   const onFinishEvent = (values) => {
     setcreatePressed(true);
+    let asset = {};
     let temp = {};
     console.log(values);
     for (let key in values) {
@@ -196,6 +204,9 @@ export default function AssetCreate() {
       }
     }
     asset.type_fields = temp;
+    asset.images = images;
+    asset.docs = docs;
+    console.log(asset, images, docs);
     fetch("https://digifield.onrender.com/assets/create-asset", {
       method: "POST",
       mode: "cors",
@@ -212,6 +223,7 @@ export default function AssetCreate() {
         if (data.acknowledge) {
           success("Asset has been created");
           setassetCreated(true);
+          success("Please navigate to edit asset to edit this asset");
         } else {
           warning(data.description);
         }
@@ -380,10 +392,39 @@ export default function AssetCreate() {
               zoom={13}
               style={{ width: "100%", height: "300px" }}
             >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              />
+              {mode ? (
+                <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
+              ) : (
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              )}
+
+              <div
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  zIndex: 1000, // to make sure it's above the map layers
+                }}
+                onClick={() => setMode(!mode)}
+              >
+                {mode ? (
+                  <Image
+                    src="/normal.png"
+                    className="border"
+                    width={100}
+                    height={100}
+                    alt="Satellite View"
+                  />
+                ) : (
+                  <Image
+                    src="/satellite.png"
+                    className="border"
+                    width={100}
+                    height={100}
+                    alt="Normal View"
+                  />
+                )}
+              </div>
               <Marker
                 position={
                   latLng.lat != null && latLng.lng != null
@@ -412,7 +453,15 @@ export default function AssetCreate() {
   return (
     <div className="w-full h-screen overflow-clip flex flex-col pl-20 pr-20 pt-10 pb-0">
       {contextHolder}
-      <h1 className="text-xl font-semi bold mb-5">Create New Asset</h1>
+      <div className="flex gap-2">
+        <Button
+          type="text"
+          ghost
+          icon={<LeftOutlined />}
+          onClick={() => router.push(`/assets`)}
+        ></Button>
+        <h1 className="text-xl font-semi bold mb-5">Create New Asset</h1>
+      </div>
       <div className="bg-white w-full h-full flex p-10">
         <div className="w-2/3 h-full flex flex-col overflow-y-auto mr-3">
           <Form
@@ -559,10 +608,10 @@ export default function AssetCreate() {
                     type="primary"
                     ghost
                     onClick={() => {
-                      assetCreated
+                      !assetCreated
                         ? fetch(
-                            `http://0.0.0.0:8001/media/delete-all/assets/${uniqueId}`,
-                            { method: "DELEETE" }
+                            `http://localhost:8001/media/delete-all/assets/${uniqueId}`,
+                            { method: "DELETE" }
                           )
                         : null;
                       router.push("/assets");
@@ -604,7 +653,7 @@ export default function AssetCreate() {
               <p>Add Images</p>
             </div>
 
-            <Dragger {...imageProps}>
+            <Dragger {...imageProps} disabled={assetCreated}>
               <p className="ant-upload-drag-icon ">
                 <FileImageOutlined style={{ color: "#828282" }} />
               </p>
@@ -616,7 +665,7 @@ export default function AssetCreate() {
             <div className="mb-2">
               <p>Add document</p>
             </div>
-            <Dragger {...docProps}>
+            <Dragger {...docProps} disabled={assetCreated}>
               <p className="ant-upload-drag-icon ">
                 <FileImageOutlined style={{ color: "#828282" }} />
               </p>

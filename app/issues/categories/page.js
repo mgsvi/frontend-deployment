@@ -1,9 +1,9 @@
 "use client";
 
 import { React, useState } from "react";
-import { Button, Space, ConfigProvider, Tag, Input, Modal } from "antd";
+import { Button, Space, ConfigProvider, Tag, Input, Modal, message } from "antd";
 import theme from "../../themeConfig";
-import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined, LeftOutlined } from "@ant-design/icons";
 import Table from "./CategoryTable";
 import { useRouter } from "next/navigation";
 
@@ -12,11 +12,23 @@ const Page = () => {
   const [modal2Open, setModal2Open] = useState(false);
   const [categoryTypeName, setcategoryTypeName] = useState("");
   const [searchQuery, setsearchQuery] = useState("");
+  const [messageApi, contextHolder] = message.useMessage();
+
 
   return (
     <ConfigProvider theme={theme}>
+      {contextHolder}
       <div className="flex flex-col w-full p-4">
-        <h1 className="text-xl font-semi bold mb-5">Manage issue category</h1>
+        <div className="flex gap-2">
+          {" "}
+          <Button
+            type="text"
+            ghost
+            icon={<LeftOutlined />}
+            onClick={() => router.push(`/issues`)}
+          ></Button>
+          <h1 className="text-xl font-semi bold mb-5">Manage issue category</h1>
+        </div>
 
         <div className=" flex flex-row justify-between mb-4">
           <div className="flex">
@@ -25,8 +37,8 @@ const Page = () => {
               placeholder="Search"
               prefix={<SearchOutlined />}
               style={{ color: "#828282" }}
-              onChange={e=>{
-                setsearchQuery(e.target.value)
+              onChange={(e) => {
+                setsearchQuery(e.target.value);
               }}
             />
           </div>
@@ -41,8 +53,15 @@ const Page = () => {
             centered
             open={modal2Open}
             onOk={() => {
-              setModal2Open(false);
+              if(categoryTypeName != "") {
+                setModal2Open(false);
               router.push(`/issues/categories/${categoryTypeName}`);
+              } else {
+                messageApi.open({
+                  type: "warning",
+                  content: "Issue category name cannot be empty",
+                });
+              }
             }}
             onCancel={() => setModal2Open(false)}
           >
@@ -64,4 +83,4 @@ const Page = () => {
   );
 };
 
-export default Page
+export default Page;

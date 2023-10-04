@@ -12,9 +12,14 @@ import {
   Menu,
   Form,
   Empty,
+  Modal,
 } from "antd";
-import { EllipsisOutlined } from "@ant-design/icons";
-import { LoadingOutlined } from "@ant-design/icons";
+import { EllipsisOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  LoadingOutlined,
+  LeftOutlined,
+  ExclamationCircleFilled,
+} from "@ant-design/icons";
 import { message, Space, Spin } from "antd";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -31,6 +36,7 @@ function ViewAsset({ params }) {
   const [location, setlocation] = useState([]);
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
   const [assetValues, setassetValues] = useState(null);
+  const { confirm } = Modal;
   useEffect(() => {
     fetch(
       `https://digifield.onrender.com/assets/get-assets-by-id/${params.asset}`
@@ -38,13 +44,14 @@ function ViewAsset({ params }) {
       .then((res) => res.json())
       .then((data) => {
         if (data != null) {
+          console.log(data);
           setassetValues(data);
         }
         if (data?.type_fields?.Location) {
           setlocationAvailable(true);
           setlocation(data.type_fields.Location);
         }
-        });
+      });
   }, []);
   const [messageApi, contextHolder] = message.useMessage();
   const success = () => {
@@ -66,26 +73,55 @@ function ViewAsset({ params }) {
     });
   };
   const router = useRouter();
-  const onClick = ({ key }) => {
-    if (key == 2) {
-      router.push(`/assets/${params.asset}/edit`);
-    }
-    if (key == 1) {
-      setdeleteAsset(params.asset);
-      console.log(params.asset);
-    }
-  };
-  const menu = (
-    <Menu onClick={onClick}>
-      <Menu.Item key="2">Edit</Menu.Item>
-      <Menu.Item key="1">Delete</Menu.Item>
-    </Menu>
-  );
-  let temp = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
-  const onChange = (key) => {
-    console.log(key);
-  };
+
   const items = [
+    {
+      label: "Delete",
+      key: "1",
+      icon: <DeleteOutlined />,
+      danger: true,
+    },
+  ];
+
+  const menuProps = {
+    items,
+    onClick: (e) => {
+      showDeleteConfirm();
+    },
+  };
+
+  const showDeleteConfirm = () => {
+    confirm({
+      title: "Are you sure delete this asset?",
+      icon: <ExclamationCircleFilled />,
+      content: "This is an irreversable action",
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
+      onOk() {
+        fetch(
+          `https://digifield.onrender.com/assets/delete-asset/${assetValues.asset_id}`,
+          {
+            method: "DELETE",
+          }
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.acknowledge) {
+              success("Asset has been deleted");
+              router.push("/assets");
+            } else {
+              warning(data.description);
+            }
+          });
+      },
+      onCancel() {
+        console.log("Cancel");
+      },
+    });
+  };
+
+  const tabs = [
     {
       key: "1",
       label: `All`,
@@ -107,6 +143,7 @@ function ViewAsset({ params }) {
       children: `Content of Tab Pane 4`,
     },
   ];
+
   if (assetValues == null) {
     return (
       <div className="w-full h-screen flex flex-col justify-center align-middle">
@@ -118,36 +155,27 @@ function ViewAsset({ params }) {
 
   return (
     <div className="h-screen w-full flex flex-col px-32 pt-10 gap-4 overflow-y-auto">
-      <div class="flex justify-between">
-        <h1 class="text-xl font-semibold">{assetValues.asset_name}</h1>
-        <div class="flex-grow"></div>
-        <Dropdown overlay={menu} onClick={menu}>
-          <EllipsisOutlined rotate={90} />
-        </Dropdown>
-        <Popconfirm
-          title="Delete the asset "
-          description="Performing this action will remove the asset , are you sure?"
-          okText="Yes"
-          open={deleteAsset}
-          cancelText="No"
-          onConfirm={() => {
-            fetch(
-              `https://digifield.onrender.com/assets/delete-asset/${assetValues.asset_id}`,
-              {
-                method: "DELETE",
-              }
-            )
-              .then((res) => res.json())
-              .then((data) => {
-                if (data.acknowledge) {
-                  success("Asset has been deleted");
-                  router.push("/assets");
-                } else {
-                  warning(data.description);
-                }
-              });
-          }}
-        ></Popconfirm>
+      <div class="w-full flex justify-between">
+        <div className="flex gap-2">
+          <Button
+            type="text"
+            ghost
+            icon={<LeftOutlined />}
+            onClick={() => router.push(`/assets`)}
+          ></Button>
+          <h1 class="text-xl font-semibold">{assetValues.asset_name}</h1>
+        </div>
+        <div>
+          <Dropdown.Button
+            menu={menuProps}
+            icon={<EllipsisOutlined />}
+            onClick={() => {
+              router.push(`/assets/${params.asset}/edit`);
+            }}
+          >
+            Edit
+          </Dropdown.Button>
+        </div>
       </div>
       <div className="h-full w-full ">
         <Row justify="space-between">
@@ -266,7 +294,7 @@ function ViewAsset({ params }) {
                   </div>
                 ) : (
                   <div className="bg-white rounded p-2">
-                    <Empty description="No Images"/>
+                    <Empty description="No Images" />
                   </div>
                 )}
               </div>
@@ -289,7 +317,7 @@ function ViewAsset({ params }) {
                       );
                     })
                   ) : (
-                    <Empty description="No Documents"/>
+                    <Empty description="No Documents" />
                   )}
                 </div>
               </div>
@@ -298,7 +326,7 @@ function ViewAsset({ params }) {
           <Col span={13}>
             <Tabs
               tabBarStyle={{ "border-bottom": " 1px solid #ced3de" }}
-              items={items}
+              items={tabs}
             />
           </Col>
         </Row>

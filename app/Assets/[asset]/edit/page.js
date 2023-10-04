@@ -22,7 +22,11 @@ import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility
 import "leaflet/dist/leaflet.css";
 import "leaflet-geosearch/assets/css/leaflet.css";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import { FileImageOutlined, LoadingOutlined } from "@ant-design/icons";
+import {
+  FileImageOutlined,
+  LoadingOutlined,
+  LeftOutlined,
+} from "@ant-design/icons";
 import { Donegal_One } from "next/font/google";
 
 const { Option } = Select;
@@ -80,7 +84,13 @@ export default function AssetEdit({ params }) {
     multiple: true,
     action: `http://localhost:8001/media/uploadfile/assets/${params.asset}`,
     beforeUpload: (file) => {
-      let allowedExtension = ['image/jpeg', 'image/jpg', 'image/png','image/gif','image/bmp'];
+      let allowedExtension = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/gif",
+        "image/bmp",
+      ];
       const isIMG = allowedExtension.includes(file.type);
       if (!isIMG) {
         message.error(`${file.name} is not an image`);
@@ -94,15 +104,17 @@ export default function AssetEdit({ params }) {
         console.log(info.file, info.fileList);
       }
       if (status === "done") {
-        let newAssetValues = {...assetValues}
-        newAssetValues.images.push(info.file.response.url)
-        setassetValues(newAssetValues)
+        let newAssetValues = { ...assetValues };
+        newAssetValues.images.push(info.file.response.url);
+        setassetValues(newAssetValues);
         message.success(`${info.file.name} file uploaded successfully.`);
       } else if (status === "error") {
         message.error(`${info.file.name} file upload failed.`);
       }
       if (status === "removed") {
-        let newImages = assetValues.images.filter((img) => img.split("/")[5] != info.file.name);
+        let newImages = assetValues.images.filter(
+          (img) => img.split("/")[5] != info.file.name
+        );
         let copy = { ...assetValues };
         copy.images = newImages;
         setassetValues(copy);
@@ -133,7 +145,9 @@ export default function AssetEdit({ params }) {
         console.log(info.file, info.fileList);
       }
       if (status === "removed") {
-        let newDocs = assetValues.docs.filter((doc) => doc.split("/")[5] != info.file.name);
+        let newDocs = assetValues.docs.filter(
+          (doc) => doc.split("/")[5] != info.file.name
+        );
         let copy = { ...assetValues };
         copy.docs = newDocs;
         setassetValues(copy);
@@ -141,9 +155,9 @@ export default function AssetEdit({ params }) {
       }
       if (status === "done") {
         message.success(`${info.file.name} file uploaded successfully.`);
-        let newAssetValues = {...assetValues}
-        newAssetValues.docs.push(info.file.response.url)
-        setassetValues(newAssetValues)
+        let newAssetValues = { ...assetValues };
+        newAssetValues.docs.push(info.file.response.url);
+        setassetValues(newAssetValues);
       } else if (status === "error") {
         message.error(`${info.file.name} file upload failed.`);
       }
@@ -398,12 +412,11 @@ export default function AssetEdit({ params }) {
                 setassetValues({ ...assetValues, [field.field_name]: e });
               }
             }}
-            options={() => {
-              return field.values.map((val) => {
-                return { lebel: val, value: val };
-              });
-            }}
-          />
+          >
+            {field.values.map((val) => {
+              return <Option value={val}>{val}</Option>;
+            })}
+          </Select>
         );
       case "select":
         return (
@@ -431,7 +444,7 @@ export default function AssetEdit({ params }) {
               }
             }}
           >
-            {field.values.map((val, i) => {
+            {field.values.map((val) => {
               return <Option value={val}>{val}</Option>;
             })}
           </Select>
@@ -564,7 +577,16 @@ export default function AssetEdit({ params }) {
   return (
     <div className="w-full h-screen overflow-clip flex flex-col pl-20 pr-20 pt-10 pb-0">
       {contextHolder}
-      <h1 className="text-xl font-semi bold mb-5">Edit Asset</h1>
+      <div className="flex gap-2">
+        <Button
+          type="text"
+          ghost
+          icon={<LeftOutlined />}
+          onClick={() => router.push(`/assets/${params.asset}`)}
+        ></Button>
+        <h1 className="text-xl font-semi bold mb-5">Edit Asset</h1>
+      </div>
+
       <div className="bg-white w-full h-full flex p-10">
         <div className="w-2/3 h-full flex flex-col overflow-y-auto mr-3">
           <Form
@@ -684,6 +706,7 @@ export default function AssetEdit({ params }) {
                   </div>
                 );
               })}
+
             {/* button */}
             <div className="flex justify-between">
               <div className="flex">

@@ -1,16 +1,17 @@
 "use client";
 import { React, useState, useEffect } from "react";
-import { Tabs } from "antd";
+import { Tabs, Button, message } from "antd";
 import useSWR from "swr";
 import Details from "./Details";
 import Access from "./Access";
 import { useRouter } from "next/navigation";
 import { EllipsisOutlined } from "@ant-design/icons";
 import { Menu, Dropdown, Popconfirm, message } from "antd";
+import { LeftOutlined } from "@ant-design/icons";
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
-function CategoryCreate({params}) {
-  const name=params.name
+function CategoryCreate({ params }) {
+  const name = params.name;
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
   const { data, mutate, error, isLoading } = useSWR(
@@ -30,6 +31,7 @@ function CategoryCreate({params}) {
 
   const [formData, setFormData] = useState([]);
   const [activeKey, setactiveKey] = useState("1");
+
   const updateDetailsData = (data) => {
     setFormData({ ...formData, questions: data.questions, name: data.name });
   };
@@ -45,14 +47,13 @@ function CategoryCreate({params}) {
   };
 
   console.log(formData);
-  
+
   const handleSubmit = () => {
-    
     const category = {
       name: formData.name,
-      notify:[],
+      notify: [],
       questions: formData.questions,
-      access:[]
+      access: [],
     };
     console.log(JSON.stringify(category));
 
@@ -61,9 +62,8 @@ function CategoryCreate({params}) {
       mode: "cors",
       cache: "no-cache",
       headers: {
-      
-        "accept": "application/json",
-        "Content-Type": "application/json"
+        accept: "application/json",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify(category),
     })
@@ -102,7 +102,7 @@ function CategoryCreate({params}) {
 
   useEffect(() => {
     if (formData.updatecategory) {
-      console.log(formData.updatecategory+"new")
+      console.log(formData.updatecategory + "new");
       handleSubmit();
     }
   }, [formData]);
@@ -113,7 +113,11 @@ function CategoryCreate({params}) {
       label: "Details",
       children: (
         <div className="mt-10 flex flex-col justify-center items-center">
-          <Details name={name} onDataUpdate={updateDetailsData} moveToTab={setactiveKey} />
+          <Details
+            name={name}
+            onDataUpdate={updateDetailsData}
+            moveToTab={setactiveKey}
+          />
         </div>
       ),
     },
@@ -130,7 +134,14 @@ function CategoryCreate({params}) {
   return (
     <div className="flex flex-col">
       <div className="px-10 pt-10 ">
-        <div className="flex justify-between">
+        <div className="flex gap-2">
+          <Button
+            type="text"
+            ghost
+            icon={<LeftOutlined />}
+            onClick={() => router.push(`/issues/categories`)}
+          ></Button>
+
           <h1 className="text-xl font-semi font-medium">
             Create issue category{" "}
           </h1>
