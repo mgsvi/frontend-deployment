@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Divider, Table } from "antd";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
+import Highlighter from "react-highlight-words";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
@@ -9,23 +10,7 @@ const onChange = (pagination, filters, sorter, extra) => {
   console.log("params", pagination, filters, sorter, extra);
 };
 
-const columns = [
-  {
-    title: "Title",
-    dataIndex: "name",
-  },
-  {
-    title: "Assigned By",
-    dataIndex: "reportedBy",
-  },
-  {
-    title: "Assigned To",
-    dataIndex: "accessibleTo",
-  },
-];
-
-const CategoryTable = ({searchQuery}) => {
-  
+const CategoryTable = ({ searchQuery }) => {
   const router = useRouter();
   const [dataSource, setDataSource] = useState([]);
   const { data, error, isLoading } = useSWR(
@@ -33,6 +18,54 @@ const CategoryTable = ({searchQuery}) => {
     fetcher,
     { refreshInterval: 1000 }
   );
+
+  const columns = [
+    {
+      title: "Title",
+      dataIndex: "name",
+      render: (text) => (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: "#ffc069",
+            padding: 0,
+          }}
+          searchWords={[searchQuery]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ""}
+        />
+      ),
+    },
+    {
+      title: "Assigned By",
+      dataIndex: "reportedBy",
+      render: (text) => (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: "#ffc069",
+            padding: 0,
+          }}
+          searchWords={[searchQuery]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ""}
+        />
+      ),
+    },
+    {
+      title: "Assigned To",
+      dataIndex: "accessibleTo",
+      render: (text) => (
+        <Highlighter
+          highlightStyle={{
+            backgroundColor: "#ffc069",
+            padding: 0,
+          }}
+          searchWords={[searchQuery]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ""}
+        />
+      ),
+    },
+  ];
 
   useEffect(() => {
     const transformedData = data
@@ -51,10 +84,10 @@ const CategoryTable = ({searchQuery}) => {
     ? dataSource.filter((val) => {
         return (
           searchQuery === "" ||
-          val.name.toLowerCase().includes(searchQuery) ||
-          val.reportedBy.toLowerCase().includes(searchQuery) ||
-          val.accessibleTo.toLowerCase().includes(searchQuery) ||
-          val.assigned_to.toLowerCase().includes(searchQuery)
+          val.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          val.reportedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          val.accessibleTo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          val.assigned_to.toLowerCase().includes(searchQuery.toLowerCase())
         );
       })
     : [];
@@ -71,11 +104,13 @@ const CategoryTable = ({searchQuery}) => {
 
   return (
     <div>
-      <Divider />
       <Table
         style={{ maxHeight: "100%" }}
         onRow={(record, rowIndex) => {
           return {
+            style: {
+              cursor: "pointer",
+            },
             onClick: (event) => {
               router.push(`/issues/categories/${record.name}`);
             },

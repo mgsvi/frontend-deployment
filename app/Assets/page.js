@@ -8,7 +8,7 @@ import {
   ConfigProvider,
   Tag,
   Input,
-  Modal,
+  message,
   Tabs,
   Spin,
 } from "antd";
@@ -19,6 +19,7 @@ import AssetTable from "./AssetTable";
 import MapView from "../Mapview";
 import { Card, Col, Row } from "antd";
 import useSWR from "swr";
+
 import { data } from "autoprefixer";
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 const onChange = (key) => {
@@ -63,6 +64,7 @@ const Page = () => {
 
   return (
     <ConfigProvider theme={theme}>
+      
       <div className="flex flex-col h-full w-full p-4">
         <div className=" flex flex-row  mb-4 w-full justify-between">
           <h1 className="text-xl font-semi font-semibold mb-5">
