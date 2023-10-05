@@ -112,7 +112,7 @@ const App = () => {
         <Menu.Item
           key="templates"
           icon={<PicCenterOutlined />}
-          onClick={() => router.push("/templates")}
+          onClick={() => router.push("/inspection_templates")}
         >
           Templates
         </Menu.Item>

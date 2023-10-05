@@ -35,6 +35,15 @@ function CategoryCreate({ params }) {
   const updateDetailsData = (data) => {
     setFormData({ ...formData, questions: data.questions, name: data.name });
   };
+
+  useEffect(() => {
+    fetch(`https://digifield.onrender.com/issues/get-issue-category/${name}`)
+  
+    return () => {
+      second
+    }
+  }, [third])
+  
  
   const menu = (
     <Menu onClick={onClick}>
@@ -77,6 +86,7 @@ function CategoryCreate({ params }) {
       .then((data) => {
         if (data.acknowledge) {
           success("Category has been created");
+          
         } else {
         }
       })

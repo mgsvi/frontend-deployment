@@ -44,7 +44,7 @@ function Access({ onDataUpdate }) {
       </div>
 
       <Button type="primary" className="mr-5 w-[20%] mt-5" onClick={()=>{
-          onDataUpdate({updatecategory : true})
+           ({updatecategory : true})
           setupdatecategory(true)
           router.push("/issues/categories");
       }}>Save and Apply</Button>

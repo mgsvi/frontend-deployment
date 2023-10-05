@@ -53,6 +53,10 @@ function reportissue({ params }) {
   form.setFieldsValue({ "Unique Id": uniqueId });
   let issue = {};
   const getBase64 = (file) =>
+
+
+
+  
     new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);

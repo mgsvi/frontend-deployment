@@ -32,7 +32,6 @@ function Details({ onDataUpdate, moveToTab, name }) {
           </div>
         </Form.Item>
       </div>
-
       <div className="bg-white p-6 mt-5 rounded-lg flex flex-col">
         <p className="text-sm">Notifications</p>
         <p className="text-sm">
