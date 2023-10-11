@@ -286,7 +286,7 @@ function Page({ params }) {
                   return (
                     <div className="">
                       <Row>
-                        <Col span={21} lign={"middle"}>
+                        <Col span={21} align={"middle"}>
                           <div className="w-full flex justify-between items-center">
                             <h1 className="text-[#828282] mb-2 ">
                               {val.section_name}

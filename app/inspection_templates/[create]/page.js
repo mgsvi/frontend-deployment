@@ -6,10 +6,38 @@ import { LeftOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import Create from "./Create";
 
-
-function createTemplate({params}) {
+function createTemplate({ params }) {
   console.log(params.create);
-  const templateName= params.create;
+  const [inspectionTemplate, setinspectionTemplate] = useState({
+    title: params.create,
+    description: "This is a sample description",
+    image: null,
+    assets: [],
+    enforeAssetZone: false,
+    createdAt: null,
+    access: [],
+    pages: [
+      {
+        pageTitle: "Page 1",
+        sections: [
+          {
+            sectionName: "Primary",
+            questions: [
+              {
+                orderNo: 1,
+                questionTitle: "this is the question title",
+                responseType: {
+                  type: "text",
+                },
+                required: true,
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  });
+
   const router = useRouter();
   const onChange = (key) => {
     console.log(key);
@@ -20,7 +48,7 @@ function createTemplate({params}) {
       label: "Create",
       children: (
         <div className="mt-10 flex flex-col px-20">
-          <Create name={templateName}/>
+          <Create inspectionTemplate={inspectionTemplate} setinspectionTemplate={setinspectionTemplate} />
         </div>
       ),
     },
