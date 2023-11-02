@@ -30,3 +30,50 @@ const Chat = () => {
 };
 
 export default Chat;
+
+// import { StreamChat, User } from 'stream-chat';
+// import {
+//   Chat,
+//   Channel,
+//   ChannelHeader,
+//   MessageInput,
+//   MessageList,
+//   Thread,
+//   Window, 
+// } from 'stream-chat-react';
+
+
+// const userId = 'lively-mud-1';
+// const userName = 'Jessica Alba';
+
+// const user: User = {
+//   id: userId,
+//   name: userName,
+//   image: `https://getstream.io/random_png/?id=${userId}&name=${userName}`,
+// };
+
+// export default function App() {
+//   const [client, setclient] = useState(null)
+//   const [channel, setchannel] = useState(null)
+
+// useEffect(() => {
+//   async function init() {
+//     const chatClient = StreamChat.getInstance("pu24yd72nz97")
+//     await chatClient.connectUser(user, chatClient.devToken(user.id))
+//     const channel = chatClient. channel( 'messaging', 'sample-talk', {
+//       image: 'https://www.drupal.org/files/project-images/react.png' 
+//       name: 'Talk about React' 
+//       members: [user. id]
+//     })
+//await channel.watch()
+// setChannel()
+// setClient(chatClient)
+//   }
+// init()
+//   return () => {
+//
+//   }
+// }, [])
+
+
+// }

@@ -18,7 +18,7 @@ function createTemplate({ params }) {
     access: [],
     pages: [
       {
-        pageTitle: "Page 1",
+        pageTitle: "Title Page",
         sections: [
           {
             sectionName: "Primary",
@@ -47,7 +47,7 @@ function createTemplate({ params }) {
       key: "1",
       label: "Create",
       children: (
-        <div className="mt-10 flex flex-col px-20">
+        <div className=" flex flex-col ">
           <Create inspectionTemplate={inspectionTemplate} setinspectionTemplate={setinspectionTemplate} />
         </div>
       ),
@@ -83,10 +83,10 @@ function createTemplate({ params }) {
           <Button type="primary">Save</Button>
         </div>
       </div>
-      <div className="pt-5 px-10">
+      <div className="pl-10 ">
         <Tabs
           tabBarStyle={{ "border-bottom": "1px solid #ced3de" }}
-          className="text-xl"
+          className="text-xl "
           items={items}
           onChange={onChange}
         />
