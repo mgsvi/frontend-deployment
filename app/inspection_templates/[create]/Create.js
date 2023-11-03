@@ -15,6 +15,7 @@ import {
   MessageOutlined,
   CloseOutlined,
   CheckSquareOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import {
   message,
@@ -29,6 +30,8 @@ import {
   Button,
   Checkbox,
   Divider,
+  Dropdown,
+  Typography,
 } from "antd";
 import { BiSolidImageAdd } from "react-icons/bi";
 import { TbChartDots3 } from "react-icons/tb";
@@ -61,13 +64,12 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState();
   const [isNameEditEnabled, setisNameEditEnabled] = useState(false);
+  const [editEnabled, seteditEnabled] = useState(false);
   const [selectedOption, setSelectedOption] = useState("text");
   const [form] = Form.useForm();
   const { v4: uuidv4 } = require("uuid");
   const uniqueId = uuidv4();
-  const [MultipleChoiceResponse, setMultipleChoiceResponse] = useState([
-   
-  ]);
+  const [MultipleChoiceResponse, setMultipleChoiceResponse] = useState([]);
 
   form.setFieldsValue({ "Unique Id": uniqueId });
   const handleChange = (info) => {
@@ -96,41 +98,255 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
     </div>
   );
 
-  const renderColumnsForOption = (option) => {
-    switch (option) {
+  const renderColumnsForOption = (
+    question,
+    pageIndex,
+    sectionIndex,
+    questionIndex
+  ) => {
+    const addLogic = (newLogic) => {
+      let temp = { ...inspectionTemplate };
+      temp.pages[pageIndex].sections[sectionIndex].questions[
+        questionIndex
+      ].responseType.logic.push(newLogic);
+      setinspectionTemplate(temp);
+    };
+
+    switch (question.responseType.type) {
       case "text":
         return (
-          <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <TbChartDots3 size={18} className="text-[#2F80ED] mr-2" />
-                <h1 className="text-[#2F80ED]">Add logic</h1>
-              </div>
-            </Col>
-            <Col span={6} className="flex justify-around ">
-              <div className="flex flex-row">
-                <Checkbox defaultChecked className="mr-2" />
-                <h1>Required</h1>
-              </div>
-            </Col>
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <h1 className="mr-2">Format: </h1>
-                <h1 className="text-[#2F80ED] underline-offset-1">
-                  {" "}
-                  Short answer
-                </h1>
-              </div>
-            </Col>
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <MdOutlineAttachFile
-                  size={18}
-                  className="text-[#2F80ED] mr-2"
-                />
-                <h1 className="text-[#2F80ED]">Add image</h1>
-              </div>
-            </Col>
+          <div className="flex flex-col w-full">
+            <div className="flex flex-row justify-start w-full divide-x-2  py-2 items-center gap-1 bg-[#F8F9FC] border-b-2">
+              <Col span={3} className="flex justify-center">
+                <div className="flex flex-row">
+                  <Button
+                    icon={<TbChartDots3 />}
+                    type="link"
+                    onClick={() => {
+                      addLogic({
+                        condition: "is",
+                        value: "bjkn",
+                        action: [],
+                      });
+                    }}
+                  >
+                    Add logic
+                  </Button>
+                </div>
+              </Col>
+              <Col span={3} className="flex justify-center">
+                <div className="flex flex-row">
+                  <Checkbox
+                    checked={question.responseType.required}
+                    className="mr-2"
+                    onChange={(e) => {
+                      let temp = { ...inspectionTemplate };
+                      temp.pages[pageIndex].sections[sectionIndex].questions[
+                        questionIndex
+                      ].responseType.required = e.target.checked;
+                      setinspectionTemplate(temp);
+                    }}
+                  />
+                  <h1>Required</h1>
+                </div>
+              </Col>
+              <Col span={5} className="flex justify-center">
+                <div className="flex flex-row">
+                  <h1 className="mr-2">Format: </h1>
+                  <Dropdown
+                    menu={{
+                      items: [
+                        { label: "Short Answer", key: "shortAnswer" },
+                        { label: "Paragraph", key: "paragraph" },
+                      ],
+                      selectable: true,
+                      defaultSelectedKeys: ["shortAnswer"],
+                      onClick: (e) => {
+                        let temp = { ...inspectionTemplate };
+                        temp.pages[pageIndex].sections[sectionIndex].questions[
+                          questionIndex
+                        ].responseType.format = e.key;
+                        setinspectionTemplate(temp);
+                      },
+                    }}
+                    trigger={["click"]}
+                  >
+                    <Typography.Link>
+                      {question.responseType.format == "shortAnswer"
+                        ? "Short Answer"
+                        : "Paragraph"}
+                    </Typography.Link>
+                  </Dropdown>
+                </div>
+              </Col>
+              <Col span={4} className="flex justify-center">
+                <div className="flex flex-row">
+                  <MdOutlineAttachFile
+                    size={18}
+                    className="text-[#2F80ED] mr-2"
+                  />
+                  <h1 className="text-[#2F80ED]">Add image</h1>
+                </div>
+              </Col>
+            </div>
+            <div className="flex flex-col bg-[#E9EEF6] w-full pl-7 divide-y-2">
+              {inspectionTemplate.pages[pageIndex].sections[
+                sectionIndex
+              ].questions[questionIndex].responseType.logic.map((log, ind) => {
+                return (
+                  <div className="flex flex-row bg-white w-full items-center p-3">
+                    <p>If answer</p>
+                    <Dropdown
+                      className="pl-1"
+                      menu={{
+                        items: [
+                          { label: "is", key: "is" },
+                          { label: "is not", key: "isNot" },
+                        ],
+                        selectable: true,
+                        onClick: (e) => {
+                          let temp = { ...inspectionTemplate };
+                          temp.pages[pageIndex].sections[
+                            sectionIndex
+                          ].questions[questionIndex].responseType.logic[
+                            ind
+                          ].condition = e.key;
+                          setinspectionTemplate(temp);
+                        },
+                      }}
+                      trigger={["click"]}
+                    >
+                      <Typography.Link>
+                        {log.condition == "is" ? " is " : " is not "}
+                      </Typography.Link>
+                    </Dropdown>
+                    {editEnabled ? (
+                      <Input
+                        placeholder="blank"
+                        value={log.value}
+                        bordered={false}
+                        size="small"
+                        className="pl-1 w-[60px] max-w-[100px]"
+                        onChange={(e) => {
+                          let temp = { ...inspectionTemplate };
+                          temp.pages[pageIndex].sections[
+                            sectionIndex
+                          ].questions[questionIndex].responseType.logic[
+                            ind
+                          ].value = e.target.value;
+                          setinspectionTemplate(temp);
+                        }}
+                      />
+                    ) : (
+                      <p className="pl-1">{log.value}</p>
+                    )}
+                    <Button
+                      icon={editEnabled ? <CheckOutlined /> : <EditOutlined />}
+                      onClick={() => seteditEnabled(!editEnabled)}
+                      type="text"
+                    ></Button>
+                    <p>then</p>
+                    <div className="flex flex-row gap-1">
+                      {inspectionTemplate.pages[pageIndex].sections[
+                        sectionIndex
+                      ].questions[questionIndex].responseType.logic[
+                        ind
+                      ].action.map((trigger, index) => {
+                        const deleteAction = () => {
+                          let temp = { ...inspectionTemplate };
+                          temp.pages[pageIndex].sections[
+                            sectionIndex
+                          ].questions[
+                            questionIndex
+                          ].responseType.logic[ind].action =
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[
+                              questionIndex
+                            ].responseType.logic[ind].action.filter(
+                              (val, i) => i != index
+                            );
+                          setinspectionTemplate(temp);
+                        }
+                        switch (trigger) {
+                          case "reportIssue":
+                            return (
+                              <div className="flex flex-row px-2 bg-[#FFE5C6] ml-1 rounded-lg gap-2 items-center">
+                                <p>report issue</p>{" "}
+                                <button
+                                  className="bg-[#FFE5C6]"
+                                  onClick={deleteAction}
+                                >
+                                  x
+                                </button>
+                              </div>
+                            );
+                          case "requireEvidence":
+                            return (
+                              <div className="flex flex-row px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
+                                <p>require evidence</p>{" "}
+                                <button
+                                  className="bg-[#c6ffca]"
+                                  onClick={deleteAction}
+                                >
+                                  x
+                                </button>
+                              </div>
+                            );
+                          case "notify":
+                            return (
+                              <div className="flex flex-row px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
+                                <p>notify</p>{" "}
+                                <button
+                                  className="bg-[#c6dcff]"
+                                  onClick={deleteAction}
+                                >
+                                  x
+                                </button>
+                              </div>
+                            );
+                          case "askQuestions":
+                            return (
+                              <div className="flex flex-row px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
+                                <p>ask questions</p>{" "}
+                                <button
+                                  className="bg-[#dac6ff]"
+                                  onClick={deleteAction}
+                                >
+                                  x
+                                </button>
+                              </div>
+                            );
+                        }
+                      })}
+                    </div>
+                    <Dropdown
+                      className="pl-1"
+                      menu={{
+                        items: [
+                          { label: "Report Issue", key: "reportIssue" },
+                          { label: "Require Evidence", key: "requireEvidence" },
+                          { label: "Notify", key: "notify" },
+                          { label: "Ask Questions", key: "askQuestions" },
+                        ],
+                        onClick: (e) => {
+                          let temp = { ...inspectionTemplate };
+                          temp.pages[pageIndex].sections[
+                            sectionIndex
+                          ].questions[questionIndex].responseType.logic[
+                            ind
+                          ].action.push(e.key);
+                          setinspectionTemplate(temp);
+                        },
+                      }}
+                      trigger={["click"]}
+                    >
+                      <Typography.Link>+trigger</Typography.Link>
+                    </Dropdown>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         );
       case "number":
@@ -146,12 +362,6 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
               <div className="flex flex-row">
                 <Checkbox defaultChecked className="mr-2" />
                 <h1>Required</h1>
-              </div>
-            </Col>
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <h1 className="mr-2">Format: </h1>
-                <h1 className="text-[#2F80ED] underline-offset-1"> Number</h1>
               </div>
             </Col>
             <Col span={6} className="flex justify-around">
@@ -192,25 +402,22 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
             </Col>
           </div>
         );
-      case "date":
+      case "multiplechoice":
         return (
           <div className="flex flex-row w-[60%] divide-x-2  py-2">
+            <Col span={6} className="flex justify-around">
+              <div className="flex flex-row">
+                <TbChartDots3 size={18} className="text-[#2F80ED] mr-2" />
+                <h1 className="text-[#2F80ED]">Add logic</h1>
+              </div>
+            </Col>
             <Col span={6} className="flex justify-around ">
               <div className="flex flex-row">
                 <Checkbox defaultChecked className="mr-2" />
                 <h1>Required</h1>
               </div>
             </Col>
-            <Col span={6} className="flex justify-around ">
-              <div className="flex flex-row">
-                <Checkbox defaultChecked className="mr-2" />
-                <h1>Date</h1>
-              </div>
-              <div className="flex flex-row">
-                <Checkbox defaultChecked className="mr-2" />
-                <h1>Time</h1>
-              </div>
-            </Col>
+
             <Col span={6} className="flex justify-around">
               <div className="flex flex-row">
                 <MdOutlineAttachFile
@@ -218,6 +425,17 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
                   className="text-[#2F80ED] mr-2"
                 />
                 <h1 className="text-[#2F80ED]">Add image</h1>
+              </div>
+            </Col>
+          </div>
+        );
+      case "date":
+        return (
+          <div className="flex flex-row w-[60%] divide-x-2  py-2">
+            <Col span={6} className="flex justify-around ">
+              <div className="flex flex-row">
+                <Checkbox defaultChecked className="mr-2" />
+                <h1>Required</h1>
               </div>
             </Col>
           </div>
@@ -237,33 +455,10 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
       case "slider":
         return (
           <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <TbChartDots3 size={18} className="text-[#2F80ED] mr-2" />
-                <h1 className="text-[#2F80ED]">Add logic</h1>
-              </div>
-            </Col>
             <Col span={6} className="flex justify-around ">
               <div className="flex flex-row">
                 <Checkbox defaultChecked className="mr-2" />
                 <h1>Required</h1>
-              </div>
-            </Col>
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <h1 className="text-[#2F80ED] underline-offset-1">
-                  {" "}
-                  Range: 1 - 10
-                </h1>
-              </div>
-            </Col>
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <MdOutlineAttachFile
-                  size={18}
-                  className="text-[#2F80ED] mr-2"
-                />
-                <h1 className="text-[#2F80ED]">Add image</h1>
               </div>
             </Col>
           </div>
@@ -275,14 +470,6 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
               <div className="flex flex-row">
                 <Checkbox defaultChecked className="mr-2" />
                 <h1>Required</h1>
-              </div>
-            </Col>
-            <Col span={8} className="flex justify-around">
-              <div className="flex flex-row">
-                <h1 className="text-[#2F80ED] underline-offset-1">
-                  {" "}
-                  Upload image to annotate
-                </h1>
               </div>
             </Col>
           </div>
@@ -302,12 +489,6 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
       case "signature":
         return (
           <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <TbChartDots3 size={18} className="text-[#2F80ED] mr-2" />
-                <h1 className="text-[#2F80ED]">Add logic</h1>
-              </div>
-            </Col>
             <Col span={6} className="flex justify-around ">
               <div className="flex flex-row">
                 <Checkbox defaultChecked className="mr-2" />
@@ -319,17 +500,10 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
       case "instructions":
         return (
           <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={8} className="flex justify-around">
+            <Col span={6} className="flex justify-around ">
               <div className="flex flex-row">
-                <FaImages size={18} className="text-[#2F80ED] mr-2" />
-                <h1 className="text-[#2F80ED]">Upload Attachment</h1>
-              </div>
-            </Col>
-            <Col span={10} className="flex justify-around">
-              <div className="flex flex-row">
-                <h1 className="mr-2 text-[#7E8A9C]">
-                  One image or PDF can be uploaded{" "}
-                </h1>
+                <Checkbox defaultChecked className="mr-2" />
+                <h1>Required</h1>
               </div>
             </Col>
           </div>
@@ -341,11 +515,6 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
               <div className="flex flex-row">
                 <Checkbox defaultChecked className="mr-2" />
                 <h1>Required</h1>
-              </div>
-            </Col>
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <h1 className="text-[#2F80ED]">Manage site</h1>
               </div>
             </Col>
           </div>
@@ -361,12 +530,14 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
     const lastSectionIndex =
       newTemplate.pages[lastPageIndex].sections.length - 1;
     newTemplate.pages[lastPageIndex].sections[lastSectionIndex].questions.push({
-      orderNo:
-        newTemplate.pages[lastPageIndex].sections[lastSectionIndex].questions
-          .length + 1,
-      questionTitle: "New Question",
-      responseType: { type: "text" },
-      required: true,
+      questionTitle: "this is the question title",
+      responseType: {
+        type: "text",
+        required: false,
+        logic: [],
+        format: "shortAnswer",
+        image: null,
+      },
     });
     setinspectionTemplate(newTemplate);
   };
@@ -465,7 +636,7 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
               rows={1}
               placeholder="A brief description about the inspection template"
               maxLength={150}
-              className = "mt-3"
+              className="mt-3"
             />
           </div>
         </div>
@@ -483,7 +654,6 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
                       let temp = { ...inspectionTemplate };
                       temp.pages[index].pageTitle = e.target.value;
                       setinspectionTemplate(temp);
-                      form.setFieldsValue({ templateName: e.target.value });
                     }}
                   />
                   <div className="flex justify-end">
@@ -512,11 +682,40 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
                 )}
                 {/* <EnterOutlined /> */}
                 {page.sections.map((section, sectionIndex) => (
-                  <div>
+                  <div className="ml-5 mt-2">
+                    <div className="flex flex-row">
+                      <Input
+                        className="font-semi text-xl bold max-w-[300px]"
+                        value={section.sectionName}
+                        bordered={false}
+                        placeholder="Click here to enter the page title"
+                        onChange={(e) => {
+                          let temp = { ...inspectionTemplate };
+                          temp.pages[index].section[sectionIndex].sectionName =
+                            e.target.value;
+                          setinspectionTemplate(temp);
+                        }}
+                      />
+                      <Button
+                        type="text"
+                        disabled={index == 0 && sectionIndex == 0}
+                        onClick={() => {
+                          const newTemplate = { ...inspectionTemplate };
+                          newTemplate.pages[index].sections.splice(
+                            sectionIndex,
+                            1
+                          );
+                          setinspectionTemplate(newTemplate);
+                        }}
+                      >
+                        <DeleteOutlined style={{ fontSize: "18px" }} />
+                      </Button>
+                    </div>
+
                     {section.questions.map((question, questionIndex) => (
-                      <div className=" flex flex-row items-center">
+                      <div className=" flex flex-row items-center mb-3">
                         <div className="w-[90%]">
-                          <Row className="bg-white  mt-5 ">
+                          <Row className="bg-white ">
                             <Col span={18} className=" border p-2">
                               <h1 className="text-[#7E8A9C] font-semibold">
                                 Question
@@ -625,6 +824,30 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
                                     </h1>
                                   </div>
                                 </Option>
+
+                                {/* Multiplechoice dropdown */}
+                                <Option value="multiplechoice">
+                                  <div className="flex justify-start">
+                                    <Space wrap>
+                                      <Avatar
+                                        size={21}
+                                        style={{
+                                          backgroundColor: "#ECF4FF",
+                                          color: "#219653",
+                                          fontSize: "12px",
+                                        }}
+                                      >
+                                        <p className="text-sm">
+                                          <CheckSquareOutlined />
+                                        </p>
+                                      </Avatar>
+                                    </Space>
+                                    <h1 className="text-[#828282] ml-2  ">
+                                      Multiple Choice
+                                    </h1>
+                                  </div>
+                                </Option>
+
                                 {/* date dropdown */}
                                 <Option value="date">
                                   <div className="flex justify-start">
@@ -810,7 +1033,10 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
                             {renderColumnsForOption(
                               page.sections[sectionIndex].questions[
                                 questionIndex
-                              ].responseType.type
+                              ],
+                              index,
+                              sectionIndex,
+                              questionIndex
                             )}
                           </Row>
                         </div>

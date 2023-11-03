@@ -1,11 +1,12 @@
-"use client"
+"use client";
 import { React, useState, useEffect } from "react";
 import {
   Drawer,
   Divider,
   Carousel,
   Button,
-  Modal,Image,
+  Modal,
+  Image,
   Popover,
   message,
   Space,
@@ -26,9 +27,9 @@ import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 import useSWR from "swr";
-import image from "next/image";
+import { Image as Img } from "next/image";
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const onClick = ({ key }) => {
@@ -41,7 +42,7 @@ const temp = [
   "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png",
 ];
 
-  const IssueDrawer = ({ open, onClose, selectedRow }) => {
+const IssueDrawer = ({ open, onClose, selectedRow }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedRow, setEditedRow] = useState(selectedRow);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -50,7 +51,7 @@ const temp = [
     lat: 12.99097225692328,
     lng: 80.17281532287599,
   });
- //Map view code
+  //Map view code
   const router = useRouter();
 
   const { data, error, isLoading } = useSWR(
@@ -66,13 +67,12 @@ const temp = [
       const extractedLocations = data
         .map((issue) => issue.location)
         .filter((location) => location && location.length === 2);
-  
+
       console.log(extractedLocations);
       setLocations(extractedLocations);
     }
   }, [data]);
- 
- 
+
   const [messageApi, contextHolder] = message.useMessage();
   const [selectedPriority, setSelectedPriority] = useState(
     selectedRow.priority
@@ -268,7 +268,7 @@ const temp = [
         </Space>
       }
     >
-      <div className="flex fixedflex-row h-screen overflow-hidden">
+      <div className="flex h-full overflow-hidden">
         <div className="flex flex-col bg-white overflow-y-auto w-[45%] pr-5">
           {isEditing ? (
             <Form form={form} onFinish={onFinishEvent}>
@@ -290,7 +290,10 @@ const temp = [
                           value={editedRow.remarks}
                           onChange={(e) => {
                             form.setFieldsValue({ remarks: e.target.value });
-                            setEditedRow({...editedRow,remarks: e.target.value})
+                            setEditedRow({
+                              ...editedRow,
+                              remarks: e.target.value,
+                            });
                           }}
                           className="w-full p-2 rounded-lg border border-gray-300"
                           placeholder="Remarks"
@@ -301,7 +304,10 @@ const temp = [
                             form.setFieldsValue({
                               description: e.target.value,
                             });
-                            setEditedRow({...editedRow,description: e.target.value})
+                            setEditedRow({
+                              ...editedRow,
+                              description: e.target.value,
+                            });
                           }}
                           className="w-full p-2 mt-2 rounded-lg border border-gray-300 "
                           placeholder="Description"
@@ -316,125 +322,133 @@ const temp = [
                     {formattedDate} {formattedTime}
                   </p>
                   <Button
-  type="default"
-  className="p-1"
-  onClick={() => setmapModalOpen(true)}
->
-<MdLocationPin className="text-2xl mb-2 text-red-600" />
-</Button>
-{mapModalOpen ? (
-  <div>
-    <Modal
-      title="Change Coordinates"
-      centered
-      open={open}
-      onOk={() => setmapModalOpen(false)}
-      onCancel={() => setmapModalOpen(false)}
-    >
-      <div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-          }}
-          className="mb-5"
-        >
-          <div style={{ flex: 1, marginRight: "10px" }}>
-            <label
-              htmlFor="latitude"
-              className="mb-2 text-[#333] font-light"
-            >
-              Latitude:
-            </label>
-            <Input
-              type="number"
-              id="latitude"
-              name="latitude"
-              value={selectedRow.location[0]}
-              onChange={(e) => {
-                const latitude = parseFloat(e.target.value);
-                setEditedRow({
-                  ...editedRow,
-                  location: [latitude, editedRow.location[1]],
-                });
-              }}
-            />
-          </div>
-          <div style={{ flex: 1 }}>
-            <label
-              htmlFor="longitude"
-              className="text-[#333] font-light mb-2"
-            >
-              Longitude:
-            </label>
-            <Input
-              type="number"
-              id="longitude"
-              name="longitude"
-              value={selectedRow.location[1]}
-              onChange={(e) => {
-                const longitude = parseFloat(e.target.value);
-                setEditedRow({
-                  ...editedRow,
-                  location: [editedRow.location[0], longitude],
-                });
-              }}
-            />
-          </div>
-        </div>
-        <div className="w-full h-[600px]">
-      <MapContainer
-        center={[12.99097225692328, 80.17281532287599]}
-        zoom={13}
-        className="w-full h-[600px]"
-      >
-        {mode ? (
-            <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
-          ) : (
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          )}
+                    type="default"
+                    className="p-1"
+                    onClick={() => setmapModalOpen(true)}
+                  >
+                    <MdLocationPin className="text-2xl mb-2 text-red-600" />
+                  </Button>
+                  {mapModalOpen ? (
+                    <div>
+                      <Modal
+                        title="Change Coordinates"
+                        centered
+                        open={open}
+                        onOk={() => setmapModalOpen(false)}
+                        onCancel={() => setmapModalOpen(false)}
+                        className="w-1/2"
+                      >
+                        <div className="flex flex-col w-full h-[600px]">
+                          <div className="flex justify-between mb-5">
+                            <div style={{ flex: 1 }}>
+                              <label
+                                htmlFor="latitude"
+                                className="mb-2 text-[#333] font-light"
+                              >
+                                Latitude:
+                              </label>
+                              <Input
+                                type="number"
+                                id="latitude"
+                                name="latitude"
+                                value={selectedRow.location[0]}
+                                onChange={(e) => {
+                                  const latitude = parseFloat(e.target.value);
+                                  setEditedRow({
+                                    ...editedRow,
+                                    location: [latitude, editedRow.location[1]],
+                                  });
+                                }}
+                              />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <label
+                                htmlFor="longitude"
+                                className="text-[#333] font-light mb-2"
+                              >
+                                Longitude:
+                              </label>
+                              <Input
+                                type="number"
+                                id="longitude"
+                                name="longitude"
+                                value={selectedRow.location[1]}
+                                onChange={(e) => {
+                                  const longitude = parseFloat(e.target.value);
+                                  setEditedRow({
+                                    ...editedRow,
+                                    location: [
+                                      editedRow.location[0],
+                                      longitude,
+                                    ],
+                                  });
+                                }}
+                              />
+                            </div>
+                          </div>
+                          <div className="w-full h-full">
+                            <MapContainer
+                              center={[12.99097225692328, 80.17281532287599]}
+                              zoom={13}
+                              className="w-full h-full"
+                            >
+                              {mode ? (
+                                <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
+                              ) : (
+                                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                              )}
 
-          <div
-            style={{
-              position: "absolute",
-              top: "10px",
-              right: "10px",
-              zIndex: 1000, // to make sure it's above the map layers
-            }}
-            onClick={() => setMode(!mode)}
-          >
-            {mode ? (
-              <Image src="/normal.png" className="border" width={100} height={100} alt="Satellite View" />
-            ) : (
-              <Image src="/satellite.png" className="border" width={100} height={100} alt="Normal View" />
-            )}
-          </div>
-          
-        {locations.map((locData, index) => {
-          console.log(locData);
-          return(
-          <Marker
-            key={index}
-            position={[locData.location.lat, locData.location.lng]}
-            eventHandlers={{
-              click: () => {
-                router.push(`/assets/${locData.asset_id}`);
-              },
-            }}
-          >
-            <Popup>
-              Location: {locData.location.lat}, {locData.location.lng}
-            </Popup>
-          </Marker>
-        );})}
-      </MapContainer>
-    </div>
-      </div>
-    </Modal>
-  </div>
-) : (
-  ""
-)}
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  top: "10px",
+                                  right: "10px",
+                                  zIndex: 1000,
+                                }}
+                                onClick={() => setMode(!mode)}
+                              >
+                                {mode ? (
+                                  <Image
+                                    preview={false}
+                                    src="/normal.png"
+                                    className="border"
+                                    width={100}
+                                    height={100}
+                                    alt="Satellite View"
+                                  />
+                                ) : (
+                                  <Image
+                                    preview={false}
+                                    src="/satellite.png"
+                                    className="border"
+                                    width={100}
+                                    height={100}
+                                    alt="Normal View"
+                                  />
+                                )}
+                              </div>
+
+                              <Marker
+                                position={[
+                                  editedRow.location[0],
+                                  editedRow.location[1],
+                                ]}
+                                eventHandlers={{
+                                  click: () => {
+                                    router.push(`/assets/${locData.asset_id}`);
+                                  },
+                                }}
+                              >
+                                <Popup>"nkj"</Popup>
+                              </Marker>
+                            </MapContainer>
+                          </div>
+                        </div>
+                      </Modal>
+                    </div>
+                  ) : (
+                    ""
+                  )}
                 </div>
                 <Divider />
                 <Form.Item
@@ -588,8 +602,8 @@ const temp = [
             </div>
           )}
         </div>
-        <div className="bg-[#E9EDF6] w-[55%] h-full overflow-y-auto">
-          {/* <Chat /> */}
+        <div className="flex bg-[#E9EDF6] w-[55%] h-full overflow-y-auto">
+          <Chat issue={selectedRow} />
         </div>
       </div>
     </Drawer>
