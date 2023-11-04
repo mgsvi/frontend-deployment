@@ -36,7 +36,7 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
       { color: "#FFA500", flagged: true, optionName: "Option 4" },
     ],
   });
-  
+
   const onDragEnd = (result) => {
     if (!result.destination) return;
 
@@ -46,37 +46,10 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
 
     setMultipleChoice({ options: items });
   };
-  
-  const dataSource1 = MultipleChoiceResponse.map((row, rowIndex) => ({
-    key: rowIndex,
-    row,
-  }));
 
-  const columns1 = [
-    {
-      dataIndex: "row",
-      key: "row",
-      render: (row) => (
-        <div className="flex items-center bg-white">
-          {row.map((item, itemIndex) => (
-            <p
-              key={itemIndex}
-              style={{
-                backgroundColor: item.color,
-                color: "#ffff",
-                fontSize: "12px",
-              }}
-              className="rounded-full mx-2 p-2"
-            >
-              {item.optionName}
-            </p>
-          ))}
-        </div>
-      ),
-    },
-  ];
+  
   const [open, setOpen] = useState(false);
-  console.log(MultipleChoice);
+  console.log(JSON.stringify(MultipleChoice));
   const [count, setcount] = useState(4);
 
   const [expand, setexpand] = useState([]);
@@ -318,15 +291,23 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
           + Create responses
         </Button>
       </div>
-      <div className="flex flex-col ">
-        <Table
-          dataSource={dataSource1}
-          columns={columns1}
-          pagination={false}
-          showHeader={false}
-          bordered={false}
-          size="small"
-        />
+      <div className="flex flex-col p-5">
+        {MultipleChoiceResponse.map((row, rowIndex) => (
+          <div key={rowIndex} className="flex items-center bg-white">
+            {row.map((item, itemIndex) => (
+              <p
+                style={{
+                  backgroundColor: item.color,
+                  color: "#ffff",
+                  fontSize: "12px",
+                }}
+                className=" rounded-full mx-2 p-2"
+              >
+                {item.optionName}
+              </p>
+            ))}
+          </div>
+        ))}
       </div>
       {/* creating Multiple choice responses  */}
       <Drawer
