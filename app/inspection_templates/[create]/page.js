@@ -9,27 +9,49 @@ import Create from "./Create";
 function createTemplate({ params }) {
   console.log(params.create);
   const [inspectionTemplate, setinspectionTemplate] = useState({
-    title: params.create,
-    description: "This is a sample description",
-    image: null,
-    assets: [],
-    enforeAssetZone: false,
-    createdAt: null,
-    access: [],
+    title: "sample Template Title",
+    description: "this is a sample description",
+    image: "http://example.com/url-of-image",
+    assets: ["asset1", "asset2"],
+    enforeAssetZone: true,
+    createdAt: 19332489798,
+    access: ["Shraddha@blunav.in", "sussy_sushma@blunav.in"],
+    multipleChoiceResponse: [
+      [
+        {
+          optionName: "sampel1",
+          flagged: true,
+          color: "#111",
+        },
+        {
+          optionName: "sampel1",
+          flagged: true,
+          color: "#111",
+        },
+      ],
+    ],
     pages: [
       {
-        pageTitle: "Title Page",
+        pageTitle: "Basic Details",
         sections: [
           {
             sectionName: "Primary",
             questions: [
               {
-                orderNo: 1,
                 questionTitle: "this is the question title",
                 responseType: {
                   type: "text",
+                  required: true,
+                  logic: [
+                    {
+                      condition: "is",
+                      value: "abc",
+                      action: ["reportIssue"],
+                    },
+                  ],
+                  format: "shortAnswer",
+                  image: null
                 },
-                required: true,
               },
             ],
           },
@@ -48,7 +70,10 @@ function createTemplate({ params }) {
       label: "Create",
       children: (
         <div className=" flex flex-col ">
-          <Create inspectionTemplate={inspectionTemplate} setinspectionTemplate={setinspectionTemplate} />
+          <Create
+            inspectionTemplate={inspectionTemplate}
+            setinspectionTemplate={setinspectionTemplate}
+          />
         </div>
       ),
     },
