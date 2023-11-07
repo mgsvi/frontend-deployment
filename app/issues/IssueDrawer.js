@@ -21,12 +21,11 @@ import { BsFillBookmarkFill } from "react-icons/bs";
 import { BiSolidUser } from "react-icons/bi";
 import { PiFolderOpenFill } from "react-icons/pi";
 import { MdDeleteOutline } from "react-icons/md";
-import "leaflet-defaulticon-compatibility";
-import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
-import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
+import "leaflet/dist/leaflet.css";
+
 import { Image as Img } from "next/image";
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
@@ -50,6 +49,17 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
     lng: 80.17281532287599,
   });
   //Map view code
+
+  const [mode, setMode] = useState(true);
+
+  const handleOpenMapModal = () => {
+    setmapModalOpen(true);
+  };
+
+  const handleCloseMapModal = () => {
+    setmapModalOpen(false);
+  };
+
   const router = useRouter();
 
   const { data, error, isLoading } = useSWR(
@@ -59,7 +69,7 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
   );
 
   const [locations, setLocations] = useState([]);
-  const [mode, setMode] = useState(false);
+
   useEffect(() => {
     if (data) {
       const extractedLocations = data
@@ -88,16 +98,6 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
     form.setFieldValue({ status: e.target.value });
   };
 
-  // function UpdateMapPosition({ setLatLng, field }) {
-  //   const map = useMap();
-  //   map.on("click", function (e) {
-  //     let temp = { ...assetValues };
-  //     temp.type_fields[field.field_name] = e.latlng;
-  //     setassetValues({ ...assetValues, temp });
-  //   });
-  //   return null;
-  // }
-
   const toggleEditMode = () => {
     setIsEditing(!isEditing);
   };
@@ -107,6 +107,8 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
     toggleEditMode();
     onFinishEvent();
   };
+  const onFinishEvent = (value) => {};
+
   const success = (msg) => {
     messageApi.open({
       type: "success",
@@ -127,11 +129,9 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
       content: msg,
     });
   };
-
   const handleDelete = () => {
     setIsDeleteModalVisible(true);
   };
-
   const handleConfirmDelete = () => {
     console.log("Deleting issue...");
     fetch(
@@ -158,62 +158,8 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
       });
     setIsDeleteModalVisible(false);
   };
-
   const handleCancelDelete = () => {
     setIsDeleteModalVisible(false);
-  };
-
-  const onFinishEvent = (value) => {
-    let temp = {};
-    for (let key in value) {
-      if (key === "remarks") {
-        issue.remarks = value[key];
-      } else if (key === "description") {
-        issue.description = value[key];
-      } else if (key === "priority") {
-        issue.priority = value[key];
-      } else if (key === "status") {
-        issue.status = value[key];
-      } else {
-        temp[`${key}`] = value[key];
-      }
-    }
-
-    issue.reported_by = "employee@blunav.in";
-    issue.reported_time = 1635249073607;
-    issue.type = "observation";
-    issue.issue_id = selectedRow.issue_id;
-    issue.asset = ["gowtham"];
-    issue.deadline = 1635249073607;
-    issue.assigned_to = "jerry@blunav.in";
-    issue.channel = "mobile";
-    issue.location = [];
-    issue.images = [];
-    issue.issue_occurence_time = 1635249073607;
-    issue.docs = [];
-    console.log(issue);
-    console.log(JSON.stringify(issue));
-    fetch(
-      `https://digifield.onrender.com/issues/update-issue/${selectedRow.issue_id}`,
-      {
-        method: "PUT",
-        mode: "cors",
-        cache: "no-cache",
-        headers: {
-          "Content-Type": "application/json",
-          accept: "application/json",
-        },
-        body: JSON.stringify(issue),
-      }
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.acknowledge) {
-          success("Issue has been created");
-        } else {
-          warning(data.description);
-        }
-      });
   };
 
   const reportedTime = new Date(selectedRow.reported_time);
@@ -229,6 +175,20 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
     2,
     "0"
   )}:${String(reportedTime.getSeconds()).padStart(2, "0")} ${amPm}`;
+
+  function Map({ coordinates }) {
+    const position = coordinates;
+    const fillBlueOptions = { fillColor: "#0484D6" };
+    const [map, setMap] = useState(null);
+
+    useEffect(() => {
+      if (map) {
+        setInterval(function () {
+          map.invalidateSize();
+        }, 100);
+      }
+    }, [map]);
+  }
 
   return (
     <Drawer
@@ -273,16 +233,8 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
               <div>
                 <div className="flex flex-row">
                   <div>
-                    <Form.Item
-                      name="remarks"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please type the asset name",
-                        },
-                      ]}
-                    >
-                      <div className="w-full h-full">
+                    <div className="w-full h-full">
+                      
                         <input
                           type="text"
                           value={editedRow.remarks}
@@ -294,25 +246,24 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                             });
                           }}
                           className="w-full p-2 rounded-lg border border-gray-300"
-                          placeholder="Remarks"
+                          
                         />
-                        <textarea
-                          value={editedRow.description}
-                          onChange={(e) => {
-                            form.setFieldsValue({
-                              description: e.target.value,
-                            });
-                            setEditedRow({
-                              ...editedRow,
-                              description: e.target.value,
-                            });
-                          }}
-                          className="w-full p-2 mt-2 rounded-lg border border-gray-300 "
-                          placeholder="Description"
-                          rows="4"
-                        />
-                      </div>
-                    </Form.Item>
+                      <textarea
+                        value={editedRow.description}
+                        onChange={(e) => {
+                          form.setFieldsValue({
+                            description: e.target.value,
+                          });
+                          setEditedRow({
+                            ...editedRow,
+                            description: e.target.value,
+                          });
+                        }}
+                        className="w-full p-2 mt-2 rounded-lg border border-gray-300 "
+                       
+                        rows="4"
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="pt-5 flex flex-row justify-between">
@@ -331,119 +282,11 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                       <Modal
                         title="Change Coordinates"
                         centered
-                        open={open}
-                        onOk={() => setmapModalOpen(false)}
-                        onCancel={() => setmapModalOpen(false)}
+                        visible={mapModalOpen}
+                        onOk={handleCloseMapModal}
+                        onCancel={handleCloseMapModal}
                         className="w-1/2"
-                      >
-                        
-                        <div className="flex flex-col w-full h-[600px]">
-                          <div className="flex justify-between mb-5">
-                            <div style={{ flex: 1 }}>
-                              <label
-                                htmlFor="latitude"
-                                className="mb-2 text-[#333] font-light"
-                              >
-                                Latitude:
-                              </label>
-                              <Input
-                                type="number"
-                                id="latitude"
-                                name="latitude"
-                                value={selectedRow.location[0]}
-                                onChange={(e) => {
-                                  const latitude = parseFloat(e.target.value);
-                                  setEditedRow({
-                                    ...editedRow,
-                                    location: [latitude, editedRow.location[1]],
-                                  });
-                                }}
-                              />
-                            </div>
-                            <div style={{ flex: 1 }}>
-                              <label
-                                htmlFor="longitude"
-                                className="text-[#333] font-light mb-2"
-                              >
-                                Longitude:
-                              </label>
-                              <Input
-                                type="number"
-                                id="longitude"
-                                name="longitude"
-                                value={selectedRow.location[1]}
-                                onChange={(e) => {
-                                  const longitude = parseFloat(e.target.value);
-                                  setEditedRow({
-                                    ...editedRow,
-                                    location: [
-                                      editedRow.location[0],
-                                      longitude,
-                                    ],
-                                  });
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <MapContainer
-                              center={[12.99097225692328, 80.17281532287599]}
-                              zoom={13}
-                              className="w-[100%] h-[100%]"
-                            >
-                              {mode ? (
-                                <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
-                              ) : (
-                                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                              )}
-
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  top: "10px",
-                                  right: "10px",
-                                  zIndex: 1000,
-                                }}
-                                onClick={() => setMode(!mode)}
-                              >
-                                {mode ? (
-                                  <Image
-                                    preview={false}
-                                    src="/normal.png"
-                                    className="border"
-                                    width={100}
-                                    height={100}
-                                    alt="Satellite View"
-                                  />
-                                ) : (
-                                  <Image
-                                    preview={false}
-                                    src="/satellite.png"
-                                    className="border"
-                                    width={100}
-                                    height={100}
-                                    alt="Normal View"
-                                  />
-                                )}
-                              </div>
-
-                              <Marker
-                                position={[
-                                  editedRow.location[0],
-                                  editedRow.location[1],
-                                ]}
-                                eventHandlers={{
-                                  click: () => {
-                                    router.push(`/assets/${locData.asset_id}`);
-                                  },
-                                }}
-                              >
-                                <Popup>"nkj"</Popup>
-                              </Marker>
-                            </MapContainer>
-                          </div>
-                        </div>
-                      </Modal>
+                      ></Modal>
                     </div>
                   ) : (
                     ""
@@ -451,13 +294,8 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                 </div>
                 <Divider />
                 <Form.Item
-                  name="remarks"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Please type the asset name",
-                    },
-                  ]}
+                  name="priority"
+                 
                 >
                   <div>
                     <Select
@@ -479,6 +317,7 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                 </div>
                 <Divider />
                 <div className="flex flex-row justify-between">
+                <Form.Item name="status">
                   <Select
                     defaultValue={selectedRow.status}
                     style={{ width: 120 }}
@@ -488,6 +327,7 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                       { value: "closed", label: "closed" },
                     ]}
                   />
+                  </Form.Item >
                 </div>
                 <Divider />
                 <div className="flex items-center">
@@ -608,5 +448,4 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
     </Drawer>
   );
 };
-
 export default IssueDrawer;

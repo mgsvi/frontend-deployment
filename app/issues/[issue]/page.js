@@ -142,9 +142,6 @@ function reportissue({ params }) {
       } else if (key === "description") {
         issue.description = value[key];
       }
-      // else if (key === "asset") {
-      //   issue.asset = value[key];
-      // }
       else if (key === "location") {
         issue.location = value[key];
       } else {
@@ -156,7 +153,7 @@ function reportissue({ params }) {
     issue.reported_by = "employee@blunav.in";
     issue.reported_time = 1635249073607;
     issue.status = "open";
-    issue.asset = "vishal";
+    issue.asset = "gowtham";
     issue.deadline = 1635249073607;
     issue.assigned_to = "jerry@blunav.in";
     issue.priority = "low";
@@ -170,7 +167,7 @@ function reportissue({ params }) {
       mode: "cors",
       cache: "no-cache",
       headers: {
-        "Content-Type": "application/json",
+       "Content-Type": "application/json",
         accept: "application/json",
       },
       body: JSON.stringify(issue),
