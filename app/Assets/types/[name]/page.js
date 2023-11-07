@@ -30,8 +30,10 @@ import {
   DeleteOutlined,
   LoadingOutlined,
   EnterOutlined,
+  LeftOutlined,
 } from "@ant-design/icons";
 import FieldsSection from "./FieldsSection";
+import useSWR from "swr";
 
 function Page({ params }) {
   const router = useRouter();
@@ -81,12 +83,34 @@ function Page({ params }) {
     });
   };
 
+  const validateFields = () => {
+    console.log("validate");
+    for (let section of assetType.fields) {
+      for (let field of section.fields) {
+        if (field.field_name == "" || field.field_name == undefined) {
+          warning("Please provide names for each field");
+          setupdatePressed(false);
+          return false;
+        }
+        if (field.type == "tags" || field.type == "select") {
+          if (field.values.length == 0) {
+            warning(`Please provide values for the field ${field.field_name}`);
+            setupdatePressed(false);
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  };
+
   useEffect(() => {
     fetch(`https://digifield.onrender.com/assets/get-asset-type/${params.name}`)
       .then((res) => res.json())
       .then((data) => {
         if (data == null) {
           setassetTypeExists(false);
+          console.log(assetTypeExists);
         } else {
           console.log(data);
           originalData = data;
@@ -100,18 +124,19 @@ function Page({ params }) {
             }
           });
         }
+        console.log(assetTypeExists);
         setisLoading(false);
       });
   }, []);
 
-
-
   const [isNameEditEnabled, setisNameEditEnabled] = useState(false);
-  const [isDateField, setisDateField] = useState(false); 
+  const [isDateField, setisDateField] = useState(false);
 
   //Asset Zone related values and Methods
   const [assetZoneUnit, setassetZoneUnit] = useState("m");
-  const [checked, setChecked] = useState(assetType.asset_zone == null ? false : true);
+  const [checked, setChecked] = useState(
+    assetType.asset_zone == null ? false : true
+  );
 
   const onAssetZoneEnabledChange = (e) => {
     let value = 0;
@@ -142,7 +167,7 @@ function Page({ params }) {
   const handleAssetZoneUnitChange = (value) => {
     setassetZoneUnit(value);
   };
-  //end of Asset Zone related values and Methods
+  
 
   return (
     <div className="flex w-full h-screen ">
@@ -151,7 +176,15 @@ function Page({ params }) {
         {!isLoading ? (
           <div className="flex flex-col w-full">
             <div className="flex justify-between mb-8">
-              <h1 className="text-xl font-semi bold">Edit Asset type</h1>
+              <div className="flex gap-2">
+                <Button
+                  type="text"
+                  ghost
+                  icon={<LeftOutlined />}
+                  onClick={() => router.push(`/assets/types`)}
+                ></Button>
+                <h1 className="text-xl font-semi bold">Edit Asset type</h1>
+              </div>
               <Popconfirm
                 title="Delete the asset type"
                 description="Performing this action will remove the asset type, are you sure?"
@@ -225,9 +258,7 @@ function Page({ params }) {
                   min={1}
                   max={1000}
                   style={{ width: 60 }}
-                  defaultValue={
-                    assetType.asset_zone
-                  }
+                  defaultValue={assetType.asset_zone}
                   disabled={!checked}
                   onChange={(val) => {
                     setassetType({ ...assetType, asset_zone: val });
@@ -255,7 +286,7 @@ function Page({ params }) {
                   return (
                     <div className="">
                       <Row>
-                        <Col span={21} lign={"middle"}>
+                        <Col span={21} align={"middle"}>
                           <div className="w-full flex justify-between items-center">
                             <h1 className="text-[#828282] mb-2 ">
                               {val.section_name}
@@ -323,6 +354,7 @@ function Page({ params }) {
                                         setassetType({ ...assetType, copy });
                                       }}
                                       bordered={false}
+                                      style={{ width: 150 }}
                                     >
                                       {/* text dropdown */}
                                       <Option value="text">
@@ -543,6 +575,7 @@ function Page({ params }) {
                                     style={{ width: "100%" }}
                                     placeholder="Enter possible option values"
                                     onChange={(selectedOptions) => {
+                                      console.log(selectedOptions);
                                       let copy = { ...assetType };
 
                                       copy.fields[i].fields[index].values =
@@ -553,10 +586,11 @@ function Page({ params }) {
                                     defaultValue={field.values.map((val) => {
                                       return { value: val, label: val };
                                     })}
-                                    options={field.values.map((val) => {
-                                      return { value: val, label: val };
+                                  >
+                                    {field.values.map((val) => {
+                                      return <Option value={val}>{val}</Option>;
                                     })}
-                                  />
+                                  </Select>
                                 </Col>
                                 <Col span={1} align={"middle"}>
                                   <EnterOutlined className="text-[22px] text-[#a1a1a1]" />
@@ -619,60 +653,69 @@ function Page({ params }) {
             onClick={() => {
               setupdatePressed(true);
               console.log(JSON.stringify(assetType));
-              if (assetTypeExists) {
-                fetch(
-                  `https://digifield.onrender.com/assets/update-asset-type/${params.name}`,
-                  {
-                    method: "PUT",
-                    mode: "cors",
-                    cache: "no-cache",
-                    headers: {
-                      "Content-Type": "application/json",
-                      accept: "application/json",
-                    },
-                    body: JSON.stringify(assetType),
-                  }
-                )
-                  .then((res) => res.json())
-                  .then((data) => {
-                    console.log(data);
-                    setupdatePressed(false);
-                    if (data.acknowledge) {
-                      success("Asset Type has been updated");
-                      router.push(`/assets/types/${assetType.name}`)
-                    } else {
-                      warning(data.description);
+              if (validateFields()) {
+                if (assetTypeExists) {
+                  fetch(
+                    `https://digifield.onrender.com/assets/update-asset-type/${params.name}`,
+                    {
+                      method: "PUT",
+                      mode: "cors",
+                      cache: "no-cache",
+                      headers: {
+                        "Content-Type": "application/json",
+                        accept: "application/json",
+                      },
+                      body: JSON.stringify(assetType),
                     }
-                  });
-              } else {
-                fetch(
-                  "https://digifield.onrender.com/assets/create-asset-type",
-                  {
-                    method: "POST",
-                    mode: "cors",
-                    cache: "no-cache",
-                    headers: {
-                      "Content-Type": "application/json",
-                      accept: "application/json",
-                    },
-                    body: JSON.stringify(assetType),
-                  }
-                )
-                  .then((res) => res.json())
-                  .then((data) => {
-                    console.log(data);
-                    setupdatePressed(false);
-                    if (data.acknowledge) {
-                      success("Asset Type has been updated");
-                      setassetTypeExists(true)
-                    } else {
-                      warning(data.description);
+                  )
+                    .then((res) => res.json())
+                    .then((data) => {
+                      console.log(data);
+                      setupdatePressed(false);
+                      if (data.acknowledge) {
+                        success("Asset Type has been updated");
+                        router.push(`/assets/types/${assetType.name}`);
+                      } else {
+                        warning(data.description);
+                      }
+                    })
+                    .catch((err) => {
+                      error(err.toString());
+                      setupdatePressed(false);
+                    });
+                } else {
+                  fetch(
+                    "https://digifield.onrender.com/assets/create-asset-type",
+                    {
+                      method: "POST",
+                      mode: "cors",
+                      cache: "no-cache",
+                      headers: {
+                        "Content-Type": "application/json",
+                        accept: "application/json",
+                      },
+                      body: JSON.stringify(assetType),
                     }
-                  });
+                  )
+                    .then((res) => res.json())
+                    .then((data) => {
+                      console.log(data);
+                      setupdatePressed(false);
+                      if (data.acknowledge) {
+                        success("Asset Type has been updated");
+                        setassetTypeExists(true);
+                      } else {
+                        warning(data.description);
+                      }
+                    })
+                    .catch((err) => {
+                      error(err.toString());
+                    });
+                }
               }
             }}
           >
-            Update
+            {assetTypeExists == true ? "Update" : "Create"}
           </Button>
           <Button
             disabled={isLoading}
@@ -692,6 +735,10 @@ function Page({ params }) {
         title="Add Section"
         visible={showAddSection}
         onOk={() => {
+          if (addsectionName == "" || addsectionName == undefined) {
+            error("Section name cannot be empty");
+            return;
+          }
           let temp = { ...assetType };
           temp = temp.fields.push({
             section_name: addsectionName.toUpperCase(),

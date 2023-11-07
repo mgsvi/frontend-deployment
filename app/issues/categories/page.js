@@ -1,16 +1,16 @@
 "use client";
 
 import { React, useState } from "react";
-import { Button, message, ConfigProvider, Tag, Input, Modal } from "antd";
+import { Button, Space, ConfigProvider, Tag, Input, Modal, message } from "antd";
 import theme from "../../themeConfig";
 import { SearchOutlined, LeftOutlined } from "@ant-design/icons";
-import TypeTable from "./Table";
+import Table from "./CategoryTable";
 import { useRouter } from "next/navigation";
 
 const Page = () => {
   const router = useRouter();
   const [modal2Open, setModal2Open] = useState(false);
-  const [assetTypeName, setassetTypeName] = useState("");
+  const [categoryTypeName, setcategoryTypeName] = useState("");
   const [searchQuery, setsearchQuery] = useState("");
   const [messageApi, contextHolder] = message.useMessage();
 
@@ -19,10 +19,15 @@ const Page = () => {
     <ConfigProvider theme={theme}>
       {contextHolder}
       <div className="flex flex-col w-full p-4">
-        <div className="flex items-baseline gap-2">
+        <div className="flex gap-2">
           {" "}
-          <Button type="text" ghost icon={<LeftOutlined />} onClick={()=>router.push(`/assets`)}></Button>
-          <h1 className="text-xl font-semi bold mb-5">Manage asset types</h1>
+          <Button
+            type="text"
+            ghost
+            icon={<LeftOutlined />}
+            onClick={() => router.push(`/issues`)}
+          ></Button>
+          <h1 className="text-xl font-semi bold mb-5">Manage issue category</h1>
         </div>
 
         <div className=" flex flex-row justify-between mb-4">
@@ -39,39 +44,39 @@ const Page = () => {
           </div>
 
           <Button type="primary" onClick={() => setModal2Open(true)}>
-            create Type
+            create category
           </Button>
 
           {/* popup */}
           <Modal
-            title="Create new type"
+            title="Create new category"
             centered
             open={modal2Open}
             onOk={() => {
-              if(assetTypeName != "") {
+              if(categoryTypeName != "") {
                 setModal2Open(false);
-              router.push(`/assets/types/${assetTypeName}`);
+              router.push(`/issues/categories/${categoryTypeName}`);
               } else {
                 messageApi.open({
                   type: "warning",
-                  content: "Asset type name cannot be empty",
+                  content: "Issue category name cannot be empty",
                 });
               }
             }}
             onCancel={() => setModal2Open(false)}
           >
-            <p className="mt-3">Name of type</p>
+            <p className="mt-3">Name of Category</p>
             <Input
               placeholder=""
-              value={assetTypeName}
+              value={categoryTypeName}
               onChange={(e) => {
-                setassetTypeName(e.target.value);
+                setcategoryTypeName(e.target.value);
               }}
             />
           </Modal>
         </div>
         <div className="w-full">
-          <TypeTable searchQuery={searchQuery} />
+          <Table searchQuery={searchQuery} />
         </div>
       </div>
     </ConfigProvider>

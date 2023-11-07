@@ -16,30 +16,55 @@ import {
 } from "@ant-design/icons";
 import Image from "next/image";
 import { Layout, Menu, theme } from "antd";
+import { signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { MdOutlineEditLocation } from "react-icons/md";
+
+
 const { Header, Sider, Content } = Layout;
 
 const App = () => {
+  const { data: session, loading } = useSession();
   const [collapsed, setCollapsed] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
-  const [selected, setselected] = useState(pathname.split("/")[1]);
+  const [selected, setSelected] = useState(pathname.split("/")[1]);
   console.log(pathname.split("/")[1]);
   const {
     token: { colorBgContainer },
   } = theme.useToken();
 
+  const toggleCollapsed = () => {
+    setCollapsed(!collapsed);
+  };
+
   return (
     <Sider
       collapsible
       collapsed={collapsed}
-      onCollapse={(value) => setCollapsed(value)}
+      onCollapse={toggleCollapsed}
       style={{
         backgroundColor: "#002C4F",
       }}
-      // Set the background color of the sidebar
     >
-      <div className="demo-logo-vertical" />
-      <Image src="/sidebariconexpanded.png" width={500} height={500} />
+      {
+        collapsed ? (
+          <div className="mt-4 flex justify-center items-center"><MdOutlineEditLocation
+          onClick={toggleCollapsed}
+          className="text-white text-2xl mt-5 mb-10 items-center"/></div>
+        ) 
+        
+        : (
+        <>
+          <div className="demo-logo-vertical" />
+          <Image
+            src={"/sidebariconexpanded.png"}
+            alt="side-bar"
+            width={500}
+            height={500}
+          />
+        </>
+      )}
       <Menu
         theme="dark"
         mode="inline"
@@ -87,10 +112,11 @@ const App = () => {
         <Menu.Item
           key="templates"
           icon={<PicCenterOutlined />}
-          onClick={() => router.push("/templates")}
+          onClick={() => router.push("/inspection_templates")}
         >
           Templates
         </Menu.Item>
+        
         <Menu.Item
           key="team"
           icon={<TeamOutlined />}
@@ -98,8 +124,6 @@ const App = () => {
         >
           Team
         </Menu.Item>
-
-        {/* Move Settings and Logout to the bottom */}
         <Menu.Item
           key="settings"
           icon={<SettingOutlined />}
@@ -112,6 +136,9 @@ const App = () => {
           key="9"
           icon={<LogoutOutlined />}
           style={{ position: "absolute", bottom: 50 }}
+          onClick={() => {
+            signOut();
+          }}
         >
           Logout
         </Menu.Item>
@@ -119,5 +146,4 @@ const App = () => {
     </Sider>
   );
 };
-
 export default App;

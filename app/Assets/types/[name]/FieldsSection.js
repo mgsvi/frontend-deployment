@@ -1,7 +1,6 @@
 import { React, useState, useEffect } from "react";
 import {
   Input,
-  Table,
   Row,
   Col,
   Spin,
@@ -10,7 +9,7 @@ import {
   Button,
   Popconfirm,
   message,
-  Result
+  Result,
 } from "antd";
 import useSWR from "swr";
 import {
@@ -219,7 +218,7 @@ function FieldsSection(props) {
     }
   }
   return (
-    <div className="w-full h-full">
+    <div className="flex flex-col w-full h-screen pb-1 overflow-hidden">
       {contextHolder}
 
       <h1 className="text-lg bold mb-4">Add existing fields</h1>
@@ -227,26 +226,30 @@ function FieldsSection(props) {
         Reuse existing fields that have been added to other types to keep your
         assets details consistent
       </h4>
-      <Input
+      <div className="mb-5"><Input
         value={query}
         onChange={(e) => setquery(e.target.value)}
         allowClear
         placeholder="search"
         prefix={<SearchOutlined style={{ color: "#828282" }} />}
-      />
-      <div className="w-full mt-5 overflow-y-auto bg-white">
+      /></div>
+      
+      <div className="flex flex-col w-full max-h-full overflow-y-auto bg-white">
         {data
           .filter((val) => {
             if (query == "") return true;
             else {
-              return val.field_name.toLowerCase().includes(query) || val.type.toLowerCase().includes(query);
+              return (
+                val.field_name.toLowerCase().includes(query) ||
+                val.type.toLowerCase().includes(query)
+              );
             }
           })
           .map((val, i) => {
             return (
               <Row
                 align={"middle"}
-                className={`border p-2 ${
+                className={`border p-1 pl-2 ${
                   i != data.length - 1 ? "border-b-0" : ""
                 } `}
               >
@@ -257,13 +260,16 @@ function FieldsSection(props) {
                   <p className="text-[#828282]">{FieldType(val.type)}</p>
                 </Col>
                 <Col span={3} align={"middle"}>
-                  <Button type="text" onClick={()=>{
-                    props.setassetType((old)=>{
-                        let temp = {...old}
-                        temp.fields[temp.fields.length-1].fields.push(val)
-                        return temp
-                    })
-                  }}>
+                  <Button
+                    type="text"
+                    onClick={() => {
+                      props.setassetType((old) => {
+                        let temp = { ...old };
+                        temp.fields[temp.fields.length - 1].fields.push(val);
+                        return temp;
+                      });
+                    }}
+                  >
                     <PlusOutlined />
                   </Button>
                 </Col>

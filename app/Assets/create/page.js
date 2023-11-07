@@ -1,18 +1,17 @@
 "use client";
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
-
-import 'leaflet-geosearch/assets/css/leaflet.css';
+import "leaflet-geosearch/assets/css/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
-import 'leaflet/dist/leaflet.css';
+import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
+import "leaflet/dist/leaflet.css";
 import dayjs from "dayjs";
 import {
   Button,
   Form,
+  Result,
   Input,
   Select,
   Upload,
@@ -24,7 +23,12 @@ import {
   QRCode,
 } from "antd";
 import useSWR from "swr";
-import { FileImageOutlined, LoadingOutlined } from "@ant-design/icons";
+import {
+  FileImageOutlined,
+  LoadingOutlined,
+  LeftOutlined,
+} from "@ant-design/icons";
+import { useForm } from "antd/es/form/Form";
 
 const { Option } = Select;
 const { Dragger } = Upload;
@@ -34,31 +38,11 @@ const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 //gps function to update position
 function UpdateMapPosition({ setLatLng }) {
   const map = useMap();
-  map.on("click", function(e) {
+  map.on("click", function (e) {
     setLatLng(e.latlng);
   });
   return null;
 }
-
-const props = {
-  name: "file",
-  multiple: true,
-  action: "https://www.mocky.io/v2/5cc8019d300000980a055e76",
-  onChange(info) {
-    const { status } = info.file;
-    if (status !== "uploading") {
-      console.log(info.file, info.fileList);
-    }
-    if (status === "done") {
-      message.success(`${info.file.name} file uploaded successfully.`);
-    } else if (status === "error") {
-      message.error(`${info.file.name} file upload failed.`);
-    }
-  },
-  onDrop(e) {
-    console.log("Dropped files", e.dataTransfer.files);
-  },
-};
 
 const downloadQRCode = () => {
   const canvas = document.getElementById("myqrcode")?.querySelector("canvas");
@@ -79,13 +63,22 @@ export default function AssetCreate() {
   const [createPressed, setcreatePressed] = useState(false);
   const [assetCreated, setassetCreated] = useState(false);
   const [assetType, setassetType] = useState(null);
-  const [latLng, setLatLng] = useState(null);
+  const [mode, setMode] = useState(false);
+  const [latLng, setLatLng] = useState({
+    lat: 12.99097225692328,
+    lng: 80.17281532287599,
+  });
+  const [images, setimages] = useState([]);
+  const [docs, setdocs] = useState([]);
   const [assetValues, setassetValues] = useState({});
   const { data, mutate, error, isLoading } = useSWR(
     "https://digifield.onrender.com/assets/get-all-asset-types/",
     fetcher,
     { refreshInterval: 10000 }
   );
+  const uniqueId = self.crypto.randomUUID();
+  const [form] = Form.useForm();
+  form.setFieldsValue({ "Unique Id": uniqueId });
 
   const success = (msg) => {
     messageApi.open({
@@ -107,14 +100,95 @@ export default function AssetCreate() {
       content: msg,
     });
   };
-  function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-  const [form] = Form.useForm();
-  const onFinish = (values) => {
-    setcreatePressed(true)
-    let temp = {};
+
+  const imageProps = {
+    name: "file",
+    multiple: true,
+    action: `http://localhost:8001/media/uploadfile/assets/${uniqueId}/`,
+    beforeUpload: (file) => {
+      let allowedExtension = [
+        "image/jpeg",
+        "image/jpg",
+        "image/png",
+        "image/gif",
+        "image/bmp",
+      ];
+      const isIMG = allowedExtension.includes(file.type);
+      if (!isIMG) {
+        message.error(`${file.name} is not an image`);
+      }
+      return isIMG || Upload.LIST_IGNORE;
+    },
+    onChange(info) {
+      const { status } = info.file;
+      if (status !== "uploading") {
+        console.log(info.file, info.fileList);
+      }
+      if (status === "done") {
+        console.log(info.file.response.url);
+        setimages([...images, info.file.response.url]);
+        message.success(`${info.file.name} file uploaded successfully.`);
+      } else if (status === "error") {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+      if (status === "removed") {
+        console.log(info.file.name);
+        setimages(images.filter((img) => img.split("/")[5] != info.file.name));
+        fetch(
+          `http://localhost:8001/media/delete/assets/${uniqueId}/${info.file.name}`,
+          { method: "DELETE" }
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+          });
+      }
+    },
+    onDrop(e) {
+      console.log("Dropped files", e.dataTransfer);
+    },
+  };
+
+  const docProps = {
+    name: "file",
+    multiple: true,
+    action: `http://localhost:8001/media/uploadfile/assets/${uniqueId}`,
+    onChange(info) {
+      const { status } = info.file;
+      if (status !== "uploading") {
+        console.log(info.file, info.fileList);
+      }
+      if (status === "removed") {
+        console.log(info.file.name);
+        setdocs(docs.filter((doc) => doc.split("/")[5] != info.file.name));
+
+        fetch(
+          `http://localhost:8001/media/delete/assets/${uniqueId}/${info.file.name}`,
+          { method: "DELETE" }
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            console.log(data);
+          });
+      }
+      if (status === "done") {
+        console.log(info.file.response.url);
+        message.success(`${info.file.name} file uploaded successfully.`);
+        setdocs((prev) => [...docs, info.file.response.url]);
+        console.log(docs);
+      } else if (status === "error") {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+    },
+    onDrop(e) {
+      console.log("Dropped files", e.dataTransfer.files);
+    },
+  };
+
+  const onFinishEvent = (values) => {
+    setcreatePressed(true);
     let asset = {};
+    let temp = {};
     console.log(values);
     for (let key in values) {
       if (key === "asset_name") {
@@ -129,9 +203,10 @@ export default function AssetCreate() {
         temp[`${key}`] = values[key];
       }
     }
-    console.log(temp);
     asset.type_fields = temp;
-    console.log(asset);
+    asset.images = images;
+    asset.docs = docs;
+    console.log(asset, images, docs);
     fetch("https://digifield.onrender.com/assets/create-asset", {
       method: "POST",
       mode: "cors",
@@ -148,18 +223,25 @@ export default function AssetCreate() {
         if (data.acknowledge) {
           success("Asset has been created");
           setassetCreated(true);
+          success("Please navigate to edit asset to edit this asset");
         } else {
           warning(data.description);
         }
       });
   };
 
+  useEffect(() => {
+    form.setFieldsValue({
+      Location: latLng,
+    });
+  }, [latLng]);
+
   if (error)
     return (
       <div>
         <Result
           status="warning"
-          title="There are some problems with Loading the fields."
+          title="There are some problems with Loading the page."
         />
       </div>
     );
@@ -176,6 +258,8 @@ export default function AssetCreate() {
       case "text":
         return (
           <Input
+            defaultValue={field.field_name == "Unique Id" ? uniqueId : ""}
+            disabled={field.field_name == "Unique Id"}
             onChange={(e) => {
               form.setFieldsValue({ [field.field_name]: e.target.value });
             }}
@@ -217,12 +301,12 @@ export default function AssetCreate() {
               setassetValues({ ...assetValues, [field.field_name]: val });
               form.setFieldsValue({ [field.field_name]: val });
             }}
-            options={() => {
-              return field.values.map((val) => {
-                return { lebel: val, value: val };
-              });
-            }}
-          />
+          >
+            {" "}
+            {field.values.map((val, i) => {
+              return <Option value={val}>{val}</Option>;
+            })}
+          </Select>
         );
 
       case "select":
@@ -239,70 +323,119 @@ export default function AssetCreate() {
             })}
           </Select>
         );
-        case "gps":
-          
-          return (
-            <div>
-              
-              { latLng && 
-                <div>
-                  Selected Latitude: {latLng.lat}, Longitude: {latLng.lng}
-                 
-                </div>
-              }
-              <div style={{ display: "flex", justifyContent: "space-between" }} className="mb-5">
-        <div style={{ flex: 1, marginRight: "10px" }}>
-          <label htmlFor="latitude">Latitude:</label>
-          <input
-            type="number"
-            id="latitude"
-            name="latitude"
-          //  value={latLng.lat}
-           onChange={(val) => setLatLng([val, latLng.lng])}
-            style={{
-              padding: "4px",
-              border: "1px solid grey",
-              borderRadius: "5px", 
-              width: "100%",
-            }}
-          />
-        </div>
-        <div style={{ flex: 1 }}>
-          <label htmlFor="longitude">Longitude:</label>
-          <input
-            type="number"
-            id="longitude"
-            name="longitude"
-          //  value={latLng.lng}
-           onChange={(val) => setLatLng([latLng.lat, val])}
-            style={{
-              padding: "4px",
-              border: "1px solid grey",
-              borderRadius: "5px", 
-              width: "100%",
-            }}
-          />
-        </div>
-        <Button type="primary" className="">
-          Update
-        </Button>
-      </div>
-              <MapContainer                
-                center={[12.99097225692328,  80.17281532287599]}
-                zoom={13}
-                style={{ width: '100%', height: '300px' }}
-              >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                />
-                <Marker position={latLng != null ? [latLng.lat, latLng.lng]: [12.99097225692328,  80.17281532287599]}></Marker>
-                <UpdateMapPosition setLatLng={setLatLng} />
-              </MapContainer>
-            </div>
-          );
 
-        
+      case "gps":
+        return (
+          <div>
+            <div
+              style={{ display: "flex", justifyContent: "space-between" }}
+              className="mb-5"
+            >
+              <div style={{ flex: 1, marginRight: "10px" }}>
+                <label
+                  htmlFor="latitude"
+                  className="mb-2 text-[#333] font-light"
+                >
+                  Latitude:
+                </label>
+                <Input
+                  type="number"
+                  id="latitude"
+                  name="latitude"
+                  value={latLng.lat}
+                  onChange={(e) => {
+                    if (e.target.value === "") {
+                      setLatLng({ ...latLng, lat: null });
+                      form.setFieldsValue({
+                        [field.field_name]: null,
+                      });
+                    } else {
+                      setLatLng({ ...latLng, lat: parseFloat(e.target.value) });
+                      form.setFieldsValue({
+                        [field.field_name]: latLng,
+                      });
+                    }
+                    form.setFieldsValue({ [field.field_name]: latLng });
+                  }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label
+                  htmlFor="longitude"
+                  className="text-[#333] font-light mb-2"
+                >
+                  Longitude:
+                </label>
+                <Input
+                  type="number"
+                  id="longitude"
+                  name="longitude"
+                  value={latLng.lng}
+                  onChange={(e) => {
+                    if (e.target.value === "") {
+                      setLatLng({ ...latLng, lng: null });
+                      form.setFieldsValue({
+                        [field.field_name]: null,
+                      });
+                    } else {
+                      setLatLng({ ...latLng, lng: parseFloat(e.target.value) });
+                      form.setFieldsValue({
+                        [field.field_name]: latLng,
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </div>
+            <MapContainer
+              center={[12.99097225692328, 80.17281532287599]}
+              zoom={13}
+              style={{ width: "100%", height: "300px" }}
+            >
+              {mode ? (
+                <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
+              ) : (
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              )}
+
+              <div
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  zIndex: 1000, // to make sure it's above the map layers
+                }}
+                onClick={() => setMode(!mode)}
+              >
+                {mode ? (
+                  <Image
+                    src="/normal.png"
+                    className="border"
+                    width={100}
+                    height={100}
+                    alt="Satellite View"
+                  />
+                ) : (
+                  <Image
+                    src="/satellite.png"
+                    className="border"
+                    width={100}
+                    height={100}
+                    alt="Normal View"
+                  />
+                )}
+              </div>
+              <Marker
+                position={
+                  latLng.lat != null && latLng.lng != null
+                    ? [latLng.lat, latLng.lng]
+                    : [12.99097225692328, 80.17281532287599]
+                }
+              ></Marker>
+              <UpdateMapPosition setLatLng={setLatLng} />
+            </MapContainer>
+          </div>
+        );
 
       case "date":
         return (
@@ -320,13 +453,21 @@ export default function AssetCreate() {
   return (
     <div className="w-full h-screen overflow-clip flex flex-col pl-20 pr-20 pt-10 pb-0">
       {contextHolder}
-      <h1 className="text-xl font-semi bold mb-5">Create New Asset</h1>
+      <div className="flex gap-2">
+        <Button
+          type="text"
+          ghost
+          icon={<LeftOutlined />}
+          onClick={() => router.push(`/assets`)}
+        ></Button>
+        <h1 className="text-xl font-semi bold mb-5">Create New Asset</h1>
+      </div>
       <div className="bg-white w-full h-full flex p-10">
         <div className="w-2/3 h-full flex flex-col overflow-y-auto mr-3">
-          <form
+          <Form
             form={form}
             name="control-hooks"
-            onFinish={onFinish}
+            onFinish={onFinishEvent}
             style={{
               maxWidth: 600,
             }}
@@ -350,7 +491,6 @@ export default function AssetCreate() {
                     form.setFieldsValue({ asset_name: e.target.value });
                   }}
                 />
-                
               </div>
             </Form.Item>
             {/* Department */}
@@ -378,7 +518,6 @@ export default function AssetCreate() {
                     return <Option value={type.name}>{type.name}</Option>;
                   })}
                 </Select>
-              
               </div>
             </Form.Item>
 
@@ -469,12 +608,18 @@ export default function AssetCreate() {
                     type="primary"
                     ghost
                     onClick={() => {
+                      !assetCreated
+                        ? fetch(
+                            `http://localhost:8001/media/delete-all/assets/${uniqueId}`,
+                            { method: "DELETE" }
+                          )
+                        : null;
                       router.push("/assets");
                     }}
                     style={{ background: "white" }}
                     className="mr-3 mt-3 mb-3"
                   >
-                    Cancel
+                    {assetCreated ? "Go Back" : "Cancel"}
                   </Button>
                 </Form.Item>
               </div>
@@ -482,14 +627,14 @@ export default function AssetCreate() {
                 <div id="myqrcode">
                   <QRCode
                     className="hidden"
-                    value={assetCreated ? form.getFieldsValue('Unique Id') : ""}
+                    value={assetCreated ? form.getFieldsValue("Unique Id") : ""}
                     bgColor="#fff"
                     style={{
                       marginBottom: 16,
                     }}
                   />
                   <Button
-                  className=" mr-3 mt-3 mb-3"
+                    className=" mr-3 mt-3 mb-3"
                     disabled={!assetCreated}
                     type="primary"
                     onClick={downloadQRCode}
@@ -499,7 +644,7 @@ export default function AssetCreate() {
                 </div>
               </Form.Item>
             </div>
-          </form>
+          </Form>
         </div>
         {/* image and file upload */}
         <div className="w-1/3">
@@ -508,21 +653,19 @@ export default function AssetCreate() {
               <p>Add Images</p>
             </div>
 
-
-            <Dragger {...props}>
+            <Dragger {...imageProps} disabled={assetCreated}>
               <p className="ant-upload-drag-icon ">
                 <FileImageOutlined style={{ color: "#828282" }} />
               </p>
               <p className="ant-upload-text"></p>
               <p className="ant-upload-hint p-3">Drag image here or browse</p>
             </Dragger>
-            
           </div>
           <div className="flex flex-col w-full mt-2">
             <div className="mb-2">
               <p>Add document</p>
             </div>
-            <Dragger {...props}>
+            <Dragger {...docProps} disabled={assetCreated}>
               <p className="ant-upload-drag-icon ">
                 <FileImageOutlined style={{ color: "#828282" }} />
               </p>

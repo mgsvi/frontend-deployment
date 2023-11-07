@@ -11,22 +11,32 @@ import {
   Dropdown,
   Menu,
   Form,
+  Empty,
+  Modal,
 } from "antd";
-import { EllipsisOutlined } from "@ant-design/icons";
-import { DownOutlined } from "@ant-design/icons";
-import { message, Space } from "antd";
+import { EllipsisOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  LoadingOutlined,
+  LeftOutlined,
+  ExclamationCircleFilled,
+} from "@ant-design/icons";
+import { message, Space, Spin } from "antd";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
+import "leaflet/dist/leaflet.css";
+import "leaflet-defaulticon-compatibility";
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
 function ViewAsset({ params }) {
   const [showMore, setShowMore] = useState(false);
+  const [deleteAsset, setdeleteAsset] = useState(null);
+  const [locationAvailable, setlocationAvailable] = useState(false);
+  const [location, setlocation] = useState([]);
   const fetcher = (...args) => fetch(...args).then((res) => res.json());
-  const { data, mutate, error, isLoading } = useSWR(
-    "https://digifield.onrender.com/assets/get-all-asset-types/",
-    fetcher,
-    { refreshInterval: 10000 }
-  );
-  const [assetValues, setassetValues] = useState({});
+  const [assetValues, setassetValues] = useState(null);
+  const { confirm } = Modal;
   useEffect(() => {
     fetch(
       `https://digifield.onrender.com/assets/get-assets-by-id/${params.asset}`
@@ -34,27 +44,84 @@ function ViewAsset({ params }) {
       .then((res) => res.json())
       .then((data) => {
         if (data != null) {
+          console.log(data);
           setassetValues(data);
         }
+        if (data?.type_fields?.Location) {
+          setlocationAvailable(true);
+          setlocation(data.type_fields.Location);
+        }
       });
-  }, [data]);
+  }, []);
+  const [messageApi, contextHolder] = message.useMessage();
+  const success = () => {
+    messageApi.open({
+      type: "success",
+      content: "This is a success message",
+    });
+  };
+  const err = () => {
+    messageApi.open({
+      type: "error",
+      content: "This is an error message",
+    });
+  };
+  const warning = () => {
+    messageApi.open({
+      type: "warning",
+      content: "This is a warning message",
+    });
+  };
   const router = useRouter();
-  const onClick = ({ key }) => {
-   if(key == 2) {
-    router.push(`/assets/${params.asset}/edit`)
-   }
-  };
-  const menu = (
-    <Menu onClick={onClick}>
-      <Menu.Item key="2">Edit</Menu.Item>
-      <Menu.Item key="1">Delete</Menu.Item>
-    </Menu>
-  );
-  let temp = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
-  const onChange = (key) => {
-    console.log(key);
-  };
+
   const items = [
+    {
+      label: "Delete",
+      key: "1",
+      icon: <DeleteOutlined />,
+      danger: true,
+    },
+  ];
+
+  const menuProps = {
+    items,
+    onClick: (e) => {
+      showDeleteConfirm();
+    },
+  };
+
+  const showDeleteConfirm = () => {
+    confirm({
+      title: "Are you sure delete this asset?",
+      icon: <ExclamationCircleFilled />,
+      content: "This is an irreversable action",
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
+      onOk() {
+        fetch(
+          `https://digifield.onrender.com/assets/delete-asset/${assetValues.asset_id}`,
+          {
+            method: "DELETE",
+          }
+        )
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.acknowledge) {
+              success("Asset has been deleted");
+              router.push("/assets");
+            } else {
+              warning(data.description);
+            }
+          });
+      },
+      onCancel() {
+        console.log("Cancel");
+      },
+    });
+  };
+
+  const tabs = [
     {
       key: "1",
       label: `All`,
@@ -77,14 +144,38 @@ function ViewAsset({ params }) {
     },
   ];
 
+  if (assetValues == null) {
+    return (
+      <div className="w-full h-screen flex flex-col justify-center align-middle">
+        <Spin indicator={antIcon} />
+        {/* <Loading/> */}
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen w-full flex flex-col px-32 pt-10 gap-4 overflow-y-auto">
-      <div class="flex justify-between">
-        <h1 class="text-xl font-semibold">{assetValues.asset_name}</h1>
-
-        <Dropdown overlay={menu} onClick={menu}>
-          <EllipsisOutlined rotate={90} />
-        </Dropdown>
+      <div class="w-full flex justify-between">
+        <div className="flex gap-2">
+          <Button
+            type="text"
+            ghost
+            icon={<LeftOutlined />}
+            onClick={() => router.push(`/assets`)}
+          ></Button>
+          <h1 class="text-xl font-semibold">{assetValues.asset_name}</h1>
+        </div>
+        <div>
+          <Dropdown.Button
+            menu={menuProps}
+            icon={<EllipsisOutlined />}
+            onClick={() => {
+              router.push(`/assets/${params.asset}/edit`);
+            }}
+          >
+            Edit
+          </Dropdown.Button>
+        </div>
       </div>
       <div className="h-full w-full ">
         <Row justify="space-between">
@@ -120,13 +211,35 @@ function ViewAsset({ params }) {
                 <div className="align left">
                   {showMore ? (
                     <div className="flex flex-col gap-3">
+                      {console.log(assetValues.type_fields)}
                       {Object.entries(assetValues.type_fields).map(
-                        ([key, value]) => (
-                          <div key={key}>
-                            <p>{key}</p>
-                            <p className="text-black">{value}</p>
-                          </div>
-                        )
+                        ([key, value]) => {
+                          if (
+                            key === "Location" &&
+                            typeof value === "object" &&
+                            value !== null
+                          ) {
+                            return (
+                              <div key={key}>
+                                <p>{key}</p>
+                                <div>
+                                  <p className="text-black">
+                                    Latitude: {value.lat}
+                                  </p>
+                                  <p className="text-black">
+                                    Longitude: {value.lng}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          }
+                          return (
+                            <div key={key}>
+                              <p>{key}</p>
+                              <p className="text-black">{value}</p>
+                            </div>
+                          );
+                        }
                       )}
                     </div>
                   ) : (
@@ -144,11 +257,23 @@ function ViewAsset({ params }) {
               </div>
             </div>
           </Col>
-          <Col span={8} className="bg-white rounded max-h-fit">
-            <div className="flex justify-center align-middle p-3">
-              <Image src="/map.png" width={340} height={200} />
-            </div>
-          </Col>
+          {locationAvailable && (
+            <Col span={8} className="bg-white rounded max-h-fit">
+              <div className="flex justify-center align-middle p-3">
+                <MapContainer
+                  center={[location.lat, location.lng]}
+                  zoom={13}
+                  style={{ width: "100%", height: "220px" }}
+                >
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  <Marker position={[location.lat, location.lng]}></Marker>
+                </MapContainer>
+              </div>
+            </Col>
+          )}
         </Row>
       </div>
       <div className="h-full w-full">
@@ -156,32 +281,44 @@ function ViewAsset({ params }) {
           <Col span={10}>
             <div>
               <h1 className="py-4 font-semibold text-lg">Images</h1>
-              <div class="grid grid-cols-4 bg-white rounded p-3 h-[200px] overflow-y-auto">
-                <Image.PreviewGroup>
-                  {temp.map((i) => {
-                    return (
-                      <Image
-                        width={100}
-                        className="p-0 m-0 mb-4"
-                        src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-                      />
-                    );
-                  })}
-                </Image.PreviewGroup>
+              <div>
+                {assetValues.images.length != 0 ? (
+                  <div className="w-full grid grid-cols-3 bg-white rounded p-3 h-fit max-h-[200px] overflow-y-auto">
+                    <Image.PreviewGroup>
+                      {assetValues.images.map((i) => {
+                        return (
+                          <Image width={100} className="p-0 m-0 mb-4" src={i} />
+                        );
+                      })}
+                    </Image.PreviewGroup>
+                  </div>
+                ) : (
+                  <div className="bg-white rounded p-2">
+                    <Empty description="No Images" />
+                  </div>
+                )}
               </div>
               <div>
                 <h1 className="py-4 font-semibold text-lg rounded">
                   Documents
                 </h1>
-                <div className="bg-white rounded p-2">
-                  <Button type="link" className="font-semibold">
-                    Instruction Manual
-                  </Button>
-                  <div>
-                    <Button type="link" className="font-semibold">
-                      Wiring Details
-                    </Button>
-                  </div>
+                <div className="bg-white rounded p-2 flex flex-col w-full justify-start">
+                  {assetValues.docs.length != 0 ? (
+                    assetValues.docs.map((i) => {
+                      return (
+                        <Button
+                          type="link"
+                          className="font-semibold w-fit"
+                          href={i}
+                          target="_blank"
+                        >
+                          {i.split("/")[5]}
+                        </Button>
+                      );
+                    })
+                  ) : (
+                    <Empty description="No Documents" />
+                  )}
                 </div>
               </div>
             </div>
@@ -189,7 +326,7 @@ function ViewAsset({ params }) {
           <Col span={13}>
             <Tabs
               tabBarStyle={{ "border-bottom": " 1px solid #ced3de" }}
-              items={items}
+              items={tabs}
             />
           </Col>
         </Row>
@@ -197,26 +334,4 @@ function ViewAsset({ params }) {
     </div>
   );
 }
-
 export default ViewAsset;
-
-/*image prev
-import React from 'react';
-import { Image } from 'antd';
-const App = () => (
-  <Image.PreviewGroup
-    preview={{
-      onChange: (current, prev) => console.log(`current index: ${current}, prev index: ${prev}`),
-    }}
-  >
-    <Image width={200} src="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg" />
-    <Image
-      width={200}
-      src="https://gw.alipayobjects.com/zos/antfincdn/aPkFc8Sj7n/method-draw-image.svg"
-    />
-  </Image.PreviewGroup>
-);
-export default App;
-
-grid pannirukom paaru
-*/
