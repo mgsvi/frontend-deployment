@@ -6,7 +6,7 @@ import Details from "./Details";
 import Access from "./Access";
 import { useRouter } from "next/navigation";
 import { EllipsisOutlined } from "@ant-design/icons";
-import { Menu, Dropdown, Popconfirm, message } from "antd";
+import { Menu, Dropdown, Popconfirm } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
