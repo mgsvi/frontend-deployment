@@ -16,15 +16,11 @@ import {
 } from "@ant-design/icons";
 import Image from "next/image";
 import { Layout, Menu, theme } from "antd";
-import { signOut } from "next-auth/react";
-import { useSession } from "next-auth/react";
 import { MdOutlineEditLocation } from "react-icons/md";
-
 
 const { Header, Sider, Content } = Layout;
 
 const App = () => {
-  const { data: session, loading } = useSession();
   const [collapsed, setCollapsed] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
@@ -47,14 +43,14 @@ const App = () => {
         backgroundColor: "#002C4F",
       }}
     >
-      {
-        collapsed ? (
-          <div className="mt-4 flex justify-center items-center"><MdOutlineEditLocation
-          onClick={toggleCollapsed}
-          className="text-white text-2xl mt-5 mb-10 items-center"/></div>
-        ) 
-        
-        : (
+      {collapsed ? (
+        <div className="mt-4 flex justify-center items-center">
+          <MdOutlineEditLocation
+            onClick={toggleCollapsed}
+            className="text-white text-2xl mt-5 mb-10 items-center"
+          />
+        </div>
+      ) : (
         <>
           <div className="demo-logo-vertical" />
           <Image
@@ -116,7 +112,7 @@ const App = () => {
         >
           Templates
         </Menu.Item>
-        
+
         <Menu.Item
           key="team"
           icon={<TeamOutlined />}
@@ -136,9 +132,6 @@ const App = () => {
           key="9"
           icon={<LogoutOutlined />}
           style={{ position: "absolute", bottom: 50 }}
-          onClick={() => {
-            signOut();
-          }}
         >
           Logout
         </Menu.Item>

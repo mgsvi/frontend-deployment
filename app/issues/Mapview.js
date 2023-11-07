@@ -1,8 +1,8 @@
 "use client"
 import { React, useState, useEffect } from "react";
 import "leaflet/dist/leaflet.css";
-import "leaflet-defaulticon-compatibility";
-import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
+//import "leaflet-defaulticon-compatibility";
+//import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { useRouter } from "next/navigation"; 
 import useSWR from "swr";
@@ -30,6 +30,8 @@ const MapView = () => {
       setLocations(extractedLocations);
     }
   }, [data]);
+
+  if (isLoading) return <p>loading</p>
 
   return (
     <div className="w-full h-[600px]">

@@ -1,14 +1,7 @@
 "use client";
-import { React, useState, useEffect } from "react";
+import { React, useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import "leaflet-geosearch/assets/css/leaflet.css";
-import "leaflet-defaulticon-compatibility";
-import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
-import "leaflet/dist/leaflet.css";
-import dayjs from "dayjs";
-import Image from 'next/image'
+import { v4 as uuidv4 } from 'uuid';
 import {
   Button,
   Form,
@@ -29,21 +22,12 @@ import {
   LoadingOutlined,
   LeftOutlined,
 } from "@ant-design/icons";
-import { useForm } from "antd/es/form/Form";
+import dynamic from "next/dynamic";
 
 const { Option } = Select;
 const { Dragger } = Upload;
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
-
-//gps function to update position
-function UpdateMapPosition({ setLatLng }) {
-  const map = useMap();
-  map.on("click", function (e) {
-    setLatLng(e.latlng);
-  });
-  return null;
-}
 
 const downloadQRCode = () => {
   const canvas = document.getElementById("myqrcode")?.querySelector("canvas");
@@ -58,13 +42,14 @@ const downloadQRCode = () => {
   }
 };
 
+const Map = dynamic(() => import("./map"), { ssr: false });
+
 export default function AssetCreate() {
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
   const [createPressed, setcreatePressed] = useState(false);
   const [assetCreated, setassetCreated] = useState(false);
   const [assetType, setassetType] = useState(null);
-  const [mode, setMode] = useState(false);
   const [latLng, setLatLng] = useState({
     lat: 12.99097225692328,
     lng: 80.17281532287599,
@@ -77,7 +62,7 @@ export default function AssetCreate() {
     fetcher,
     { refreshInterval: 10000 }
   );
-  const uniqueId = self.crypto.randomUUID();
+  const uniqueId = uuidv4()
   const [form] = Form.useForm();
   form.setFieldsValue({ "Unique Id": uniqueId });
 
@@ -305,7 +290,11 @@ export default function AssetCreate() {
           >
             {" "}
             {field.values.map((val, i) => {
-              return <Option key={i} value={val}>{val}</Option>;
+              return (
+                <Option key={i} value={val}>
+                  {val}
+                </Option>
+              );
             })}
           </Select>
         );
@@ -320,7 +309,11 @@ export default function AssetCreate() {
             }}
           >
             {field.values.map((val, i) => {
-              return <Option key={i} value={val}>{val}</Option>;
+              return (
+                <Option key={i} value={val}>
+                  {val}
+                </Option>
+              );
             })}
           </Select>
         );
@@ -388,53 +381,10 @@ export default function AssetCreate() {
                 />
               </div>
             </div>
-            <MapContainer
-              center={[12.99097225692328, 80.17281532287599]}
-              zoom={13}
-              style={{ width: "100%", height: "300px" }}
-            >
-              {mode ? (
-                <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
-              ) : (
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              )}
-
-              <div
-                style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "10px",
-                  zIndex: 1000, // to make sure it's above the map layers
-                }}
-                onClick={() => setMode(!mode)}
-              >
-                {mode ? (
-                  <Image
-                    src="/normal.png"
-                    className="border"
-                    width={100}
-                    height={100}
-                    alt="Satellite View"
-                  />
-                ) : (
-                  <Image
-                    src="/satellite.png"
-                    className="border"
-                    width={100}
-                    height={100}
-                    alt="Normal View"
-                  />
-                )}
-              </div>
-              <Marker
-                position={
-                  latLng.lat != null && latLng.lng != null
-                    ? [latLng.lat, latLng.lng]
-                    : [12.99097225692328, 80.17281532287599]
-                }
-              ></Marker>
-              <UpdateMapPosition setLatLng={setLatLng} />
-            </MapContainer>
+            <Map
+              latLng={latLng}
+              setLatLng={setLatLng}
+            />
           </div>
         );
 
@@ -516,7 +466,11 @@ export default function AssetCreate() {
                   }}
                 >
                   {data.map((type, i) => {
-                    return <Option key={i} value={type.name}>{type.name}</Option>;
+                    return (
+                      <Option key={i} value={type.name}>
+                        {type.name}
+                      </Option>
+                    );
                   })}
                 </Select>
               </div>
@@ -551,14 +505,18 @@ export default function AssetCreate() {
                   }}
                 >
                   {data.map((type, i) => {
-                    return <Option key={i} value={type.name}>{type.name}</Option>;
+                    return (
+                      <Option key={i} value={type.name}>
+                        {type.name}
+                      </Option>
+                    );
                   })}
                 </Select>
               </div>
             </Form.Item>
             {assetType != null &&
               assetType.fields &&
-              assetType.fields.map((field,i) => {
+              assetType.fields.map((field, i) => {
                 return (
                   <div key={i}>
                     <h1 className="text-[#828282] mb-2 ">
@@ -567,7 +525,7 @@ export default function AssetCreate() {
                     {field.fields.map((val, i) => {
                       return (
                         <Form.Item
-                        key={i}
+                          key={i}
                           name={val.field_name}
                           rules={[
                             {

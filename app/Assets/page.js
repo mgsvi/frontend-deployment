@@ -2,6 +2,7 @@
 
 import { React, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   Button,
   Space,
@@ -14,44 +15,16 @@ import {
 } from "antd";
 import theme from "../themeConfig";
 import { LoadingOutlined } from "@ant-design/icons";
-import { PlusOutlined } from "@ant-design/icons";
 import AssetTable from "./AssetTable";
-import MapView from "../Mapview";
 import { Card, Col, Row } from "antd";
 import useSWR from "swr";
 
-import { data } from "autoprefixer";
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 const onChange = (key) => {
   console.log(key);
 };
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
-const items = [
-  {
-    key: "1",
-    label: `Table view`,
-    children: (
-      <div className="h-full">
-        <AssetTable />
-      </div>
-    ),
-  },
-  {
-    key: "2",
-    label: `Map view`,
-    children: (
-      <div className="">
-        <MapView />{" "}
-        
-      </div>
-    ),
-  },
-  {
-    key: "3",
-    label: `Untagged assets`,
-    children: `Content of Tab Pane 3`,
-  },
-];
+const MapView = dynamic(() => import("../Mapview"), { ssr:false })
 
 const Page = () => {
   const { data, error, isLoading } = useSWR(
@@ -59,12 +32,36 @@ const Page = () => {
     fetcher,
     { refreshInterval: 1000 }
   );
+  const items = [
+    {
+      key: "1",
+      label: `Table view`,
+      children: (
+        <div className="h-full">
+          <AssetTable />
+        </div>
+      ),
+    },
+    {
+      key: "2",
+      label: `Map view`,
+      children: (
+        <div className="">
+          <MapView />
+        </div>
+      ),
+    },
+    {
+      key: "3",
+      label: `Untagged assets`,
+      children: `Content of Tab Pane 3`,
+    },
+  ];
 
   const [modal2Open, setModal2Open] = useState(false);
 
   return (
     <ConfigProvider theme={theme}>
-      
       <div className="flex flex-col h-full w-full p-4">
         <div className=" flex flex-row  mb-4 w-full justify-between">
           <h1 className="text-xl font-semi font-semibold mb-5">

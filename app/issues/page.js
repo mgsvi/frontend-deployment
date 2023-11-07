@@ -10,21 +10,22 @@ import {
   Row,
   Modal,
   Input,
-  message
+  message,
 } from "antd";
 import theme from "../themeConfig";
 import { LoadingOutlined } from "@ant-design/icons";
 import IssueTable from "./IssueTable";
-import Mapview from "./Mapview";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
+import dynamic from 'next/dynamic';
+
+const Mapview = dynamic(() => import('./Mapview'), { ssr: false });
 
 const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const Page = () => {
-
   const [messageApi, contextHolder] = message.useMessage();
   const { data, error, isLoading } = useSWR(
     "https://digifield.onrender.com/issues/get-all-issues",
@@ -41,6 +42,13 @@ const Page = () => {
     console.log(key);
     setSelectedTab(key);
   };
+
+  if (isLoading)
+    return (
+      <div className="flex h-full w-full justify-center items-center">
+        <LoadingOutlined />
+      </div>
+    );
 
   return (
     <ConfigProvider theme={theme}>
@@ -66,7 +74,7 @@ const Page = () => {
               centered
               open={modal2Open}
               onOk={() => {
-                if(issueName != "") {
+                if (issueName != "") {
                   setModal2Open(false);
                   router.push(`/issues/${issueName}`);
                 } else {
@@ -75,7 +83,6 @@ const Page = () => {
                     content: "Issue name cannot be empty",
                   });
                 }
-              
               }}
               onCancel={() => setModal2Open(false)}
             >
