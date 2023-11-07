@@ -6,7 +6,6 @@ import { Children, Suspense } from "react";
 const { Header, Content, Footer, Sider } = Layout;
 import { LeftOutlined } from "@ant-design/icons";
 import StyledComponentsRegistry from "./AntdRegistry";
-import AuthProvider from "./context/AuthProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,7 +21,6 @@ export default function RootLayout({ children }) {
         className={inter.className}
         style={{ background: "#EBEEF3", height: "100Vh", width: "100vw" }}
       >
-        <AuthProvider>
           <StyledComponentsRegistry>
             <Layout
               hasSider
@@ -38,7 +36,6 @@ export default function RootLayout({ children }) {
               </div>
             </Layout>
           </StyledComponentsRegistry>
-        </AuthProvider>
       </body>
     </html>
   );
