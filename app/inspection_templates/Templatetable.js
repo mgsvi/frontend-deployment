@@ -5,9 +5,6 @@ import { GoCheckbox } from "react-icons/go";
 import { TfiGallery } from "react-icons/tfi";
 import { BiBell } from "react-icons/bi";
 import { BiMessageDetail} from "react-icons/bi";
-
-
-
 const Templatetable = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 

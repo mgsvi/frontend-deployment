@@ -44,8 +44,8 @@ function createTemplate({ params }) {
                   required: true,
                   logic: [
                     {
-                      condition: "is",
-                      value: "abc",
+                      condition: "",
+                      value: "",
                       action: ["reportIssue"],
                     },
                   ],

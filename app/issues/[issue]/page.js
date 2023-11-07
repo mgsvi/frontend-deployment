@@ -27,7 +27,7 @@ import Image from "next/image";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 function reportissue({ params }) {
-    const router = useRouter()
+  const router = useRouter();
   const handleChange = (value) => {
     console.log(value.label);
     setcreate(true);
@@ -53,10 +53,6 @@ function reportissue({ params }) {
   form.setFieldsValue({ "Unique Id": uniqueId });
   let issue = {};
   const getBase64 = (file) =>
-
-
-
-  
     new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
@@ -439,23 +435,6 @@ function reportissue({ params }) {
                           id="latitude"
                           name="latitude"
                           value={latLng[0]}
-                          // onChange={(e) => {
-                          //   if (e.target.value === "") {
-                          //     setLatLng({ ...latLng, lat: null });
-                          //     form.setFieldsValue({
-                          //       [field.field_name]: null,
-                          //     });
-                          //   } else {
-                          //     setLatLng({
-                          //       ...latLng,
-                          //       lat: parseFloat(e.target.value),
-                          //     });
-                          //     form.setFieldsValue({
-                          //       [field.field_name]: latLng,
-                          //     });
-                          //   }
-                          //   form.setFieldsValue({ [field.field_name]: latLng });
-                          // }}
                           onChange={(e) => {
                             const newLat = e.target.value
                               ? parseFloat(e.target.value)
@@ -479,22 +458,6 @@ function reportissue({ params }) {
                           id="longitude"
                           name="longitude"
                           value={latLng[1]}
-                          // onChange={(e) => {
-                          //   if (e.target.value === "") {
-                          //     setLatLng({ ...latLng, lng: null });
-                          //     form.setFieldsValue({
-                          //       [field.field_name]: null,
-                          //     });
-                          //   } else {
-                          //     setLatLng({
-                          //       ...latLng,
-                          //       lng: parseFloat(e.target.value),
-                          //     });
-                          //     form.setFieldsValue({
-                          //       [field.field_name]: latLng,
-                          //     });
-                          //   }
-                          // }}
                           onChange={(e) => {
                             const newLng = e.target.value
                               ? parseFloat(e.target.value)
@@ -513,38 +476,38 @@ function reportissue({ params }) {
                       style={{ width: "100%", height: "300px" }}
                     >
                       {mode ? (
-                <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
-              ) : (
-                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              )}
+                        <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
+                      ) : (
+                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                      )}
 
-              <div
-                style={{
-                  position: "absolute",
-                  top: "10px",
-                  right: "10px",
-                  zIndex: 1000, // to make sure it's above the map layers
-                }}
-                onClick={() => setMode(!mode)}
-              >
-                {mode ? (
-                  <Image
-                    src="/normal.png"
-                    className="border"
-                    width={100}
-                    height={100}
-                    alt="Satellite View"
-                  />
-                ) : (
-                  <Image
-                    src="/satellite.png"
-                    className="border"
-                    width={100}
-                    height={100}
-                    alt="Normal View"
-                  />
-                )}
-              </div>
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "10px",
+                          right: "10px",
+                          zIndex: 1000, // to make sure it's above the map layers
+                        }}
+                        onClick={() => setMode(!mode)}
+                      >
+                        {mode ? (
+                          <Image
+                            src="/normal.png"
+                            className="border"
+                            width={100}
+                            height={100}
+                            alt="Satellite View"
+                          />
+                        ) : (
+                          <Image
+                            src="/satellite.png"
+                            className="border"
+                            width={100}
+                            height={100}
+                            alt="Normal View"
+                          />
+                        )}
+                      </div>
                       <Marker
                         draggable={true}
                         position={

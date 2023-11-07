@@ -16,6 +16,7 @@ import {
   CloseOutlined,
   CheckSquareOutlined,
   EditOutlined,
+  DownOutlined
 } from "@ant-design/icons";
 import {
   message,
@@ -29,7 +30,7 @@ import {
   Avatar,
   Button,
   Checkbox,
-  Divider,
+  Menu,
   Dropdown,
   Typography,
 } from "antd";
@@ -59,7 +60,7 @@ const beforeUpload = (file) => {
   return isJpgOrPng && isLt2M;
 };
 
-function Create({ inspectionTemplate, setinspectionTemplate }) {
+function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
   const { TextArea } = Input;
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState();
@@ -194,155 +195,176 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
                 sectionIndex
               ].questions[questionIndex].responseType.logic.map((log, ind) => {
                 return (
-                  <div className="flex flex-row bg-white w-full items-center p-3">
-                    <p>If answer</p>
-                    <Dropdown
-                      className="pl-1"
-                      menu={{
-                        items: [
-                          { label: "is", key: "is" },
-                          { label: "is not", key: "isNot" },
-                        ],
-                        selectable: true,
-                        onClick: (e) => {
-                          let temp = { ...inspectionTemplate };
-                          temp.pages[pageIndex].sections[
-                            sectionIndex
-                          ].questions[questionIndex].responseType.logic[
-                            ind
-                          ].condition = e.key;
-                          setinspectionTemplate(temp);
-                        },
-                      }}
-                      trigger={["click"]}
-                    >
-                      <Typography.Link>
-                        {log.condition == "is" ? " is " : " is not "}
-                      </Typography.Link>
-                    </Dropdown>
-                    {editEnabled ? (
-                      <Input
-                        placeholder="blank"
-                        value={log.value}
-                        bordered={false}
-                        size="small"
-                        className="pl-1 w-[60px] max-w-[100px]"
-                        onChange={(e) => {
-                          let temp = { ...inspectionTemplate };
-                          temp.pages[pageIndex].sections[
-                            sectionIndex
-                          ].questions[questionIndex].responseType.logic[
-                            ind
-                          ].value = e.target.value;
-                          setinspectionTemplate(temp);
-                        }}
-                      />
-                    ) : (
-                      <p className="pl-1">{log.value}</p>
-                    )}
-                    <Button
-                      icon={editEnabled ? <CheckOutlined /> : <EditOutlined />}
-                      onClick={() => seteditEnabled(!editEnabled)}
-                      type="text"
-                    ></Button>
-                    <p>then</p>
-                    <div className="flex flex-row gap-1">
-                      {inspectionTemplate.pages[pageIndex].sections[
-                        sectionIndex
-                      ].questions[questionIndex].responseType.logic[
-                        ind
-                      ].action.map((trigger, index) => {
-                        const deleteAction = () => {
-                          let temp = { ...inspectionTemplate };
-                          temp.pages[pageIndex].sections[
-                            sectionIndex
-                          ].questions[
-                            questionIndex
-                          ].responseType.logic[ind].action =
+                  <div className="flex flex-row bg-white w-full items-center p-3 justify-between">
+                    <div className="flex items-center">
+                      <p>If answer</p>
+                      <Dropdown
+                        className="pl-1"
+                        menu={{
+                          items: [
+                            { label: "is", key: "is" },
+                            { label: "is not", key: "isNot" },
+                          ],
+                          selectable: true,
+                          onClick: (e) => {
+                            let temp = { ...inspectionTemplate };
                             temp.pages[pageIndex].sections[
                               sectionIndex
-                            ].questions[
-                              questionIndex
-                            ].responseType.logic[ind].action.filter(
-                              (val, i) => i != index
-                            );
-                          setinspectionTemplate(temp);
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].condition = e.key;
+                            setinspectionTemplate(temp);
+                          },
+                        }}
+                        trigger={["click"]}
+                      >
+                        <Typography.Link>
+                          {log.condition == "is" ? " is " : " is not "}
+                        </Typography.Link>
+                      </Dropdown>
+                      {editEnabled ? (
+                        <Input
+                          placeholder="blank"
+                          value={log.value}
+                          bordered={false}
+                          size="small"
+                          className="pl-1 w-[60px] max-w-[100px]"
+                          onChange={(e) => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].value = e.target.value;
+                            setinspectionTemplate(temp);
+                          }}
+                        />
+                      ) : (
+                        <p className="pl-1">{log.value}</p>
+                      )}
+                      <Button
+                        icon={
+                          editEnabled ? <CheckOutlined /> : <EditOutlined />
                         }
-                        switch (trigger) {
-                          case "reportIssue":
-                            return (
-                              <div className="flex flex-row px-2 bg-[#FFE5C6] ml-1 rounded-lg gap-2 items-center">
-                                <p>report issue</p>{" "}
-                                <button
-                                  className="bg-[#FFE5C6]"
-                                  onClick={deleteAction}
-                                >
-                                  x
-                                </button>
-                              </div>
-                            );
-                          case "requireEvidence":
-                            return (
-                              <div className="flex flex-row px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
-                                <p>require evidence</p>{" "}
-                                <button
-                                  className="bg-[#c6ffca]"
-                                  onClick={deleteAction}
-                                >
-                                  x
-                                </button>
-                              </div>
-                            );
-                          case "notify":
-                            return (
-                              <div className="flex flex-row px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
-                                <p>notify</p>{" "}
-                                <button
-                                  className="bg-[#c6dcff]"
-                                  onClick={deleteAction}
-                                >
-                                  x
-                                </button>
-                              </div>
-                            );
-                          case "askQuestions":
-                            return (
-                              <div className="flex flex-row px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
-                                <p>ask questions</p>{" "}
-                                <button
-                                  className="bg-[#dac6ff]"
-                                  onClick={deleteAction}
-                                >
-                                  x
-                                </button>
-                              </div>
-                            );
-                        }
-                      })}
+                        onClick={() => seteditEnabled(!editEnabled)}
+                        type="text"
+                      ></Button>
+                      <p>then</p>
+                      <div className="flex flex-row gap-1">
+                        {inspectionTemplate.pages[pageIndex].sections[
+                          sectionIndex
+                        ].questions[questionIndex].responseType.logic[
+                          ind
+                        ].action.map((trigger, index) => {
+                          const deleteAction = () => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].action = temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].action.filter((val, i) => i != index);
+                            setinspectionTemplate(temp);
+                          };
+                          switch (trigger) {
+                            case "reportIssue":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#FFE5C6] ml-1 rounded-lg gap-2 items-center">
+                                  <p>report issue</p>{" "}
+                                  <button
+                                    className="bg-[#FFE5C6]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                            case "requireEvidence":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
+                                  <p>require evidence</p>{" "}
+                                  <button
+                                    className="bg-[#c6ffca]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                            case "notify":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
+                                  <p>notify</p>{" "}
+                                  <button
+                                    className="bg-[#c6dcff]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                            case "askQuestions":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
+                                  <p>ask questions</p>{" "}
+                                  <button
+                                    className="bg-[#dac6ff]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                          }
+                        })}
+                      </div>
+                      <Dropdown
+                        className="pl-1"
+                        menu={{
+                          items: [
+                            { label: "Report Issue", key: "reportIssue" },
+                            {
+                              label: "Require Evidence",
+                              key: "requireEvidence",
+                            },
+                            { label: "Notify", key: "notify" },
+                            { label: "Ask Questions", key: "askQuestions" },
+                          ],
+                          onClick: (e) => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].action.push(e.key);
+                            setinspectionTemplate(temp);
+                          },
+                        }}
+                        trigger={["click"]}
+                      >
+                        <Typography.Link>+trigger</Typography.Link>
+                      </Dropdown>
                     </div>
-                    <Dropdown
-                      className="pl-1"
-                      menu={{
-                        items: [
-                          { label: "Report Issue", key: "reportIssue" },
-                          { label: "Require Evidence", key: "requireEvidence" },
-                          { label: "Notify", key: "notify" },
-                          { label: "Ask Questions", key: "askQuestions" },
-                        ],
-                        onClick: (e) => {
+                    <div className=" justify-end right-0">
+                      <Button
+                        type="text"
+                        onClick={() => {
                           let temp = { ...inspectionTemplate };
                           temp.pages[pageIndex].sections[
                             sectionIndex
-                          ].questions[questionIndex].responseType.logic[
-                            ind
-                          ].action.push(e.key);
+                          ].questions[questionIndex].responseType.logic.splice(
+                            questionIndex,
+                            1
+                          );
                           setinspectionTemplate(temp);
-                        },
-                      }}
-                      trigger={["click"]}
-                    >
-                      <Typography.Link>+trigger</Typography.Link>
-                    </Dropdown>
+                        }}
+                      >
+                        X
+                      </Button>
+                    </div>
                   </div>
                 );
               })}
@@ -351,82 +373,700 @@ function Create({ inspectionTemplate, setinspectionTemplate }) {
         );
       case "number":
         return (
-          <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <TbChartDots3 size={18} className="text-[#2F80ED] mr-2" />
-                <h1 className="text-[#2F80ED]">Add logic</h1>
-              </div>
-            </Col>
-            <Col span={6} className="flex justify-around ">
-              <div className="flex flex-row">
-                <Checkbox defaultChecked className="mr-2" />
-                <h1>Required</h1>
-              </div>
-            </Col>
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <MdOutlineAttachFile
-                  size={18}
-                  className="text-[#2F80ED] mr-2"
-                />
-                <h1 className="text-[#2F80ED]">Add image</h1>
-              </div>
-            </Col>
+          <div className="flex flex-col w-full">
+            <div className="flex flex-row justify-start w-full divide-x-2  py-2 items-center gap-1 bg-[#F8F9FC] border-b-2">
+              <Col span={3} className="flex justify-center">
+                <div className="flex flex-row">
+                  <Button
+                    icon={<TbChartDots3 />}
+                    type="link"
+                    onClick={() => {
+                      addLogic({
+                        condition: "is",
+                        value: "bjkn",
+                        action: [],
+                      });
+                    }}
+                  >
+                    Add logic
+                  </Button>
+                </div>
+              </Col>
+              <Col span={3} className="flex justify-center">
+                <div className="flex flex-row">
+                  <Checkbox
+                    checked={question.responseType.required}
+                    className="mr-2"
+                    onChange={(e) => {
+                      let temp = { ...inspectionTemplate };
+                      temp.pages[pageIndex].sections[sectionIndex].questions[
+                        questionIndex
+                      ].responseType.required = e.target.checked;
+                      setinspectionTemplate(temp);
+                    }}
+                  />
+                  <h1>Required</h1>
+                </div>
+              </Col>
+
+              <Col span={4} className="flex justify-center">
+                <div className="flex flex-row">
+                  <MdOutlineAttachFile
+                    size={18}
+                    className="text-[#2F80ED] mr-2"
+                  />
+                  <h1 className="text-[#2F80ED]">Add image</h1>
+                </div>
+              </Col>
+            </div>
+            <div className="flex flex-col bg-[#E9EEF6] w-full pl-7 divide-y-2">
+              {inspectionTemplate.pages[pageIndex].sections[
+                sectionIndex
+              ].questions[questionIndex].responseType.logic.map((log, ind) => {
+                return (
+                  <div className="flex flex-row bg-white w-full items-center p-3 justify-between">
+                    <div className="flex items-center">
+                      <p>If answer</p>
+                      <Dropdown
+                        className="pl-1"
+                        menu={{
+                          items: [
+                            { label: "Equal to", key: "Equal to" },
+                            { label: "Not equal to", key: "Not equal to" },
+                            { label: "Less than", key: "Less than" },
+                            {
+                              label: "Less than or Equal to",
+                              key: "Less than or Equal to",
+                            },
+                            { label: "Greater than", key: "Greater than" },
+                            {
+                              label: "Greater than or Equal to",
+                              key: "Greater than or Equal to",
+                            },
+                            { label: "Between", key: "Between" },
+                            { label: "Not Between", key: "Not Between" },
+                          ],
+                          selectable: true,
+                          defaultSelectedKeys: ["Equal to"],
+                          onClick: (e) => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].condition = e.key;
+                            setinspectionTemplate(temp);
+                          },
+                        }}
+                        trigger={["click"]}
+                      >
+                        <Typography.Link>
+                          {log.condition || "Equal to"}{" "}
+                        </Typography.Link>
+                      </Dropdown>
+
+                      {editEnabled ? (
+                        <Input
+                          type="number"
+                          placeholder="Value"
+                          value={log.value}
+                          bordered={false}
+                          size="small"
+                          className="pl-1 w-[60px] max-w-[100px]"
+                          onChange={(e) => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].value = e.target.value;
+                            setinspectionTemplate(temp);
+                          }}
+                        />
+                      ) : (
+                        <p className="pl-1">{log.value}</p>
+                      )}
+                      <Button
+                        icon={
+                          editEnabled ? <CheckOutlined /> : <EditOutlined />
+                        }
+                        onClick={() => seteditEnabled(!editEnabled)}
+                        type="text"
+                      ></Button>
+                      <p>then</p>
+                      <div className="flex flex-row gap-1">
+                        {inspectionTemplate.pages[pageIndex].sections[
+                          sectionIndex
+                        ].questions[questionIndex].responseType.logic[
+                          ind
+                        ].action.map((trigger, index) => {
+                          const deleteAction = () => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].action = temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].action.filter((val, i) => i != index);
+                            setinspectionTemplate(temp);
+                          };
+                          switch (trigger) {
+                            case "reportIssue":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#FFE5C6] ml-1 rounded-lg gap-2 items-center">
+                                  <p>report issue</p>{" "}
+                                  <button
+                                    className="bg-[#FFE5C6]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                            case "requireEvidence":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
+                                  <p>require evidence</p>{" "}
+                                  <button
+                                    className="bg-[#c6ffca]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                            case "notify":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
+                                  <p>notify</p>{" "}
+                                  <button
+                                    className="bg-[#c6dcff]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                            case "askQuestions":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
+                                  <p>ask questions</p>{" "}
+                                  <button
+                                    className="bg-[#dac6ff]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                          }
+                        })}
+                      </div>
+                      <Dropdown
+                        className="pl-1"
+                        menu={{
+                          items: [
+                            { label: "Report Issue", key: "reportIssue", },
+                            {
+                              label: "Require Evidence",
+                              key: "requireEvidence",
+                            },
+                            { label: "Notify", key: "notify" },
+                            { label: "Ask Questions", key: "askQuestions" },
+                          ],
+                          onClick: (e) => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].action.push(e.key);
+                            setinspectionTemplate(temp);
+                          },
+                        }}
+                        trigger={["click"]}
+                      >
+                        <Typography.Link>+trigger</Typography.Link>
+                      </Dropdown>
+                    </div>
+                    <div className=" justify-end right-0">
+                      <Button
+                        type="text"
+                        onClick={() => {
+                          let temp = { ...inspectionTemplate };
+                          temp.pages[pageIndex].sections[
+                            sectionIndex
+                          ].questions[questionIndex].responseType.logic.splice(
+                            questionIndex,
+                            1
+                          );
+                          setinspectionTemplate(temp);
+                        }}
+                      >
+                        X
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         );
       case "checkbox":
         return (
-          <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <TbChartDots3 size={18} className="text-[#2F80ED] mr-2" />
-                <h1 className="text-[#2F80ED]">Add logic</h1>
-              </div>
-            </Col>
-            <Col span={6} className="flex justify-around ">
-              <div className="flex flex-row">
-                <Checkbox defaultChecked className="mr-2" />
-                <h1>Required</h1>
-              </div>
-            </Col>
+          <div className="flex flex-col w-full">
+            <div className="flex flex-row justify-start w-full divide-x-2  py-2 items-center gap-1 bg-[#F8F9FC] border-b-2">
+              <Col span={3} className="flex justify-center">
+                <div className="flex flex-row">
+                  <Button
+                    icon={<TbChartDots3 />}
+                    type="link"
+                    onClick={() => {
+                      addLogic({
+                        condition: "is",
+                        value: "bjkn",
+                        action: [],
+                      });
+                    }}
+                  >
+                    Add logic
+                  </Button>
+                </div>
+              </Col>
+              <Col span={3} className="flex justify-center">
+                <div className="flex flex-row">
+                  <Checkbox
+                    checked={question.responseType.required}
+                    className="mr-2"
+                    onChange={(e) => {
+                      let temp = { ...inspectionTemplate };
+                      temp.pages[pageIndex].sections[sectionIndex].questions[
+                        questionIndex
+                      ].responseType.required = e.target.checked;
+                      setinspectionTemplate(temp);
+                    }}
+                  />
+                  <h1>Required</h1>
+                </div>
+              </Col>
 
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <MdOutlineAttachFile
-                  size={18}
-                  className="text-[#2F80ED] mr-2"
-                />
-                <h1 className="text-[#2F80ED]">Add image</h1>
-              </div>
-            </Col>
+              <Col span={4} className="flex justify-center">
+                <div className="flex flex-row">
+                  <MdOutlineAttachFile
+                    size={18}
+                    className="text-[#2F80ED] mr-2"
+                  />
+                  <h1 className="text-[#2F80ED]">Add image</h1>
+                </div>
+              </Col>
+            </div>
+            <div className="flex flex-col bg-[#E9EEF6] w-full pl-7 divide-y-2">
+              {inspectionTemplate.pages[pageIndex].sections[
+                sectionIndex
+              ].questions[questionIndex].responseType.logic.map((log, ind) => {
+                return (
+                  <div className="flex flex-row bg-white w-full items-center p-3 justify-between">
+                    <div className="flex items-center">
+                      <p>If Checkbox is </p>
+                      <Dropdown
+                        className="pl-1"
+                        menu={{
+                          items: [
+                            { label: "Checked ", key: "Checked" },
+                            { label: "Not checked ", key: "Notchecked" },
+                          ],
+                          selectable: true,
+                          defaultSelectedKeys: ["Checked"],
+                          onClick: (e) => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].condition = e.key;
+                            setinspectionTemplate(temp);
+                          },
+                        }}
+                        trigger={["click"]}
+                      >
+                        <Typography.Link>
+                          {log.condition || "Checked"}
+                        </Typography.Link>
+                      </Dropdown>
+
+                      <p> then trigger</p>
+                      <div className="flex flex-row gap-1">
+                        {inspectionTemplate.pages[pageIndex].sections[
+                          sectionIndex
+                        ].questions[questionIndex].responseType.logic[
+                          ind
+                        ].action.map((trigger, index) => {
+                          const deleteAction = () => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].action = temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].action.filter((val, i) => i != index);
+                            setinspectionTemplate(temp);
+                          };
+                          switch (trigger) {
+                            case "reportIssue":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#FFE5C6] ml-1 rounded-lg gap-2 items-center">
+                                  <p>report issue</p>{" "}
+                                  <button
+                                    className="bg-[#FFE5C6]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                            case "requireEvidence":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
+                                  <p>require evidence</p>{" "}
+                                  <button
+                                    className="bg-[#c6ffca]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                            case "notify":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
+                                  <p>notify</p>{" "}
+                                  <button
+                                    className="bg-[#c6dcff]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                            case "askQuestions":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
+                                  <p>ask questions</p>{" "}
+                                  <button
+                                    className="bg-[#dac6ff]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                          }
+                        })}
+                      </div>
+                      <Dropdown
+                        className="pl-1"
+                        menu={{
+                          items: [
+                            { label: "Report Issue", key: "reportIssue" },
+                            {
+                              label: "Require Evidence",
+                              key: "requireEvidence",
+                            },
+                            { label: "Notify", key: "notify" },
+                            { label: "Ask Questions", key: "askQuestions" },
+                          ],
+                          onClick: (e) => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].action.push(e.key);
+                            setinspectionTemplate(temp);
+                          },
+                        }}
+                        trigger={["click"]}
+                      >
+                        <Typography.Link>+trigger</Typography.Link>
+                      </Dropdown>
+                    </div>
+                    <div className=" justify-end right-0">
+                      <Button
+                        type="text"
+                        onClick={() => {
+                          let temp = { ...inspectionTemplate };
+                          temp.pages[pageIndex].sections[
+                            sectionIndex
+                          ].questions[questionIndex].responseType.logic.splice(
+                            questionIndex,
+                            1
+                          );
+                          setinspectionTemplate(temp);
+                        }}
+                      >
+                        X
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         );
       case "multiplechoice":
         return (
-          <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <TbChartDots3 size={18} className="text-[#2F80ED] mr-2" />
-                <h1 className="text-[#2F80ED]">Add logic</h1>
-              </div>
-            </Col>
-            <Col span={6} className="flex justify-around ">
-              <div className="flex flex-row">
-                <Checkbox defaultChecked className="mr-2" />
-                <h1>Required</h1>
-              </div>
-            </Col>
+          <div className="flex flex-col w-full">
+            <div className="flex flex-row justify-start w-full divide-x-2  py-2 items-center gap-1 bg-[#F8F9FC] border-b-2">
+              <Col span={3} className="flex justify-center">
+                <div className="flex flex-row">
+                  <Button
+                    icon={<TbChartDots3 />}
+                    type="link"
+                    onClick={() => {
+                      addLogic({
+                        condition: "is",
+                        value: "bjkn",
+                        action: [],
+                      });
+                    }}
+                  >
+                    Add logic
+                  </Button>
+                </div>
+              </Col>
+              <Col span={3} className="flex justify-center">
+                <div className="flex flex-row">
+                  <Checkbox
+                    checked={question.responseType.required}
+                    className="mr-2"
+                    onChange={(e) => {
+                      let temp = { ...inspectionTemplate };
+                      temp.pages[pageIndex].sections[sectionIndex].questions[
+                        questionIndex
+                      ].responseType.required = e.target.checked;
+                      setinspectionTemplate(temp);
+                    }}
+                  />
+                  <h1>Required</h1>
+                </div>
+              </Col>
 
-            <Col span={6} className="flex justify-around">
-              <div className="flex flex-row">
-                <MdOutlineAttachFile
-                  size={18}
-                  className="text-[#2F80ED] mr-2"
-                />
-                <h1 className="text-[#2F80ED]">Add image</h1>
-              </div>
-            </Col>
+              <Col span={4} className="flex justify-center">
+                <div className="flex flex-row">
+                  <MdOutlineAttachFile
+                    size={18}
+                    className="text-[#2F80ED] mr-2"
+                  />
+                  <h1 className="text-[#2F80ED]">Add image</h1>
+                </div>
+              </Col>
+            </div>
+            <div className="flex flex-col bg-[#E9EEF6] w-full pl-7 divide-y-2">
+              {inspectionTemplate.pages[pageIndex].sections[
+                sectionIndex
+              ].questions[questionIndex].responseType.logic.map((log, ind) => {
+                return (
+                  <div className="flex flex-row bg-white w-full items-center p-3 justify-between">
+                    <div className="flex items-center">
+                      <p>If answer</p>
+                      <Dropdown
+                        className="pl-1"
+                        menu={{
+                          items: [
+                            { label: "is", key: "is" },
+                            { label: "is not", key: "is not" },
+                            { label: "is selected", key: "is selected" },
+                            {
+                              label: "is not selected",
+                              key: "is not selected",
+                            },
+                            { label: "is one of", key: "is one of" },
+                            { label: "is not one of", key: "is not one of" },
+                          ],
+                          selectable: true,
+                          defaultSelectedKeys: ["Checked"],
+                          onClick: (e) => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].condition = e.key;
+                            setinspectionTemplate(temp);
+                          },
+                        }}
+                        trigger={["click"]}
+                      >
+                        <Typography.Link>
+                          {log.condition || "is"}
+                        </Typography.Link>
+                      </Dropdown>
+
+                      <Dropdown
+                      
+                        overlay={
+                          <Menu>
+                            {MultipleChoiceResponse.map((row, rowIndex) => (
+                              <Menu.Item
+                                key={rowIndex}
+                              
+                              >
+                                <div className="flex items-center">
+                                  {row.map((item, itemIndex) => (
+                                    <span
+                                      key={itemIndex}
+                                      style={{
+                                        backgroundColor: item.color,
+                                        color: "#ffff",
+                                        fontSize: "12px",
+                                      }}
+                                      className="rounded-full mx-2 p-2"
+                                    >
+                                      {item.optionName}
+                                    </span>
+                                  ))}
+                                </div>
+                              </Menu.Item>
+                            ))}
+                          </Menu>
+                        }
+                        trigger={["click"]}
+                        
+                      >
+                        <a
+                          className="ant-dropdown-link"
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          Option <DownOutlined />
+                        </a>
+                      </Dropdown>
+
+                      <p>then</p>
+                      <div className="flex flex-row gap-1">
+                        {inspectionTemplate.pages[pageIndex].sections[
+                          sectionIndex
+                        ].questions[questionIndex].responseType.logic[
+                          ind
+                        ].action.map((trigger, index) => {
+                          const deleteAction = () => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].action = temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].action.filter((val, i) => i != index);
+                            setinspectionTemplate(temp);
+                          };
+                          switch (trigger) {
+                            case "reportIssue":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#FFE5C6] ml-1 rounded-lg gap-2 items-center">
+                                  <p>report issue</p>{" "}
+                                  <button
+                                    className="bg-[#FFE5C6]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                            case "requireEvidence":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
+                                  <p>require evidence</p>{" "}
+                                  <button
+                                    className="bg-[#c6ffca]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                            case "notify":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
+                                  <p>notify</p>{" "}
+                                  <button
+                                    className="bg-[#c6dcff]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                            case "askQuestions":
+                              return (
+                                <div className="flex flex-row px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
+                                  <p>ask questions</p>{" "}
+                                  <button
+                                    className="bg-[#dac6ff]"
+                                    onClick={deleteAction}
+                                  >
+                                    x
+                                  </button>
+                                </div>
+                              );
+                          }
+                        })}
+                      </div>
+                      <Dropdown
+                        className="pl-1"
+                        menu={{
+                          items: [
+                            { label: "Report Issue", key: "reportIssue" },
+                            {
+                              label: "Require Evidence",
+                              key: "requireEvidence",
+                            },
+                            { label: "Notify", key: "notify" },
+                            { label: "Ask Questions", key: "askQuestions" },
+                          ],
+                          onClick: (e) => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].action.push(e.key);
+                            setinspectionTemplate(temp);
+                          },
+                        }}
+                        trigger={["click"]}
+                      >
+                        <Typography.Link>+trigger</Typography.Link>
+                      </Dropdown>
+                    </div>
+                    <div className=" justify-end right-0">
+                      <Button
+                        type="text"
+                        onClick={() => {
+                          let temp = { ...inspectionTemplate };
+                          temp.pages[pageIndex].sections[
+                            sectionIndex
+                          ].questions[questionIndex].responseType.logic.splice(
+                            questionIndex,
+                            1
+                          );
+                          setinspectionTemplate(temp);
+                        }}
+                      >
+                        X
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         );
       case "date":

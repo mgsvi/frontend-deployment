@@ -16,16 +16,14 @@ import {
   Input,
 } from "antd";
 import Chat from "./Chat";
-import { EditOutlined } from "@ant-design/icons";
 import { MdLocationPin } from "react-icons/md";
 import { BsFillBookmarkFill } from "react-icons/bs";
 import { BiSolidUser } from "react-icons/bi";
 import { PiFolderOpenFill } from "react-icons/pi";
 import { MdDeleteOutline } from "react-icons/md";
-import { DownOutlined } from "@ant-design/icons";
-import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
+import "leaflet/dist/leaflet.css";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
@@ -338,6 +336,7 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                         onCancel={() => setmapModalOpen(false)}
                         className="w-1/2"
                       >
+                        
                         <div className="flex flex-col w-full h-[600px]">
                           <div className="flex justify-between mb-5">
                             <div style={{ flex: 1 }}>
@@ -386,11 +385,11 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                               />
                             </div>
                           </div>
-                          <div className="w-full h-full">
+                          <div>
                             <MapContainer
                               center={[12.99097225692328, 80.17281532287599]}
                               zoom={13}
-                              className="w-full h-full"
+                              className="w-[100%] h-[100%]"
                             >
                               {mode ? (
                                 <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />

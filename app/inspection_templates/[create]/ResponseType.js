@@ -67,7 +67,7 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
               key={itemIndex}
               style={{
                 backgroundColor: item.color,
-                color: "#ffff",
+                color: "#7E8A9C",
                 fontSize: "12px",
               }}
               className="rounded-full mx-2 p-2 "
