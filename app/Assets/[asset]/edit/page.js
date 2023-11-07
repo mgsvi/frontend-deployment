@@ -413,8 +413,8 @@ export default function AssetEdit({ params }) {
               }
             }}
           >
-            {field.values.map((val) => {
-              return <Option value={val}>{val}</Option>;
+            {field.values.map((val, i) => {
+              return <Option key={i} value={val}>{val}</Option>;
             })}
           </Select>
         );
@@ -444,8 +444,8 @@ export default function AssetEdit({ params }) {
               }
             }}
           >
-            {field.values.map((val) => {
-              return <Option value={val}>{val}</Option>;
+            {field.values.map((val,i) => {
+              return <Option key={i} value={val}>{val}</Option>;
             })}
           </Select>
         );
@@ -638,7 +638,7 @@ export default function AssetEdit({ params }) {
                   }}
                 >
                   {data.map((type, i) => {
-                    return <Option value={type.name}>{type.name}</Option>;
+                    return <Option key={i} value={type.name}>{type.name}</Option>;
                   })}
                 </Select>
               </div>
@@ -668,21 +668,22 @@ export default function AssetEdit({ params }) {
                   }}
                 >
                   {data.map((type, i) => {
-                    return <Option value={type.name}>{type.name}</Option>;
+                    return <Option key={i} value={type.name}>{type.name}</Option>;
                   })}
                 </Select>
               </div>
             </Form.Item>
             {assetType != null &&
-              assetType.fields.map((field) => {
+              assetType.fields.map((field,i) => {
                 return (
-                  <div>
+                  <div key={i}>
                     <h1 className="text-[#828282] mb-2 ">
                       {field.section_name}
                     </h1>
                     {field.fields.map((val, i) => {
                       return (
                         <Form.Item
+                        key={i}
                           name={val.field_name}
                           rules={[
                             {

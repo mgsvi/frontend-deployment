@@ -32,10 +32,10 @@ export default function Loading() {
 
         <script
             type="module"
-            src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+            src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js" async></script>
         <script
             nomodule
-            src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+            src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js" async></script>
     </div>
   )
 }

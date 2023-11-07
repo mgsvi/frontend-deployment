@@ -285,9 +285,9 @@ function ViewAsset({ params }) {
                 {assetValues.images.length != 0 ? (
                   <div className="w-full grid grid-cols-3 bg-white rounded p-3 h-fit max-h-[200px] overflow-y-auto">
                     <Image.PreviewGroup>
-                      {assetValues.images.map((i) => {
+                      {assetValues.images.map((url,i) => {
                         return (
-                          <Image width={100} className="p-0 m-0 mb-4" src={i} />
+                          <Image alt="" key={i} width={100} className="p-0 m-0 mb-4" src={url} />
                         );
                       })}
                     </Image.PreviewGroup>
@@ -304,12 +304,13 @@ function ViewAsset({ params }) {
                 </h1>
                 <div className="bg-white rounded p-2 flex flex-col w-full justify-start">
                   {assetValues.docs.length != 0 ? (
-                    assetValues.docs.map((i) => {
+                    assetValues.docs.map((url,i) => {
                       return (
                         <Button
+                        key={i}
                           type="link"
                           className="font-semibold w-fit"
-                          href={i}
+                          href={url}
                           target="_blank"
                         >
                           {i.split("/")[5]}

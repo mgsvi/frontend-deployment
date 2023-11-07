@@ -6,7 +6,7 @@ import { LeftOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import Create from "./Create";
 
-function createTemplate({ params }) {
+function CreateTemplate({ params }) {
   console.log(params.create);
   const [inspectionTemplate, setinspectionTemplate] = useState({
     title: "sample Template Title",
@@ -120,4 +120,4 @@ function createTemplate({ params }) {
   );
 }
 
-export default createTemplate;
+export default CreateTemplate;

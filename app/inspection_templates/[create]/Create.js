@@ -62,6 +62,7 @@ const beforeUpload = (file) => {
 };
 
 function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
+  const { Option } = Select;
   const { TextArea } = Input;
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState();
@@ -207,7 +208,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                 sectionIndex
               ].questions[questionIndex].responseType.logic.map((log, ind) => {
                 return (
-                  <div className="flex flex-row bg-white w-full items-center p-3 justify-between">
+                  <div key={ind} className="flex flex-row bg-white w-full items-center p-3 justify-between">
                     <div className="flex items-center">
                       <p>If answer</p>
                       <Dropdown
@@ -446,7 +447,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                 sectionIndex
               ].questions[questionIndex].responseType.logic.map((log, ind) => {
                 return (
-                  <div className="flex flex-row bg-white w-full items-center p-3 justify-between">
+                  <div key={ind} className="flex flex-row bg-white w-full items-center p-3 justify-between">
                     <div className="flex items-center">
                       <p>If answer</p>
                       <Dropdown
@@ -715,7 +716,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                 sectionIndex
               ].questions[questionIndex].responseType.logic.map((log, ind) => {
                 return (
-                  <div className="flex flex-row bg-white w-full items-center p-3 justify-between">
+                  <div key={ind} className="flex flex-row bg-white w-full items-center p-3 justify-between">
                     <div className="flex items-center gap-1">
                       <p>If Checkbox is</p>
                       <Dropdown
@@ -1011,7 +1012,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                 sectionIndex
               ].questions[questionIndex].responseType.logic.map((log, ind) => {
                 return (
-                  <div className="flex flex-row bg-white w-full items-center p-3 justify-between">
+                  <div key={ind} className="flex flex-row bg-white w-full items-center p-3 justify-between">
                     <div className="flex items-center gap-1">
                       <p>If answer</p>
                       <Dropdown
@@ -1418,7 +1419,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
         <div>
           {inspectionTemplate.pages.map((page, index) => {
             return (
-              <div className="pt-5 ">
+              <div key={index} className="pt-5 ">
                 <div className="flex flex-row ">
                   <Input
                     className="font-semi text-xl bold max-w-[300px]"
@@ -1457,7 +1458,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                 )}
                 {/* <EnterOutlined /> */}
                 {page.sections.map((section, sectionIndex) => (
-                  <div className="ml-5 mt-2">
+                  <div key={sectionIndex} className="ml-5 mt-2">
                     <div className="flex flex-row">
                       <Input
                         className="font-semi text-xl bold max-w-[300px]"
@@ -1488,7 +1489,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                     </div>
 
                     {section.questions.map((question, questionIndex) => (
-                      <div className=" flex flex-row items-center mb-3">
+                      <div key={questionIndex} className=" flex flex-row items-center mb-3">
                         <div className="w-[90%]">
                           <Row className="bg-white ">
                             <Col span={18} className=" border p-2">

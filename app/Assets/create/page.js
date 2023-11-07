@@ -8,6 +8,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { GeoSearchControl, OpenStreetMapProvider } from "leaflet-geosearch";
 import "leaflet/dist/leaflet.css";
 import dayjs from "dayjs";
+import Image from 'next/image'
 import {
   Button,
   Form,
@@ -304,7 +305,7 @@ export default function AssetCreate() {
           >
             {" "}
             {field.values.map((val, i) => {
-              return <Option value={val}>{val}</Option>;
+              return <Option key={i} value={val}>{val}</Option>;
             })}
           </Select>
         );
@@ -319,7 +320,7 @@ export default function AssetCreate() {
             }}
           >
             {field.values.map((val, i) => {
-              return <Option value={val}>{val}</Option>;
+              return <Option key={i} value={val}>{val}</Option>;
             })}
           </Select>
         );
@@ -515,7 +516,7 @@ export default function AssetCreate() {
                   }}
                 >
                   {data.map((type, i) => {
-                    return <Option value={type.name}>{type.name}</Option>;
+                    return <Option key={i} value={type.name}>{type.name}</Option>;
                   })}
                 </Select>
               </div>
@@ -550,22 +551,23 @@ export default function AssetCreate() {
                   }}
                 >
                   {data.map((type, i) => {
-                    return <Option value={type.name}>{type.name}</Option>;
+                    return <Option key={i} value={type.name}>{type.name}</Option>;
                   })}
                 </Select>
               </div>
             </Form.Item>
             {assetType != null &&
               assetType.fields &&
-              assetType.fields.map((field) => {
+              assetType.fields.map((field,i) => {
                 return (
-                  <div>
+                  <div key={i}>
                     <h1 className="text-[#828282] mb-2 ">
                       {field.section_name}
                     </h1>
                     {field.fields.map((val, i) => {
                       return (
                         <Form.Item
+                        key={i}
                           name={val.field_name}
                           rules={[
                             {

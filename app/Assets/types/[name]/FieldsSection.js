@@ -248,6 +248,7 @@ function FieldsSection(props) {
           .map((val, i) => {
             return (
               <Row
+              key={i}
                 align={"middle"}
                 className={`border p-1 pl-2 ${
                   i != data.length - 1 ? "border-b-0" : ""
