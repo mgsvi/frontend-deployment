@@ -71,12 +71,13 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
   const [form] = Form.useForm();
   const { v4: uuidv4 } = require("uuid");
   const uniqueId = uuidv4();
-  const [MultipleChoiceResponse, setMultipleChoiceResponse] = useState([[
-    { color: "#1677FF", flagged: true, optionName: "ad" },
-    { color: "#1677FF", flagged: true, optionName: "adcf" },
-    { color: "#1677FF", flagged: true, optionName: "fdv" },
-    { color: "#1677FF", flagged: true, optionName: "wer" },
-  ]]);
+
+  const setMultipleChoiceResponse = (newChoiceList) => {
+    setinspectionTemplate({
+      ...inspectionTemplate,
+      multipleChoiceResponse: newChoiceList,
+    });
+  };
 
   form.setFieldsValue({ "Unique Id": uniqueId });
   const handleChange = (info) => {
@@ -937,39 +938,72 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                   <h1 className="text-[#2F80ED]">Add image</h1>
                 </div>
               </Col>
-              <Col span={4} className="flex justify-center">
-              <Dropdown
-                        className="pl-1"
-                        menu={{
-                          items: [
-                            { label: "is", key: "is" },
-                            { label: "is not", key: "is not" },
-                            { label: "is selected", key: "is selected" },
-                            {
-                              label: "is not selected",
-                              key: "is not selected",
-                            },
-                            { label: "is one of", key: "is one of" },
-                            { label: "is not one of", key: "is not one of" },
-                          ],
-                          selectable: true,
-                          defaultSelectedKeys: ["Checked"],
-                          onClick: (e) => {
-                            let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
-                              ind
-                            ].condition = e.key;
-                            setinspectionTemplate(temp);
-                          },
-                        }}
-                        trigger={["click"]}
-                      >
-                        <Typography.Link>
-                          {"options"}
-                        </Typography.Link>
-                      </Dropdown>
+              <Col span={12} className="flex justify-start ml-2">
+                <Dropdown
+                  className="pl-1"
+                  menu={{
+                    items: inspectionTemplate.multipleChoiceResponse.map(
+                      (val, i) => ({
+                        key: i,
+                        label: (
+                          <div className="flex items-center">
+                            {val.map((item, itemIndex) => (
+                              <span
+                                key={itemIndex}
+                                style={{
+                                  backgroundColor: item.color,
+                                  color: "#ffff",
+                                  fontSize: "8px",
+                                }}
+                                className="rounded-full mx-2 p-2"
+                              >
+                                {item.optionName}
+                              </span>
+                            ))}
+                          </div>
+                        ),
+                      })
+                    ),
+                    selectable: true,
+                    defaultSelectedKeys: ["Checked"],
+                    onClick: (e) => {
+                      let temp = { ...inspectionTemplate };
+                      temp.pages[pageIndex].sections[sectionIndex].questions[
+                        questionIndex
+                      ].responseType.options =
+                        inspectionTemplate.multipleChoiceResponse[e.key];
+                      setinspectionTemplate(temp);
+                    },
+                  }}
+                  trigger={["click"]}
+                >
+                  <Typography.Link>
+                    {inspectionTemplate.pages[pageIndex].sections[sectionIndex]
+                      .questions[questionIndex].responseType.options != null ? (
+                      <div className="flex items-center">
+                        {inspectionTemplate.pages[pageIndex].sections[
+                          sectionIndex
+                        ].questions[questionIndex].responseType.options.map(
+                          (item, itemIndex) => (
+                            <span
+                              key={itemIndex}
+                              style={{
+                                backgroundColor: item.color,
+                                color: "#ffff",
+                                fontSize: "8px",
+                              }}
+                              className="rounded-full mx-2 p-2"
+                            >
+                              {item.optionName}
+                            </span>
+                          )
+                        )}
+                      </div>
+                    ) : (
+                      "options"
+                    )}
+                  </Typography.Link>
+                </Dropdown>
               </Col>
             </div>
             <div className="flex flex-col bg-[#E9EEF6] w-full pl-7 divide-y-2">
@@ -978,10 +1012,9 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
               ].questions[questionIndex].responseType.logic.map((log, ind) => {
                 return (
                   <div className="flex flex-row bg-white w-full items-center p-3 justify-between">
-                    <div className="flex items-center">
+                    <div className="flex items-center gap-1">
                       <p>If answer</p>
                       <Dropdown
-                        className="pl-1"
                         menu={{
                           items: [
                             { label: "is", key: "is" },
@@ -1014,39 +1047,41 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                       </Dropdown>
 
                       <Dropdown
-                        overlay={
-                          <Menu>
-                            {MultipleChoiceResponse.map((row, rowIndex) => (
-                              <Menu.Item key={rowIndex}>
-                                <div className="flex items-center">
-                                  {row.map((item, itemIndex) => (
-                                    <span
-                                      key={itemIndex}
-                                      style={{
-                                        backgroundColor: item.color,
-                                        color: "#ffff",
-                                        fontSize: "12px",
-                                      }}
-                                      className="rounded-full mx-2 p-2"
-                                    >
-                                      {item.optionName}
-                                    </span>
-                                  ))}
-                                </div>
-                              </Menu.Item>
-                            ))}
-                          </Menu>
-                        }
+                        menu={{
+                          items:
+                            inspectionTemplate.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.options !=
+                            null
+                              ? inspectionTemplate.pages[pageIndex].sections[
+                                  sectionIndex
+                                ].questions[
+                                  questionIndex
+                                ].responseType.options.map((val, i) => ({
+                                  key: i,
+                                  label: val.optionName,
+                                }))
+                              : [],
+                          selectable: true,
+                          onClick: (e) => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].value =
+                              inspectionTemplate.pages[pageIndex].sections[
+                                sectionIndex
+                              ].questions[questionIndex].responseType.options[
+                                e.key
+                              ].optionName;
+                            setinspectionTemplate(temp);
+                          },
+                        }}
                         trigger={["click"]}
                       >
-                        <a
-                          className="ant-dropdown-link"
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          Option <DownOutlined />
-                        </a>
+                        <Typography.Link>{log.value || "value"}</Typography.Link>
                       </Dropdown>
-
                       <p>then</p>
                       <div className="flex flex-row gap-1">
                         {inspectionTemplate.pages[pageIndex].sections[
@@ -1070,7 +1105,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                           switch (trigger) {
                             case "reportIssue":
                               return (
-                                <div className="flex flex-row px-2 bg-[#FFE5C6] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row px-2 bg-[#FFE5C6] rounded-lg gap-2 items-center">
                                   <p>report issue</p>{" "}
                                   <button
                                     className="bg-[#FFE5C6]"
@@ -1841,7 +1876,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
       </div>
       <div className="flex flex-col  bg-[#F8F9FC] w-[35%]">
         <ResponseType
-          MultipleChoiceResponse={MultipleChoiceResponse}
+          MultipleChoiceResponse={inspectionTemplate.multipleChoiceResponse}
           setMultipleChoiceResponse={setMultipleChoiceResponse}
         />
       </div>
