@@ -16,7 +16,7 @@ import {
   CloseOutlined,
   CheckSquareOutlined,
   EditOutlined,
-  DownOutlined
+  DownOutlined,
 } from "@ant-design/icons";
 import {
   message,
@@ -569,7 +569,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         className="pl-1"
                         menu={{
                           items: [
-                            { label: "Report Issue", key: "reportIssue", },
+                            { label: "Report Issue", key: "reportIssue" },
                             {
                               label: "Require Evidence",
                               key: "requireEvidence",
@@ -909,14 +909,10 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                       </Dropdown>
 
                       <Dropdown
-                      
                         overlay={
                           <Menu>
                             {MultipleChoiceResponse.map((row, rowIndex) => (
-                              <Menu.Item
-                                key={rowIndex}
-                              
-                              >
+                              <Menu.Item key={rowIndex}>
                                 <div className="flex items-center">
                                   {row.map((item, itemIndex) => (
                                     <span
@@ -937,7 +933,6 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                           </Menu>
                         }
                         trigger={["click"]}
-                        
                       >
                         <a
                           className="ant-dropdown-link"
