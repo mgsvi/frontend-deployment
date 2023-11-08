@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Divider, Table, Input, Space, Button, Result } from "antd";
 import useSWR from "swr";
-import Loading from "../loading";
 import IssueDrawer from "./IssueDrawer";
 import { SearchOutlined, DownloadOutlined } from "@ant-design/icons";
 import { Excel } from "antd-table-saveas-excel";
@@ -280,7 +279,7 @@ const App = () => {
 if (isLoading)
   return (
     <div>
-      <Loading />
+      loading
     </div>
   );
 

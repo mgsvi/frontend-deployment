@@ -3,7 +3,6 @@ import { Table, Input, Result, Select, Modal, Button, Space } from "antd";
 import { SearchOutlined, DownloadOutlined } from "@ant-design/icons";
 import { Excel } from "antd-table-saveas-excel";
 import useSWR from "swr";
-import Loading from "../loading";
 import { useRouter } from "next/navigation";
 import Highlighter from "react-highlight-words";
 import { Questrial } from "next/font/google";
@@ -243,7 +242,7 @@ const AssetTable = () => {
   if (isLoading)
     return (
       <div>
-        <Loading />
+        loading
       </div>
     );
 

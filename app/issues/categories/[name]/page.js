@@ -8,17 +8,13 @@ import { useRouter } from "next/navigation";
 import { EllipsisOutlined } from "@ant-design/icons";
 import { Menu, Dropdown, Popconfirm } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
-const fetcher = (...args) => fetch(...args).then((res) => res.json());
+
 
 function CategoryCreate({ params }) {
   const name = params.name;
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
-  const { data, mutate, error, isLoading } = useSWR(
-    "https://digifield.onrender.com/assets/get-all-asset-types/",
-    fetcher,
-    { refreshInterval: 10000 }
-  );
+  
   const onChange = (key) => {
     console.log(key);
   };
@@ -36,13 +32,10 @@ function CategoryCreate({ params }) {
     setFormData({ ...formData, questions: data.questions, name: data.name });
   };
 
-  useEffect(() => {
-    fetch(`https://digifield.onrender.com/issues/get-issue-category/${name}`)
+  // useEffect(() => {
+  //   fetch(`https://digifield.onrender.com/issues/get-issue-category/${name}`)
   
-    return () => {
-      second
-    }
-  }, [third])
+  // }, [])
   
  
   const menu = (
@@ -143,6 +136,7 @@ function CategoryCreate({ params }) {
   ];
   return (
     <div className="flex flex-col">
+      {contextHolder}
       <div className="px-10 pt-10 ">
         <div className="flex gap-2">
           <Button
