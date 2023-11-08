@@ -91,11 +91,19 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
   form.setFieldsValue({ "Unique Id": uniqueId });
 
   const handlePriorityChange = (e) => {
-    setSelectedPriority(e.target.value);
-    form.setFieldsValue({ priority: e.target.value });
+    setSelectedPriority(e);
+    form.setFieldsValue({ priority: e });
+    setEditedRow({
+      ...editedRow,
+      priority: e,
+    });
   };
   const handleStatusChange = (e) => {
-    form.setFieldValue({ status: e.target.value });
+    form.setFieldValue({ status: e });
+    setEditedRow({
+      ...editedRow,
+      status: e,
+    });
   };
 
   const toggleEditMode = () => {
@@ -105,9 +113,30 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
   const handleUpdate = () => {
     selectedRow = editedRow;
     toggleEditMode();
-    onFinishEvent();
+
+    fetch(
+      `https://digifield.onrender.com/issues/update-issue/${selectedRow.issue_id}`,
+      {
+        method: "PUT",
+        mode: "cors",
+        cache: "no-cache",
+        headers: {
+          "Content-Type": "application/json",
+          accept: "application/json",
+        },
+        body: JSON.stringify(editedRow),
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.acknowledge) {
+          success("Issue has been Updated");
+        } else {
+          warning(data.description);
+        }
+        console.log(JSON.stringify(editedRow));
+      });
   };
-  const onFinishEvent = (value) => {};
 
   const success = (msg) => {
     messageApi.open({
@@ -229,41 +258,37 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
       <div className="flex h-full overflow-hidden">
         <div className="flex flex-col bg-white overflow-y-auto w-[45%] pr-5">
           {isEditing ? (
-            <Form form={form} onFinish={onFinishEvent}>
+            <Form form={form}>
               <div>
                 <div className="flex flex-row">
-                  <div>
-                    <div className="w-full h-full">
-                      
-                        <input
-                          type="text"
-                          value={editedRow.remarks}
-                          onChange={(e) => {
-                            form.setFieldsValue({ remarks: e.target.value });
-                            setEditedRow({
-                              ...editedRow,
-                              remarks: e.target.value,
-                            });
-                          }}
-                          className="w-full p-2 rounded-lg border border-gray-300"
-                          
-                        />
-                      <textarea
-                        value={editedRow.description}
-                        onChange={(e) => {
-                          form.setFieldsValue({
-                            description: e.target.value,
-                          });
-                          setEditedRow({
-                            ...editedRow,
-                            description: e.target.value,
-                          });
-                        }}
-                        className="w-full p-2 mt-2 rounded-lg border border-gray-300 "
-                       
-                        rows="4"
-                      />
-                    </div>
+                  <div className="w-full h-full">
+                    <Input
+                      type="text"
+                      value={editedRow.remarks}
+                      onChange={(e) => {
+                        form.setFieldsValue({ remarks: e.target.value });
+                        setEditedRow({
+                          ...editedRow,
+                          remarks: e.target.value,
+                        });
+                      }}
+                      className="w-full p-2 rounded-lg border border-gray-300"
+                    />
+
+                    <textarea
+                      value={editedRow.description}
+                      onChange={(e) => {
+                        form.setFieldsValue({
+                          description: e.target.value,
+                        });
+                        setEditedRow({
+                          ...editedRow,
+                          description: e.target.value,
+                        });
+                      }}
+                      className="w-full p-2 mt-2 rounded-lg border border-gray-300 "
+                      rows="4"
+                    />
                   </div>
                 </div>
                 <div className="pt-5 flex flex-row justify-between">
@@ -293,19 +318,16 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                   )}
                 </div>
                 <Divider />
-                <Form.Item
-                  name="priority"
-                 
-                >
+                <Form.Item name="priority">
                   <div>
                     <Select
                       defaultValue={selectedPriority}
                       style={{ width: 120 }}
                       onChange={handlePriorityChange}
                       options={[
-                        { value: "High", label: "High" },
-                        { value: "Medium", label: "Medium" },
-                        { value: "Low", label: "Low" },
+                        { value: "high", label: "high" },
+                        { value: "medium", label: "medium" },
+                        { value: "low", label: "low" },
                       ]}
                     />
                   </div>
@@ -317,17 +339,17 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                 </div>
                 <Divider />
                 <div className="flex flex-row justify-between">
-                <Form.Item name="status">
-                  <Select
-                    defaultValue={selectedRow.status}
-                    style={{ width: 120 }}
-                    onChange={handleStatusChange}
-                    options={[
-                      { value: "open", label: "open" },
-                      { value: "closed", label: "closed" },
-                    ]}
-                  />
-                  </Form.Item >
+                  <Form.Item name="status">
+                    <Select
+                      defaultValue={selectedRow.status}
+                      style={{ width: 120 }}
+                      onChange={handleStatusChange}
+                      options={[
+                        { value: "open", label: "open" },
+                        { value: "closed", label: "closed" },
+                      ]}
+                    />
+                  </Form.Item>
                 </div>
                 <Divider />
                 <div className="flex items-center">
