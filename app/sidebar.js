@@ -37,7 +37,7 @@ const SideBar = () => {
 
   const menuItems = [
     {
-      key: "/",
+      key: "",
       label: "Dashboard",
       icon: <HomeOutlined />,
     },

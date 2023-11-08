@@ -217,7 +217,7 @@ function ViewAsset({ params }) {
                           if (
                             key === "Location" &&
                             typeof value === "object" &&
-                            value !== null
+                            value != null
                           ) {
                             return (
                               <div key={key}>
@@ -313,7 +313,7 @@ function ViewAsset({ params }) {
                           href={url}
                           target="_blank"
                         >
-                          {i.split("/")[5]}
+                          {url.split("/")[5]}
                         </Button>
                       );
                     })

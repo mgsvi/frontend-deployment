@@ -1464,17 +1464,17 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         className="font-semi text-xl bold max-w-[300px]"
                         value={section.sectionName}
                         bordered={false}
-                        placeholder="Click here to enter the page title"
+                        placeholder="Click here to enter the section title"
                         onChange={(e) => {
                           let temp = { ...inspectionTemplate };
-                          temp.pages[index].section[sectionIndex].sectionName =
+                          temp.pages[index].sections[sectionIndex].sectionName =
                             e.target.value;
                           setinspectionTemplate(temp);
                         }}
                       />
                       <Button
                         type="text"
-                        disabled={index == 0 && sectionIndex == 0}
+                        disabled={index === 0 || sectionIndex === 0}
                         onClick={() => {
                           const newTemplate = { ...inspectionTemplate };
                           newTemplate.pages[index].sections.splice(

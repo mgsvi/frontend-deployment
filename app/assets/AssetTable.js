@@ -5,7 +5,6 @@ import { Excel } from "antd-table-saveas-excel";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import Highlighter from "react-highlight-words";
-import { Questrial } from "next/font/google";
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 const AssetTable = () => {
   const router = useRouter();
