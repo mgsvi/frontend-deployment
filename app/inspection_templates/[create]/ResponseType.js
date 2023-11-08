@@ -30,10 +30,10 @@ import { RiDraggable } from "react-icons/ri";
 
 function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
   const defaultChoiceList = [
-    { color: "#1677FF", flagged: true, optionName: "" },
-    { color: "#1677FF", flagged: true, optionName: "" },
-    { color: "#1677FF", flagged: true, optionName: "" },
-    { color: "#1677FF", flagged: true, optionName: "" },
+    { color: "#1677FF", flagged: true, optionName: "ad" },
+    { color: "#1677FF", flagged: true, optionName: "adcf" },
+    { color: "#1677FF", flagged: true, optionName: "fdv" },
+    { color: "#1677FF", flagged: true, optionName: "wer" },
   ];
 
   const [MultipleChoice, setMultipleChoice] = useState(defaultChoiceList);

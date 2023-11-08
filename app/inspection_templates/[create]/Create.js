@@ -34,11 +34,12 @@ import {
   Dropdown,
   Typography,
 } from "antd";
-import { BiSolidImageAdd } from "react-icons/bi";
+import { BiSolidImageAdd, BiSolidMessageDetail } from "react-icons/bi";
 import { TbChartDots3 } from "react-icons/tb";
-import { MdOutlineAttachFile } from "react-icons/md";
+import { MdOutlineAttachFile, MdLibraryAddCheck } from "react-icons/md";
 import { FaSignature, FaImages, FaExternalLinkAlt } from "react-icons/fa";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { BsFillBellFill } from "react-icons/bs";
 import { MdEdit } from "react-icons/md";
 import ResponseType from "./ResponseType";
 
@@ -70,7 +71,12 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
   const [form] = Form.useForm();
   const { v4: uuidv4 } = require("uuid");
   const uniqueId = uuidv4();
-  const [MultipleChoiceResponse, setMultipleChoiceResponse] = useState([]);
+  const [MultipleChoiceResponse, setMultipleChoiceResponse] = useState([[
+    { color: "#1677FF", flagged: true, optionName: "ad" },
+    { color: "#1677FF", flagged: true, optionName: "adcf" },
+    { color: "#1677FF", flagged: true, optionName: "fdv" },
+    { color: "#1677FF", flagged: true, optionName: "wer" },
+  ]]);
 
   form.setFieldsValue({ "Unique Id": uniqueId });
   const handleChange = (info) => {
@@ -126,7 +132,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                     onClick={() => {
                       addLogic({
                         condition: "is",
-                        value: "bjkn",
+                        value: "blank",
                         action: [],
                       });
                     }}
@@ -162,6 +168,11 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                       ],
                       selectable: true,
                       defaultSelectedKeys: ["shortAnswer"],
+                      selectedKeys: [
+                        inspectionTemplate.pages[pageIndex].sections[
+                          sectionIndex
+                        ].questions[questionIndex].responseType.format,
+                      ],
                       onClick: (e) => {
                         let temp = { ...inspectionTemplate };
                         temp.pages[pageIndex].sections[sectionIndex].questions[
@@ -206,6 +217,12 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                             { label: "is not", key: "isNot" },
                           ],
                           selectable: true,
+                          selectedKeys: [
+                            inspectionTemplate.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[ind]
+                              .condition,
+                          ],
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
                             temp.pages[pageIndex].sections[
@@ -240,7 +257,11 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                           }}
                         />
                       ) : (
-                        <p className="pl-1">{log.value}</p>
+                        <p className="pl-1">
+                          {log.value === "" || log.val === null
+                            ? "Blank"
+                            : log.value}
+                        </p>
                       )}
                       <Button
                         icon={
@@ -382,8 +403,8 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                     type="link"
                     onClick={() => {
                       addLogic({
-                        condition: "is",
-                        value: "bjkn",
+                        condition: "equalTo",
+                        value: 0,
                         action: [],
                       });
                     }}
@@ -431,23 +452,29 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         className="pl-1"
                         menu={{
                           items: [
-                            { label: "Equal to", key: "Equal to" },
-                            { label: "Not equal to", key: "Not equal to" },
-                            { label: "Less than", key: "Less than" },
+                            { label: "Equal to", key: "equalTo" },
+                            { label: "Not equal to", key: "notEqualTo" },
+                            { label: "Less than", key: "lessThan" },
                             {
                               label: "Less than or Equal to",
-                              key: "Less than or Equal to",
+                              key: "lessThanOrEqualTo",
                             },
-                            { label: "Greater than", key: "Greater than" },
+                            { label: "Greater than", key: "greaterThan" },
                             {
                               label: "Greater than or Equal to",
-                              key: "Greater than or Equal to",
+                              key: "greaterThanOrEqualTo",
                             },
-                            { label: "Between", key: "Between" },
-                            { label: "Not Between", key: "Not Between" },
+                            { label: "Between", key: "between" },
+                            { label: "Not Between", key: "notBetween" },
                           ],
                           selectable: true,
-                          defaultSelectedKeys: ["Equal to"],
+                          defaultSelectedKeys: ["equalTo"],
+                          selectedKeys: [
+                            inspectionTemplate.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[ind]
+                              .condition,
+                          ],
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
                             temp.pages[pageIndex].sections[
@@ -461,7 +488,26 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         trigger={["click"]}
                       >
                         <Typography.Link>
-                          {log.condition || "Equal to"}{" "}
+                          {(() => {
+                            switch (log.condition) {
+                              case "equalTo":
+                                return "Equal to";
+                              case "notEqualTo":
+                                return "Not Equal to";
+                              case "lessThan":
+                                return "Less than";
+                              case "lessThanOrEqualTo":
+                                return "Less than or Equal to";
+                              case "greaterThan":
+                                return "Greater Than";
+                              case "greaterThanOrEqualTo":
+                                return "Greater than or equal to";
+                              case "between":
+                                return "Between";
+                              case "notBetween":
+                                return "Not Between";
+                            }
+                          })()}
                         </Typography.Link>
                       </Dropdown>
 
@@ -626,8 +672,8 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                     type="link"
                     onClick={() => {
                       addLogic({
-                        condition: "is",
-                        value: "bjkn",
+                        condition: "checked",
+                        value: true,
                         action: [],
                       });
                     }}
@@ -669,16 +715,22 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
               ].questions[questionIndex].responseType.logic.map((log, ind) => {
                 return (
                   <div className="flex flex-row bg-white w-full items-center p-3 justify-between">
-                    <div className="flex items-center">
-                      <p>If Checkbox is </p>
+                    <div className="flex items-center gap-1">
+                      <p>If Checkbox is</p>
                       <Dropdown
                         className="pl-1"
                         menu={{
                           items: [
-                            { label: "Checked ", key: "Checked" },
-                            { label: "Not checked ", key: "Notchecked" },
+                            { label: "Checked ", key: "checked" },
+                            { label: "Not checked ", key: "notchecked" },
                           ],
                           selectable: true,
+                          selectedKeys: [
+                            inspectionTemplate.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[ind]
+                              .condition,
+                          ],
                           defaultSelectedKeys: ["Checked"],
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
@@ -693,7 +745,9 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         trigger={["click"]}
                       >
                         <Typography.Link>
-                          {log.condition || "Checked"}
+                          {log.condition == "checked"
+                            ? "checked"
+                            : "not checked"}
                         </Typography.Link>
                       </Dropdown>
 
@@ -720,7 +774,8 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                           switch (trigger) {
                             case "reportIssue":
                               return (
-                                <div className="flex flex-row px-2 bg-[#FFE5C6] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row px-2 bg-[#FFE5C6] rounded-lg gap-2 items-center">
+                                  <MdLibraryAddCheck />
                                   <p>report issue</p>{" "}
                                   <button
                                     className="bg-[#FFE5C6]"
@@ -733,6 +788,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                             case "requireEvidence":
                               return (
                                 <div className="flex flex-row px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
+                                  <FaImages />
                                   <p>require evidence</p>{" "}
                                   <button
                                     className="bg-[#c6ffca]"
@@ -745,6 +801,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                             case "notify":
                               return (
                                 <div className="flex flex-row px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
+                                  <BsFillBellFill />
                                   <p>notify</p>{" "}
                                   <button
                                     className="bg-[#c6dcff]"
@@ -757,6 +814,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                             case "askQuestions":
                               return (
                                 <div className="flex flex-row px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
+                                  <BiSolidMessageDetail />
                                   <p>ask questions</p>{" "}
                                   <button
                                     className="bg-[#dac6ff]"
@@ -773,13 +831,26 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         className="pl-1"
                         menu={{
                           items: [
-                            { label: "Report Issue", key: "reportIssue" },
+                            {
+                              label: "Report Issue",
+                              key: "reportIssue",
+                              icon: <MdLibraryAddCheck />,
+                            },
                             {
                               label: "Require Evidence",
                               key: "requireEvidence",
+                              icon: <FaImages />,
                             },
-                            { label: "Notify", key: "notify" },
-                            { label: "Ask Questions", key: "askQuestions" },
+                            {
+                              label: "Notify",
+                              key: "notify",
+                              icon: <BsFillBellFill />,
+                            },
+                            {
+                              label: "Ask Questions",
+                              key: "askQuestions",
+                              icon: <BiSolidMessageDetail />,
+                            },
                           ],
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
@@ -831,7 +902,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                     onClick={() => {
                       addLogic({
                         condition: "is",
-                        value: "bjkn",
+                        value: "",
                         action: [],
                       });
                     }}
@@ -865,6 +936,40 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                   />
                   <h1 className="text-[#2F80ED]">Add image</h1>
                 </div>
+              </Col>
+              <Col span={4} className="flex justify-center">
+              <Dropdown
+                        className="pl-1"
+                        menu={{
+                          items: [
+                            { label: "is", key: "is" },
+                            { label: "is not", key: "is not" },
+                            { label: "is selected", key: "is selected" },
+                            {
+                              label: "is not selected",
+                              key: "is not selected",
+                            },
+                            { label: "is one of", key: "is one of" },
+                            { label: "is not one of", key: "is not one of" },
+                          ],
+                          selectable: true,
+                          defaultSelectedKeys: ["Checked"],
+                          onClick: (e) => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[
+                              sectionIndex
+                            ].questions[questionIndex].responseType.logic[
+                              ind
+                            ].condition = e.key;
+                            setinspectionTemplate(temp);
+                          },
+                        }}
+                        trigger={["click"]}
+                      >
+                        <Typography.Link>
+                          {"options"}
+                        </Typography.Link>
+                      </Dropdown>
               </Col>
             </div>
             <div className="flex flex-col bg-[#E9EEF6] w-full pl-7 divide-y-2">
@@ -1366,18 +1471,30 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                             <Col span={18} className=" border p-2">
                               <Input
                                 bordered={false}
+                                value={
+                                  inspectionTemplate.pages[index].sections[
+                                    sectionIndex
+                                  ].questions[questionIndex].questionTitle
+                                }
                                 className="text-[14px] font-semi bold "
                                 placeholder="* Type question"
                                 onChange={(e) => {
-                                  setinspectionTemplate({
-                                    ...inspectionTemplate,
-                                    question: e.target.value,
-                                  });
+                                  let copy = { ...inspectionTemplate };
+                                  copy.pages[index].sections[
+                                    sectionIndex
+                                  ].questions[questionIndex].questionTitle =
+                                    e.target.value;
+                                  setinspectionTemplate(copy);
                                 }}
                               />
                             </Col>
                             <Col span={6} className=" border p-2">
                               <Select
+                                value={
+                                  inspectionTemplate.pages[index].sections[
+                                    sectionIndex
+                                  ].questions[questionIndex].responseType.type
+                                }
                                 defaultValue="text"
                                 onChange={(e) => {
                                   let copy = { ...inspectionTemplate };
@@ -1385,10 +1502,12 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                     sectionIndex
                                   ].questions[questionIndex].responseType.type =
                                     e;
-                                  setinspectionTemplate({
-                                    ...inspectionTemplate,
-                                    copy,
-                                  });
+                                  copy.pages[index].sections[
+                                    sectionIndex
+                                  ].questions[
+                                    questionIndex
+                                  ].responseType.logic = [];
+                                  setinspectionTemplate(copy);
                                 }}
                                 bordered={false}
                                 className="w-full"
