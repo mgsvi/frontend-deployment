@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import {
   Button,
   Space,
@@ -41,6 +41,10 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
 
   const [messageApi, contextHolder] = message.useMessage();
 
+  useEffect(() => {
+    console.log(MultipleChoiceResponse);
+  }, [MultipleChoiceResponse]);
+
   const onDragEnd = (result) => {
     if (!result.destination) return;
 
@@ -50,6 +54,8 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
 
     setMultipleChoice(items);
   };
+
+  console.log(MultipleChoiceResponse);
 
   const dataSource1 = MultipleChoiceResponse.map((row, rowIndex) => ({
     key: rowIndex,
@@ -67,10 +73,9 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
               key={itemIndex}
               style={{
                 backgroundColor: item.color,
-                color: "#7E8A9C",
                 fontSize: "12px",
               }}
-              className="rounded-full mx-2 p-2 "
+              className="rounded-full mx-2 p-2 text-white"
             >
               {item.optionName}
             </p>
@@ -513,12 +518,15 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
               if (MultipleChoiceIndex != null) {
                 setMultipleChoice(MultipleChoiceResponse[MultipleChoiceIndex]);
                 if (validateOptions()) {
-                  setMultipleChoiceResponse((prev) => {
-                    prev[MultipleChoiceIndex] = MultipleChoice.map((option) => {
-                      return { ...option };
-                    });
-                    return prev;
-                  });
+                  const clone = MultipleChoice.map((option) => ({ ...option }));
+                  const newChoicelist = MultipleChoiceResponse.map((val,i)=>{
+                    if(i==MultipleChoiceIndex) {
+                      return clone
+                    } else {
+                      return val
+                    }
+                  })
+                  setMultipleChoiceResponse(newChoicelist);
                 } else {
                   messageApi.open({
                     type: "warning",
@@ -528,13 +536,9 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
                 }
               } else {
                 if (validateOptions()) {
-                  setMultipleChoiceResponse((prev) => {
-                    const clone = MultipleChoice.map((option) => {
-                      return { ...option };
-                    });
-                    prev.push(clone);
-                    return prev;
-                  });
+                  const clone = MultipleChoice.map((option) => ({ ...option }));
+                  console.log(clone);
+                  setMultipleChoiceResponse([...MultipleChoiceResponse, clone]);
                 } else {
                   messageApi.open({
                     type: "warning",
@@ -547,7 +551,6 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
               setMultipleChoice([...defaultChoiceList]);
               setcount(4);
               setOpen(false);
-              console.log(MultipleChoiceResponse);
             }}
           >
             Save & Apply

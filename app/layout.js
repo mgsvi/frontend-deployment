@@ -1,12 +1,9 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 import Sidebar from "./sidebar";
-import { Breadcrumb, Layout, Menu, theme, Button } from "antd";
-import { Children, Suspense } from "react";
+import { Layout} from "antd";
 const { Header, Content, Footer, Sider } = Layout;
-import { LeftOutlined } from "@ant-design/icons";
-import StyledComponentsRegistry from "./AntdRegistry";
-import AuthProvider from "./context/AuthProvider";
+//import StyledComponentsRegistry from "./AntdRegistry";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -22,8 +19,6 @@ export default function RootLayout({ children }) {
         className={inter.className}
         style={{ background: "#EBEEF3", height: "100Vh", width: "100vw" }}
       >
-        <AuthProvider>
-          <StyledComponentsRegistry>
             <Layout
               hasSider
               style={{
@@ -37,8 +32,6 @@ export default function RootLayout({ children }) {
                 {children}
               </div>
             </Layout>
-          </StyledComponentsRegistry>
-        </AuthProvider>
       </body>
     </html>
   );

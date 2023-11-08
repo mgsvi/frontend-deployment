@@ -37,6 +37,7 @@ import useSWR from "swr";
 
 function Page({ params }) {
   const router = useRouter();
+  const { Option } = Select;
   let originalData = {};
   const [updatePressed, setupdatePressed] = useState(false);
   const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
@@ -284,7 +285,7 @@ function Page({ params }) {
               <div className=" ">
                 {assetType.fields.map((val, i) => {
                   return (
-                    <div className="">
+                    <div className="" key={i}>
                       <Row>
                         <Col span={21} align={"middle"}>
                           <div className="w-full flex justify-between items-center">
@@ -321,7 +322,7 @@ function Page({ params }) {
                       </Row>
                       {val.fields.map((field, index) => {
                         return (
-                          <div className="w-full">
+                          <div className="w-full" key={index}>
                             <Row align={"middle"} className="mb-3 ">
                               <Col span={21}>
                                 <div className="rounded bg-white flex justify-between items-center  ">
@@ -587,8 +588,8 @@ function Page({ params }) {
                                       return { value: val, label: val };
                                     })}
                                   >
-                                    {field.values.map((val) => {
-                                      return <Option value={val}>{val}</Option>;
+                                    {field.values.map((val,i) => {
+                                      return <Option key={i} value={val}>{val}</Option>;
                                     })}
                                   </Select>
                                 </Col>

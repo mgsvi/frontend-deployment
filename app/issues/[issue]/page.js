@@ -26,7 +26,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
-function reportissue({ params }) {
+function ReportIssue({ params }) {
   const router = useRouter();
   const handleChange = (value) => {
     console.log(value.label);
@@ -571,4 +571,4 @@ function reportissue({ params }) {
   );
 }
 
-export default reportissue;
+export default ReportIssue;

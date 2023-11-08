@@ -29,7 +29,7 @@ function Access({ onDataUpdate }) {
         <Divider />
         <div className="flex flex-row justify-between">
           <p className="text-sm">When reported by</p>
-          <p className="text-sm">"Observation" will be visible to"</p>
+          <p className="text-sm">Observation will be visible to</p>
         </div>
         <Divider />
         <Divider />

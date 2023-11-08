@@ -35,7 +35,7 @@ function Details({ onDataUpdate, moveToTab, name }) {
       <div className="bg-white p-6 mt-5 rounded-lg flex flex-col">
         <p className="text-sm">Notifications</p>
         <p className="text-sm">
-          Automatically notify the following people when reporting "Observation"
+          Automatically notify the following people when reporting Observation
         </p>
         <Divider />
         <Button
@@ -51,7 +51,7 @@ function Details({ onDataUpdate, moveToTab, name }) {
       <div className="bg-white p-6 mt-5 rounded-lg flex flex-col">
         <p className="text-sm">Follow-Up Questions</p>
         <p className="text-sm">
-          Automatically ask these questions when "Observation" is reported
+          Automatically ask these questions when Observation is reported
         </p>
         <Divider />
 

@@ -5,7 +5,7 @@ import {SearchOutlined} from "@ant-design/icons"
 import Templatetable from "./Templatetable";
 import { useRouter } from "next/navigation";
 
-function template() {
+function Template() {
   const [modal2Open, setModal2Open] = useState(false);
   const [templateName, settemplateName] = useState("")
   const router = useRouter()
@@ -87,4 +87,4 @@ function template() {
   );
 }
 
-export default template;
+export default Template;

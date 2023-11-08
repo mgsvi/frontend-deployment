@@ -15,16 +15,13 @@ import {
   SettingOutlined,
 } from "@ant-design/icons";
 import Image from "next/image";
-import { Layout, Menu, theme } from "antd";
-import { signOut } from "next-auth/react";
-import { useSession } from "next-auth/react";
+import { Button, Layout, Menu, theme } from "antd";
 import { MdOutlineEditLocation } from "react-icons/md";
-
+import Link from "next/link";
 
 const { Header, Sider, Content } = Layout;
 
-const App = () => {
-  const { data: session, loading } = useSession();
+const SideBar = () => {
   const [collapsed, setCollapsed] = useState(true);
   const router = useRouter();
   const pathname = usePathname();
@@ -38,6 +35,48 @@ const App = () => {
     setCollapsed(!collapsed);
   };
 
+  const menuItems = [
+    {
+      key: "",
+      label: "Dashboard",
+      icon: <HomeOutlined />,
+    },
+    {
+      key: "issues",
+      label: "Issues",
+      icon: <IssuesCloseOutlined />,
+    },
+    {
+      key: "schedule",
+      label: "Schedule",
+      icon: <ScheduleOutlined />,
+    },
+    {
+      key: "inspections",
+      label: "Inspections",
+      icon: <SecurityScanOutlined />,
+    },
+    {
+      key: "assets",
+      label: "Assets",
+      icon: <EditOutlined />,
+    },
+    {
+      key: "inspection_templates",
+      label: "Templates",
+      icon: <PicCenterOutlined />,
+    },
+    {
+      key: "team",
+      label: "Team",
+      icon: <TeamOutlined />,
+    },
+  ];
+
+  const bottomMenuItems = [
+    { key: "settings", label: "Settings", icon: <SettingOutlined /> },
+    { key: "logout", label: "Logout", icon: <LogoutOutlined /> },
+  ];
   return (
     <Sider
       collapsible
@@ -47,14 +86,14 @@ const App = () => {
         backgroundColor: "#002C4F",
       }}
     >
-      {
-        collapsed ? (
-          <div className="mt-4 flex justify-center items-center"><MdOutlineEditLocation
-          onClick={toggleCollapsed}
-          className="text-white text-2xl mt-5 mb-10 items-center"/></div>
-        ) 
-        
-        : (
+      {collapsed ? (
+        <div className="mt-4 flex justify-center items-center">
+          <MdOutlineEditLocation
+            onClick={toggleCollapsed}
+            className="text-white text-2xl mt-5 mb-10 items-center"
+          />
+        </div>
+      ) : (
         <>
           <div className="demo-logo-vertical" />
           <Image
@@ -65,85 +104,33 @@ const App = () => {
           />
         </>
       )}
-      <Menu
-        theme="dark"
-        mode="inline"
-        defaultSelectedKeys={[selected]}
-        style={{ backgroundColor: "#002C4F" }}
-      >
-        {/* Menu items */}
-        <Menu.Item
-          key=""
-          icon={<HomeOutlined />}
-          onClick={() => router.push("/")}
-        >
-          Home
-        </Menu.Item>
-        <Menu.Item
-          key="issues"
-          icon={<IssuesCloseOutlined />}
-          onClick={() => router.push("/issues")}
-        >
-          Issues
-        </Menu.Item>
-        <Menu.Item
-          key="schedule"
-          icon={<ScheduleOutlined />}
-          onClick={() => router.push("/schedule")}
-        >
-          Schedule
-        </Menu.Item>
-
-        <Menu.Item
-          key="inspections"
-          icon={<SecurityScanOutlined />}
-          onClick={() => router.push("/inspections")}
-        >
-          Inspections
-        </Menu.Item>
-
-        <Menu.Item
-          key="assets"
-          icon={<EditOutlined />}
-          onClick={() => router.push("/assets")}
-        >
-          Assets
-        </Menu.Item>
-        <Menu.Item
-          key="templates"
-          icon={<PicCenterOutlined />}
-          onClick={() => router.push("/inspection_templates")}
-        >
-          Templates
-        </Menu.Item>
-        
-        <Menu.Item
-          key="team"
-          icon={<TeamOutlined />}
-          onClick={() => router.push("/team")}
-        >
-          Team
-        </Menu.Item>
-        <Menu.Item
-          key="settings"
-          icon={<SettingOutlined />}
-          style={{ position: "absolute", bottom: 90 }}
-          onClick={() => router.push("/settings")}
-        >
-          Settings
-        </Menu.Item>
-        <Menu.Item
-          key="9"
-          icon={<LogoutOutlined />}
-          style={{ position: "absolute", bottom: 50 }}
-          onClick={() => {
-            signOut();
+      <div className={`flex flex-col h-full justify-between`}>
+        <Menu
+          theme="dark"
+          mode="inline"
+          items={menuItems}
+          defaultSelectedKeys={[selected]}
+          style={{ backgroundColor: "#002C4F" }}
+          onClick={(e) => {
+            router.push(`/${e.key}`);
           }}
-        >
-          Logout
-        </Menu.Item>
-      </Menu>
+        />
+
+        <Menu
+          className={collapsed ? "mb-[120px]" : "mb-[160px]"}
+          theme="dark"
+          mode="inline"
+          items={bottomMenuItems}
+          defaultSelectedKeys={[selected]}
+          style={{ backgroundColor: "#002C4F" }}
+          onClick={(e) => {
+            if (e.key == "settings") {
+              router.push(`/${e.key}`);
+            }
+          }}
+        />
+      </div>
     </Sider>
   );
 };
-export default App;
+export default SideBar;
