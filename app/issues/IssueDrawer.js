@@ -464,7 +464,8 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
           )}
         </div>
         <div className="flex bg-[#E9EDF6] w-[55%] h-full overflow-y-auto">
-          <Chat issue={selectedRow} />
+          {/* <Chat issue={selectedRow} /> */}
+          <Chat />
         </div>
       </div>
     </Drawer>
