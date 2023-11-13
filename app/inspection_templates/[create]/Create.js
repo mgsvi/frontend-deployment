@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import {
   LoadingOutlined,
   CheckOutlined,
@@ -67,11 +67,26 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState();
   const [isNameEditEnabled, setisNameEditEnabled] = useState(false);
-  const [editEnabled, seteditEnabled] = useState(false);
+  const [textEditEnabled, settextEditEnabled] = useState(-1);
+  const [numberEditEnabled, setnumberEditEnabled] = useState(-1);
   const [selectedOption, setSelectedOption] = useState("text");
   const [form] = Form.useForm();
   const { v4: uuidv4 } = require("uuid");
   const uniqueId = uuidv4();
+
+  // useEffect(() => {
+  //   console.log(inspectionTemplate.pages[0].sections[0].questions[0].responseType.logic[0].condition);
+  //   console.log(inspectionTemplate.pages[0].sections[0].questions[0].responseType.logic[0].condition == "isSelected");
+  // }, [inspectionTemplate]);
+
+  const objectsEqual = (o1, o2) =>
+    typeof o1 === "object" && Object.keys(o1).length > 0
+      ? Object.keys(o1).length === Object.keys(o2).length && Object.keys(o1).every((p) => objectsEqual(o1[p], o2[p]))
+      : o1 === o2;
+
+  const arraysEqual = (a1, a2) => {
+    a1.length === a2.length && a1.every((o, idx) => objectsEqual(o, a2[idx]));
+  };
 
   const setMultipleChoiceResponse = (newChoiceList) => {
     setinspectionTemplate({
@@ -95,31 +110,18 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
   };
   const uploadButton = (
     <div>
-      {loading ? (
-        <LoadingOutlined />
-      ) : (
-        <BiSolidImageAdd
-          size={50}
-          color="#BFC6D4"
-          className="flex items-center"
-        />
-      )}
+      {loading ? <LoadingOutlined /> : <BiSolidImageAdd size={50} color="#BFC6D4" className="flex items-center" />}
     </div>
   );
 
-  const renderColumnsForOption = (
-    question,
-    pageIndex,
-    sectionIndex,
-    questionIndex
-  ) => {
+  const renderColumnsForOption = (question, pageIndex, sectionIndex, questionIndex) => {
     const addLogic = (newLogic) => {
       let temp = { ...inspectionTemplate };
-      temp.pages[pageIndex].sections[sectionIndex].questions[
-        questionIndex
-      ].responseType.logic.push(newLogic);
+      temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic.push(newLogic);
       setinspectionTemplate(temp);
     };
+
+    
 
     switch (question.responseType.type) {
       case "text":
@@ -127,14 +129,14 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
           <div className="flex flex-col w-full">
             <div className="flex flex-row justify-start w-full divide-x-2  py-2 items-center gap-1 bg-[#F8F9FC] border-b-2">
               <Col span={3} className="flex justify-center">
-                <div className="flex flex-row">
+                <div className="flex flex-row items-center">
                   <Button
                     icon={<TbChartDots3 />}
                     type="link"
                     onClick={() => {
                       addLogic({
                         condition: "is",
-                        value: "blank",
+                        value: "",
                         action: [],
                       });
                     }}
@@ -144,15 +146,14 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                 </div>
               </Col>
               <Col span={3} className="flex justify-center">
-                <div className="flex flex-row">
+                <div className="flex flex-row items-center">
                   <Checkbox
                     checked={question.responseType.required}
                     className="mr-2"
                     onChange={(e) => {
                       let temp = { ...inspectionTemplate };
-                      temp.pages[pageIndex].sections[sectionIndex].questions[
-                        questionIndex
-                      ].responseType.required = e.target.checked;
+                      temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.required =
+                        e.target.checked;
                       setinspectionTemplate(temp);
                     }}
                   />
@@ -160,7 +161,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                 </div>
               </Col>
               <Col span={5} className="flex justify-center">
-                <div className="flex flex-row">
+                <div className="flex flex-row items-center">
                   <h1 className="mr-2">Format: </h1>
                   <Dropdown
                     menu={{
@@ -171,48 +172,40 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                       selectable: true,
                       defaultSelectedKeys: ["shortAnswer"],
                       selectedKeys: [
-                        inspectionTemplate.pages[pageIndex].sections[
-                          sectionIndex
-                        ].questions[questionIndex].responseType.format,
+                        inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType
+                          .format,
                       ],
                       onClick: (e) => {
                         let temp = { ...inspectionTemplate };
-                        temp.pages[pageIndex].sections[sectionIndex].questions[
-                          questionIndex
-                        ].responseType.format = e.key;
+                        temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.format =
+                          e.key;
                         setinspectionTemplate(temp);
                       },
                     }}
                     trigger={["click"]}
                   >
                     <Typography.Link>
-                      {question.responseType.format == "shortAnswer"
-                        ? "Short Answer"
-                        : "Paragraph"}
+                      {question.responseType.format == "shortAnswer" ? "Short Answer" : "Paragraph"}
                     </Typography.Link>
                   </Dropdown>
                 </div>
               </Col>
-              <Col span={4} className="flex justify-center">
-                <div className="flex flex-row">
-                  <MdOutlineAttachFile
-                    size={18}
-                    className="text-[#2F80ED] mr-2"
-                  />
-                  <h1 className="text-[#2F80ED]">Add image</h1>
-                </div>
+              <Col span={4} className="justify-center">
+                <Button type="link" icon={<MdOutlineAttachFile />}>
+                  Add image
+                </Button>
               </Col>
             </div>
             <div className="flex flex-col bg-[#E9EEF6] w-full pl-7 divide-y-2">
-              {inspectionTemplate.pages[pageIndex].sections[
-                sectionIndex
-              ].questions[questionIndex].responseType.logic.map((log, ind) => {
+              {inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[
+                questionIndex
+              ].responseType.logic.map((log, ind) => {
                 return (
                   <div key={ind} className="flex flex-row bg-white w-full items-center p-3 justify-between">
-                    <div className="flex items-center">
-                      <p>If answer</p>
+                    <div className="flex items-center gap-1 w-full">
+                      <p className="flex-none">If answer</p>
                       <Dropdown
-                        className="pl-1"
+                        className="flex-none"
                         menu={{
                           items: [
                             { label: "is", key: "is" },
@@ -220,16 +213,12 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                           ],
                           selectable: true,
                           selectedKeys: [
-                            inspectionTemplate.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[ind]
-                              .condition,
+                            inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex]
+                              .responseType.logic[ind].condition,
                           ],
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
                             ].condition = e.key;
                             setinspectionTemplate(temp);
@@ -237,106 +226,88 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         }}
                         trigger={["click"]}
                       >
-                        <Typography.Link>
-                          {log.condition == "is" ? " is " : " is not "}
-                        </Typography.Link>
+                        <Typography.Link>{log.condition == "is" ? " is " : " is not "}</Typography.Link>
                       </Dropdown>
-                      {editEnabled ? (
+                      {textEditEnabled == ind ? (
                         <Input
-                          placeholder="blank"
+                          placeholder="value"
                           value={log.value}
                           bordered={false}
                           size="small"
-                          className="pl-1 w-[60px] max-w-[100px]"
+                          className="w-[60px] max-w-[100px] flex-none"
                           onChange={(e) => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
                             ].value = e.target.value;
                             setinspectionTemplate(temp);
                           }}
                         />
                       ) : (
-                        <p className="pl-1">
-                          {log.value === "" || log.val === null
-                            ? "Blank"
-                            : log.value}
+                        <p className="flex-none">
+                          {log.value === "" || log.val === null ? <p className="underline">blank</p> : log.value}
                         </p>
                       )}
                       <Button
-                        icon={
-                          editEnabled ? <CheckOutlined /> : <EditOutlined />
+                        icon={textEditEnabled == ind ? <CheckOutlined /> : <EditOutlined />}
+                        onClick={() =>
+                          settextEditEnabled((old) => {
+                            return old == -1 ? ind : -1;
+                          })
                         }
-                        onClick={() => seteditEnabled(!editEnabled)}
                         type="text"
-                      ></Button>
+                      />
                       <p>then</p>
-                      <div className="flex flex-row gap-1">
-                        {inspectionTemplate.pages[pageIndex].sections[
-                          sectionIndex
-                        ].questions[questionIndex].responseType.logic[
-                          ind
-                        ].action.map((trigger, index) => {
+                      <div className="flex flex-row max-w-full gap-1 overflow-x-auto ">
+                        {inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[
+                          questionIndex
+                        ].responseType.logic[ind].action.map((trigger, index) => {
                           const deleteAction = () => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
-                            ].action = temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
-                              ind
-                            ].action.filter((val, i) => i != index);
+                            ].action = temp.pages[pageIndex].sections[sectionIndex].questions[
+                              questionIndex
+                            ].responseType.logic[ind].action.filter((val, i) => i != index);
                             setinspectionTemplate(temp);
                           };
                           switch (trigger) {
                             case "reportIssue":
                               return (
-                                <div className="flex flex-row px-2 bg-[#FFE5C6] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#FFE5C6] ml-1 rounded-lg gap-2 items-center">
+                                  <MdLibraryAddCheck />
                                   <p>report issue</p>{" "}
-                                  <button
-                                    className="bg-[#FFE5C6]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#FFE5C6]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
                               );
                             case "requireEvidence":
                               return (
-                                <div className="flex flex-row px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
+                                  <FaImages />
                                   <p>require evidence</p>{" "}
-                                  <button
-                                    className="bg-[#c6ffca]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#c6ffca]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
                               );
                             case "notify":
                               return (
-                                <div className="flex flex-row px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
+                                  <BsFillBellFill />
                                   <p>notify</p>{" "}
-                                  <button
-                                    className="bg-[#c6dcff]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#c6dcff]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
                               );
                             case "askQuestions":
                               return (
-                                <div className="flex flex-row px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
+                                  <BiSolidMessageDetail />
                                   <p>ask questions</p>{" "}
-                                  <button
-                                    className="bg-[#dac6ff]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#dac6ff]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
@@ -345,22 +316,33 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         })}
                       </div>
                       <Dropdown
-                        className="pl-1"
+                        className="pl-1 flex-none"
                         menu={{
                           items: [
-                            { label: "Report Issue", key: "reportIssue" },
+                            {
+                              label: "Report Issue",
+                              key: "reportIssue",
+                              icon: <MdLibraryAddCheck />,
+                            },
                             {
                               label: "Require Evidence",
                               key: "requireEvidence",
+                              icon: <FaImages />,
                             },
-                            { label: "Notify", key: "notify" },
-                            { label: "Ask Questions", key: "askQuestions" },
+                            {
+                              label: "Notify",
+                              key: "notify",
+                              icon: <BsFillBellFill />,
+                            },
+                            {
+                              label: "Ask Questions",
+                              key: "askQuestions",
+                              icon: <BiSolidMessageDetail />,
+                            },
                           ],
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
                             ].action.push(e.key);
                             setinspectionTemplate(temp);
@@ -376,12 +358,9 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         type="text"
                         onClick={() => {
                           let temp = { ...inspectionTemplate };
-                          temp.pages[pageIndex].sections[
-                            sectionIndex
-                          ].questions[questionIndex].responseType.logic.splice(
-                            questionIndex,
-                            1
-                          );
+                          temp.pages[pageIndex].sections[sectionIndex].questions[
+                            questionIndex
+                          ].responseType.logic.splice(questionIndex, 1);
                           setinspectionTemplate(temp);
                         }}
                       >
@@ -407,6 +386,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                       addLogic({
                         condition: "equalTo",
                         value: 0,
+                        value2: 0,
                         action: [],
                       });
                     }}
@@ -416,15 +396,14 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                 </div>
               </Col>
               <Col span={3} className="flex justify-center">
-                <div className="flex flex-row">
+                <div className="flex flex-row items-center">
                   <Checkbox
                     checked={question.responseType.required}
                     className="mr-2"
                     onChange={(e) => {
                       let temp = { ...inspectionTemplate };
-                      temp.pages[pageIndex].sections[sectionIndex].questions[
-                        questionIndex
-                      ].responseType.required = e.target.checked;
+                      temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.required =
+                        e.target.checked;
                       setinspectionTemplate(temp);
                     }}
                   />
@@ -433,55 +412,46 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
               </Col>
 
               <Col span={4} className="flex justify-center">
-                <div className="flex flex-row">
-                  <MdOutlineAttachFile
-                    size={18}
-                    className="text-[#2F80ED] mr-2"
-                  />
-                  <h1 className="text-[#2F80ED]">Add image</h1>
-                </div>
+                <Button type="link" icon={<MdOutlineAttachFile />}>
+                  Add image
+                </Button>
               </Col>
             </div>
             <div className="flex flex-col bg-[#E9EEF6] w-full pl-7 divide-y-2">
-              {inspectionTemplate.pages[pageIndex].sections[
-                sectionIndex
-              ].questions[questionIndex].responseType.logic.map((log, ind) => {
+              {inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[
+                questionIndex
+              ].responseType.logic.map((log, ind) => {
                 return (
                   <div key={ind} className="flex flex-row bg-white w-full items-center p-3 justify-between">
-                    <div className="flex items-center">
-                      <p>If answer</p>
+                    <div className="flex items-center gap-1 w-full">
+                      <p className="flex-none">If answer</p>
                       <Dropdown
-                        className="pl-1"
+                        className="flex-none"
                         menu={{
                           items: [
-                            { label: "Equal to", key: "equalTo" },
-                            { label: "Not equal to", key: "notEqualTo" },
-                            { label: "Less than", key: "lessThan" },
+                            { label: "equal to", key: "equalTo" },
+                            { label: "not equal to", key: "notEqualTo" },
+                            { label: "less than", key: "lessThan" },
                             {
-                              label: "Less than or Equal to",
+                              label: "less than or equal to",
                               key: "lessThanOrEqualTo",
                             },
-                            { label: "Greater than", key: "greaterThan" },
+                            { label: "greater than", key: "greaterThan" },
                             {
-                              label: "Greater than or Equal to",
+                              label: "greater than or equal to",
                               key: "greaterThanOrEqualTo",
                             },
-                            { label: "Between", key: "between" },
-                            { label: "Not Between", key: "notBetween" },
+                            { label: "between", key: "between" },
+                            { label: "not between", key: "notBetween" },
                           ],
                           selectable: true,
-                          defaultSelectedKeys: ["equalTo"],
                           selectedKeys: [
-                            inspectionTemplate.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[ind]
-                              .condition,
+                            inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex]
+                              .responseType.logic[ind].condition ?? "equalTo",
                           ],
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
                             ].condition = e.key;
                             setinspectionTemplate(temp);
@@ -493,119 +463,128 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                           {(() => {
                             switch (log.condition) {
                               case "equalTo":
-                                return "Equal to";
+                                return "equal to";
                               case "notEqualTo":
-                                return "Not Equal to";
+                                return "not equal to";
                               case "lessThan":
-                                return "Less than";
+                                return "less than";
                               case "lessThanOrEqualTo":
-                                return "Less than or Equal to";
+                                return "less than or equal to";
                               case "greaterThan":
-                                return "Greater Than";
+                                return "greater than";
                               case "greaterThanOrEqualTo":
-                                return "Greater than or equal to";
+                                return "greater than or equal to";
                               case "between":
-                                return "Between";
+                                return "between";
                               case "notBetween":
-                                return "Not Between";
+                                return "not between";
                             }
                           })()}
                         </Typography.Link>
                       </Dropdown>
 
-                      {editEnabled ? (
+                      {numberEditEnabled == ind ? (
                         <Input
                           type="number"
                           placeholder="Value"
-                          value={log.value}
+                          value={log.value ?? 0}
                           bordered={false}
                           size="small"
-                          className="pl-1 w-[60px] max-w-[100px]"
+                          className="w-[60px] max-w-[100px] flex-none"
                           onChange={(e) => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
                             ].value = e.target.value;
                             setinspectionTemplate(temp);
                           }}
                         />
                       ) : (
-                        <p className="pl-1">{log.value}</p>
+                        <p className="flex-none">{log.value ?? "nil"}</p>
+                      )}
+                      {(inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType
+                        .logic[ind].condition == "between" ||
+                        inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType
+                          .logic[ind].condition == "notBetween") && (
+                        <div className="flex flex-row flex-none items-center">
+                          <p>and</p>
+                          {numberEditEnabled == ind ? (
+                            <Input
+                              type="number"
+                              placeholder="Value"
+                              value={log.value2 ?? 0}
+                              bordered={false}
+                              size="small"
+                              className="pl-1 w-[60px] max-w-[100px]"
+                              onChange={(e) => {
+                                let temp = { ...inspectionTemplate };
+                                temp.pages[pageIndex].sections[sectionIndex].questions[
+                                  questionIndex
+                                ].responseType.logic[ind].value2 = e.target.value;
+                                setinspectionTemplate(temp);
+                              }}
+                            />
+                          ) : (
+                            <p className="pl-1">{log.value2 ?? "nil"}</p>
+                          )}
+                        </div>
                       )}
                       <Button
-                        icon={
-                          editEnabled ? <CheckOutlined /> : <EditOutlined />
+                        icon={numberEditEnabled == ind ? <CheckOutlined /> : <EditOutlined />}
+                        onClick={() =>
+                          setnumberEditEnabled((old) => {
+                            return old == -1 ? ind : -1;
+                          })
                         }
-                        onClick={() => seteditEnabled(!editEnabled)}
                         type="text"
                       ></Button>
                       <p>then</p>
-                      <div className="flex flex-row gap-1">
-                        {inspectionTemplate.pages[pageIndex].sections[
-                          sectionIndex
-                        ].questions[questionIndex].responseType.logic[
-                          ind
-                        ].action.map((trigger, index) => {
+                      <div className="flex flex-row max-w-full gap-1 overflow-x-auto ">
+                        {inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[
+                          questionIndex
+                        ].responseType.logic[ind].action.map((trigger, index) => {
                           const deleteAction = () => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
-                            ].action = temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
-                              ind
-                            ].action.filter((val, i) => i != index);
+                            ].action = temp.pages[pageIndex].sections[sectionIndex].questions[
+                              questionIndex
+                            ].responseType.logic[ind].action.filter((val, i) => i != index);
                             setinspectionTemplate(temp);
                           };
                           switch (trigger) {
                             case "reportIssue":
                               return (
-                                <div className="flex flex-row px-2 bg-[#FFE5C6] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#FFE5C6] ml-1 rounded-lg gap-2 items-center">
                                   <p>report issue</p>{" "}
-                                  <button
-                                    className="bg-[#FFE5C6]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#FFE5C6]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
                               );
                             case "requireEvidence":
                               return (
-                                <div className="flex flex-row px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
                                   <p>require evidence</p>{" "}
-                                  <button
-                                    className="bg-[#c6ffca]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#c6ffca]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
                               );
                             case "notify":
                               return (
-                                <div className="flex flex-row px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
                                   <p>notify</p>{" "}
-                                  <button
-                                    className="bg-[#c6dcff]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#c6dcff]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
                               );
                             case "askQuestions":
                               return (
-                                <div className="flex flex-row px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
                                   <p>ask questions</p>{" "}
-                                  <button
-                                    className="bg-[#dac6ff]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#dac6ff]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
@@ -614,7 +593,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         })}
                       </div>
                       <Dropdown
-                        className="pl-1"
+                        className="pl-1 flex-none"
                         menu={{
                           items: [
                             { label: "Report Issue", key: "reportIssue" },
@@ -627,9 +606,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                           ],
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
                             ].action.push(e.key);
                             setinspectionTemplate(temp);
@@ -645,12 +622,9 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         type="text"
                         onClick={() => {
                           let temp = { ...inspectionTemplate };
-                          temp.pages[pageIndex].sections[
-                            sectionIndex
-                          ].questions[questionIndex].responseType.logic.splice(
-                            questionIndex,
-                            1
-                          );
+                          temp.pages[pageIndex].sections[sectionIndex].questions[
+                            questionIndex
+                          ].responseType.logic.splice(questionIndex, 1);
                           setinspectionTemplate(temp);
                         }}
                       >
@@ -691,9 +665,8 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                     className="mr-2"
                     onChange={(e) => {
                       let temp = { ...inspectionTemplate };
-                      temp.pages[pageIndex].sections[sectionIndex].questions[
-                        questionIndex
-                      ].responseType.required = e.target.checked;
+                      temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.required =
+                        e.target.checked;
                       setinspectionTemplate(temp);
                     }}
                   />
@@ -702,126 +675,99 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
               </Col>
 
               <Col span={4} className="flex justify-center">
-                <div className="flex flex-row">
-                  <MdOutlineAttachFile
-                    size={18}
-                    className="text-[#2F80ED] mr-2"
-                  />
-                  <h1 className="text-[#2F80ED]">Add image</h1>
-                </div>
+                <Button type="link" icon={<MdOutlineAttachFile />}>
+                  Add image
+                </Button>
               </Col>
             </div>
             <div className="flex flex-col bg-[#E9EEF6] w-full pl-7 divide-y-2">
-              {inspectionTemplate.pages[pageIndex].sections[
-                sectionIndex
-              ].questions[questionIndex].responseType.logic.map((log, ind) => {
+              {inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[
+                questionIndex
+              ].responseType.logic.map((log, ind) => {
                 return (
                   <div key={ind} className="flex flex-row bg-white w-full items-center p-3 justify-between">
-                    <div className="flex items-center gap-1">
-                      <p>If Checkbox is</p>
+                    <div className="flex items-center w-full gap-1">
+                      <p className="flex-none">If checkbox is</p>
                       <Dropdown
-                        className="pl-1"
+                        className="flex-none"
                         menu={{
                           items: [
-                            { label: "Checked ", key: "checked" },
-                            { label: "Not checked ", key: "notchecked" },
+                            { label: "checked ", key: "checked" },
+                            { label: "not checked ", key: "notchecked" },
                           ],
                           selectable: true,
                           selectedKeys: [
-                            inspectionTemplate.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[ind]
-                              .condition,
+                            inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex]
+                              .responseType.logic[ind].condition,
                           ],
                           defaultSelectedKeys: ["Checked"],
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
                             ].condition = e.key;
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
+                              ind
+                            ].condition = e.key == "checked" ? true : false;
                             setinspectionTemplate(temp);
                           },
                         }}
                         trigger={["click"]}
                       >
-                        <Typography.Link>
-                          {log.condition == "checked"
-                            ? "checked"
-                            : "not checked"}
-                        </Typography.Link>
+                        <Typography.Link>{log.condition == "checked" ? "checked" : "not checked"}</Typography.Link>
                       </Dropdown>
 
-                      <p> then trigger</p>
-                      <div className="flex flex-row gap-1">
-                        {inspectionTemplate.pages[pageIndex].sections[
-                          sectionIndex
-                        ].questions[questionIndex].responseType.logic[
-                          ind
-                        ].action.map((trigger, index) => {
+                      <p className="flex-none">then</p>
+                      <div className="flex flex-row max-w-full gap-1 overflow-x-auto ">
+                        {inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[
+                          questionIndex
+                        ].responseType.logic[ind].action.map((trigger, index) => {
                           const deleteAction = () => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
-                            ].action = temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
-                              ind
-                            ].action.filter((val, i) => i != index);
+                            ].action = temp.pages[pageIndex].sections[sectionIndex].questions[
+                              questionIndex
+                            ].responseType.logic[ind].action.filter((val, i) => i != index);
                             setinspectionTemplate(temp);
                           };
                           switch (trigger) {
                             case "reportIssue":
                               return (
-                                <div className="flex flex-row px-2 bg-[#FFE5C6] rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#FFE5C6] ml-1 rounded-lg gap-2 items-center">
                                   <MdLibraryAddCheck />
                                   <p>report issue</p>{" "}
-                                  <button
-                                    className="bg-[#FFE5C6]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#FFE5C6]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
                               );
                             case "requireEvidence":
                               return (
-                                <div className="flex flex-row px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
                                   <FaImages />
                                   <p>require evidence</p>{" "}
-                                  <button
-                                    className="bg-[#c6ffca]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#c6ffca]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
                               );
                             case "notify":
                               return (
-                                <div className="flex flex-row px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
                                   <BsFillBellFill />
                                   <p>notify</p>{" "}
-                                  <button
-                                    className="bg-[#c6dcff]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#c6dcff]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
                               );
                             case "askQuestions":
                               return (
-                                <div className="flex flex-row px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
                                   <BiSolidMessageDetail />
                                   <p>ask questions</p>{" "}
-                                  <button
-                                    className="bg-[#dac6ff]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#dac6ff]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
@@ -830,7 +776,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         })}
                       </div>
                       <Dropdown
-                        className="pl-1"
+                        className="flex-none"
                         menu={{
                           items: [
                             {
@@ -856,9 +802,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                           ],
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
                             ].action.push(e.key);
                             setinspectionTemplate(temp);
@@ -874,12 +818,9 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         type="text"
                         onClick={() => {
                           let temp = { ...inspectionTemplate };
-                          temp.pages[pageIndex].sections[
-                            sectionIndex
-                          ].questions[questionIndex].responseType.logic.splice(
-                            questionIndex,
-                            1
-                          );
+                          temp.pages[pageIndex].sections[sectionIndex].questions[
+                            questionIndex
+                          ].responseType.logic.splice(questionIndex, 1);
                           setinspectionTemplate(temp);
                         }}
                       >
@@ -895,7 +836,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
       case "multiplechoice":
         return (
           <div className="flex flex-col w-full">
-            <div className="flex flex-row justify-start w-full divide-x-2  py-2 items-center gap-1 bg-[#F8F9FC] border-b-2">
+            <div className="flex flex-row justify-start w-full divide-x-2  py-2 items-center gap-1 bg-[#F8F9FC] border-b-2 overflow-x-clip">
               <Col span={3} className="flex justify-center">
                 <div className="flex flex-row">
                   <Button
@@ -904,7 +845,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                     onClick={() => {
                       addLogic({
                         condition: "is",
-                        value: "",
+                        value: [],
                         action: [],
                       });
                     }}
@@ -920,72 +861,43 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                     className="mr-2"
                     onChange={(e) => {
                       let temp = { ...inspectionTemplate };
-                      temp.pages[pageIndex].sections[sectionIndex].questions[
-                        questionIndex
-                      ].responseType.required = e.target.checked;
+                      temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.required =
+                        e.target.checked;
                       setinspectionTemplate(temp);
                     }}
                   />
                   <h1>Required</h1>
                 </div>
               </Col>
-
-              <Col span={4} className="flex justify-center">
+              <Col span={5} className="flex justify-center">
                 <div className="flex flex-row">
-                  <MdOutlineAttachFile
-                    size={18}
-                    className="text-[#2F80ED] mr-2"
+                  <Checkbox
+                    checked={question.multipleSelection}
+                    className="mr-2"
+                    onChange={(e) => {
+                      let temp = { ...inspectionTemplate };
+                      temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].multipleSelection =
+                        e.target.checked;
+                      setinspectionTemplate(temp);
+                    }}
                   />
-                  <h1 className="text-[#2F80ED]">Add image</h1>
+                  <h1>Multiple selection</h1>
                 </div>
               </Col>
-              <Col span={12} className="flex justify-start ml-2">
+              <Col span={3} className="flex justify-center">
+                <Button type="link" icon={<MdOutlineAttachFile />}>
+                  Add image
+                </Button>
+              </Col>
+              <Col span={9} className="flex justify-start items-center">
                 <Dropdown
-                  className="pl-1"
+                  className="ml-2"
                   menu={{
-                    items: inspectionTemplate.multipleChoiceResponse.map(
-                      (val, i) => ({
-                        key: i,
-                        label: (
-                          <div className="flex items-center">
-                            {val.map((item, itemIndex) => (
-                              <span
-                                key={itemIndex}
-                                style={{
-                                  backgroundColor: item.color,
-                                  color: "#ffff",
-                                  fontSize: "8px",
-                                }}
-                                className="rounded-full mx-2 p-2"
-                              >
-                                {item.optionName}
-                              </span>
-                            ))}
-                          </div>
-                        ),
-                      })
-                    ),
-                    selectable: true,
-                    defaultSelectedKeys: ["Checked"],
-                    onClick: (e) => {
-                      let temp = { ...inspectionTemplate };
-                      temp.pages[pageIndex].sections[sectionIndex].questions[
-                        questionIndex
-                      ].responseType.options =
-                        inspectionTemplate.multipleChoiceResponse[e.key];
-                      setinspectionTemplate(temp);
-                    },
-                  }}
-                  trigger={["click"]}
-                >
-                  <Typography.Link>
-                    {inspectionTemplate.pages[pageIndex].sections[sectionIndex]
-                      .questions[questionIndex].responseType.options != null ? (
-                      <div className="flex items-center">
-                        {inspectionTemplate.pages[pageIndex].sections[
-                          sectionIndex
-                        ].questions[questionIndex].responseType.options.map(
-                          (item, itemIndex) => (
+                    items: inspectionTemplate.multipleChoiceResponse.map((val, i) => ({
+                      key: i,
+                      label: (
+                        <div className="flex items-center w-full overflow-x-auto">
+                          {val.map((item, itemIndex) => (
                             <span
                               key={itemIndex}
                               style={{
@@ -993,12 +905,60 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                 color: "#ffff",
                                 fontSize: "8px",
                               }}
-                              className="rounded-full mx-2 p-2"
+                              className="rounded-full mx-2 p-2 flex-none"
                             >
                               {item.optionName}
                             </span>
-                          )
-                        )}
+                          ))}
+                        </div>
+                      ),
+                    })),
+                    selectable: true,
+                    selectedKeys:
+                      inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType
+                        .options != null
+                        ? [
+                            `${inspectionTemplate.multipleChoiceResponse.findIndex((x) =>
+                              arraysEqual(
+                                x,
+                                inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex]
+                                  .responseType.options
+                              )
+                            )}`,
+                          ]
+                        : [],
+                    onClick: (e) => {
+                      let temp = { ...inspectionTemplate };
+                      let log =
+                        temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic;
+                      temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.options =
+                        inspectionTemplate.multipleChoiceResponse[e.key];
+                      temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic =
+                        log.map((item) => ({ ...item, value: [] }));
+                      setinspectionTemplate(temp);
+                    },
+                  }}
+                  trigger={["click"]}
+                >
+                  <Typography.Link>
+                    {inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType
+                      .options != null ? (
+                      <div className="flex items-center w-full overflow-x-auto">
+                        {inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[
+                          questionIndex
+                        ].responseType.options.map((item, itemIndex) => (
+                          <span
+                            key={itemIndex}
+                            style={{
+                              backgroundColor: item.color,
+                              color: "#ffff",
+                              fontSize: "8px",
+                            }}
+                            className="rounded-full mx-2 p-2 flex-none"
+                          >
+                            {item.optionName}
+                          </span>
+                        ))}
                       </div>
                     ) : (
                       "options"
@@ -1008,33 +968,36 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
               </Col>
             </div>
             <div className="flex flex-col bg-[#E9EEF6] w-full pl-7 divide-y-2">
-              {inspectionTemplate.pages[pageIndex].sections[
-                sectionIndex
-              ].questions[questionIndex].responseType.logic.map((log, ind) => {
+              {inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[
+                questionIndex
+              ].responseType.logic.map((log, ind) => {
                 return (
                   <div key={ind} className="flex flex-row bg-white w-full items-center p-3 justify-between">
-                    <div className="flex items-center gap-1">
-                      <p>If answer</p>
+                    <div className="flex items-center gap-1 w-full">
+                      <p className="flex-none">If answer</p>
                       <Dropdown
+                        className="flex-none"
                         menu={{
                           items: [
                             { label: "is", key: "is" },
-                            { label: "is not", key: "is not" },
-                            { label: "is selected", key: "is selected" },
+                            { label: "is not", key: "isNot" },
+                            { label: "is selected", key: "isSelected" },
                             {
                               label: "is not selected",
-                              key: "is not selected",
+                              key: "isNotSelected",
                             },
-                            { label: "is one of", key: "is one of" },
-                            { label: "is not one of", key: "is not one of" },
+                            { label: "is one of", key: "isOneOf" },
+                            { label: "is none of", key: "isNoneOf" },
                           ],
                           selectable: true,
-                          defaultSelectedKeys: ["Checked"],
+                          selectedKeys: [
+                            inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex]
+                              .responseType.logic[ind].condition,
+                          ],
+                          defaultSelectedKeys: ["is"],
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
                             ].condition = e.key;
                             setinspectionTemplate(temp);
@@ -1043,111 +1006,150 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         trigger={["click"]}
                       >
                         <Typography.Link>
-                          {log.condition || "is"}
+                          {(() => {
+                            switch (log.condition) {
+                              case "is":
+                                return "is";
+                              case "isNot":
+                                return "is not";
+                              case "isSelected":
+                                return "is selected";
+                              case "isNotSelected":
+                                return "is not selected";
+                              case "isOneOf":
+                                return "is one of";
+                              case "isNoneOf":
+                                return "is none of";
+                            }
+                          })()}
                         </Typography.Link>
                       </Dropdown>
 
                       <Dropdown
+                        className="flex-none"
+                        disabled={log.condition == "isSelected" || log.condition == "isNotSelected" ? true : false}
                         menu={{
                           items:
-                            inspectionTemplate.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.options !=
-                            null
-                              ? inspectionTemplate.pages[pageIndex].sections[
-                                  sectionIndex
-                                ].questions[
+                            inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex]
+                              .responseType.options != null
+                              ? inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[
                                   questionIndex
                                 ].responseType.options.map((val, i) => ({
-                                  key: i,
+                                  key: val.optionName,
                                   label: val.optionName,
                                 }))
                               : [],
                           selectable: true,
+                          multiple:
+                            inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex]
+                              .responseType.logic[ind].value == "isOneOf" ||
+                            inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex]
+                              .responseType.logic[ind].value == "isNoneOf"
+                              ? true
+                              : false,
+                          selectedKeys:
+                            inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex]
+                              .responseType.logic[ind].value.length != 0
+                              ? inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex]
+                                  .responseType.logic[ind].value
+                              : [],
+                          onDeselect: (e) => {
+                            let temp = { ...inspectionTemplate };
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
+                              ind
+                            ].value = temp.pages[pageIndex].sections[sectionIndex].questions[
+                              questionIndex
+                            ].responseType.logic[ind].value.filter((item) => item != e.key);
+                            setinspectionTemplate(temp);
+                          },
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
-                              ind
-                            ].value =
-                              inspectionTemplate.pages[pageIndex].sections[
-                                sectionIndex
-                              ].questions[questionIndex].responseType.options[
-                                e.key
-                              ].optionName;
+                            let cond =
+                              temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
+                                ind
+                              ].condition;
+                            if (cond == "isOneOf" || cond == "isNoneOf") {
+                              if (
+                                !temp.pages[pageIndex].sections[sectionIndex].questions[
+                                  questionIndex
+                                ].responseType.logic[ind].value.includes(e.key)
+                              ) {
+                                temp.pages[pageIndex].sections[sectionIndex].questions[
+                                  questionIndex
+                                ].responseType.logic[ind].value = [
+                                  ...temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType
+                                    .logic[ind].value,
+                                  e.key,
+                                ];
+                              }
+                            }
+                            if (cond == "is" || cond == "isNot") {
+                              temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
+                                ind
+                              ].value = [e.key];
+                            }
+                            if (cond == "isSelected" || cond == "isNotSelected") {
+                              temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
+                                ind
+                              ].value = [];
+                            }
                             setinspectionTemplate(temp);
                           },
                         }}
                         trigger={["click"]}
                       >
-                        <Typography.Link>{log.value || "value"}</Typography.Link>
+                        <Typography.Link className="flex-none max-w-xs truncate">
+                          {log.value.length != 0 ? log.value.join(", ") : "value"}
+                        </Typography.Link>
                       </Dropdown>
+
                       <p>then</p>
-                      <div className="flex flex-row gap-1">
-                        {inspectionTemplate.pages[pageIndex].sections[
-                          sectionIndex
-                        ].questions[questionIndex].responseType.logic[
-                          ind
-                        ].action.map((trigger, index) => {
+                      <div className="flex flex-row gap-1 overflow-x-auto">
+                        {inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[
+                          questionIndex
+                        ].responseType.logic[ind].action.map((trigger, index) => {
                           const deleteAction = () => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
-                            ].action = temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
-                              ind
-                            ].action.filter((val, i) => i != index);
+                            ].action = temp.pages[pageIndex].sections[sectionIndex].questions[
+                              questionIndex
+                            ].responseType.logic[ind].action.filter((val, i) => i != index);
                             setinspectionTemplate(temp);
                           };
                           switch (trigger) {
                             case "reportIssue":
                               return (
-                                <div className="flex flex-row px-2 bg-[#FFE5C6] rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#FFE5C6] rounded-lg gap-2 items-center">
                                   <p>report issue</p>{" "}
-                                  <button
-                                    className="bg-[#FFE5C6]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#FFE5C6]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
                               );
                             case "requireEvidence":
                               return (
-                                <div className="flex flex-row px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
                                   <p>require evidence</p>{" "}
-                                  <button
-                                    className="bg-[#c6ffca]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#c6ffca]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
                               );
                             case "notify":
                               return (
-                                <div className="flex flex-row px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
                                   <p>notify</p>{" "}
-                                  <button
-                                    className="bg-[#c6dcff]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#c6dcff]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
                               );
                             case "askQuestions":
                               return (
-                                <div className="flex flex-row px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
                                   <p>ask questions</p>{" "}
-                                  <button
-                                    className="bg-[#dac6ff]"
-                                    onClick={deleteAction}
-                                  >
+                                  <button className="bg-[#dac6ff]" onClick={deleteAction}>
                                     x
                                   </button>
                                 </div>
@@ -1156,7 +1158,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         })}
                       </div>
                       <Dropdown
-                        className="pl-1"
+                        className="pl-1 flex-none"
                         menu={{
                           items: [
                             { label: "Report Issue", key: "reportIssue" },
@@ -1169,9 +1171,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                           ],
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
-                            temp.pages[pageIndex].sections[
-                              sectionIndex
-                            ].questions[questionIndex].responseType.logic[
+                            temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
                             ].action.push(e.key);
                             setinspectionTemplate(temp);
@@ -1187,12 +1187,9 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         type="text"
                         onClick={() => {
                           let temp = { ...inspectionTemplate };
-                          temp.pages[pageIndex].sections[
-                            sectionIndex
-                          ].questions[questionIndex].responseType.logic.splice(
-                            questionIndex,
-                            1
-                          );
+                          temp.pages[pageIndex].sections[sectionIndex].questions[
+                            questionIndex
+                          ].responseType.logic.splice(questionIndex, 1);
                           setinspectionTemplate(temp);
                         }}
                       >
@@ -1207,35 +1204,71 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
         );
       case "date":
         return (
-          <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={6} className="flex justify-around ">
-              <div className="flex flex-row">
-                <Checkbox defaultChecked className="mr-2" />
-                <h1>Required</h1>
-              </div>
+          <div className="flex flex-row w-full divide-x-2  py-2 items-center">
+            <Col span={4} className="flex w-full justify-around ">
+              <Checkbox
+                defaultChecked
+                className="mr-2"
+                checked={question.responseType.required}
+                onChange={(e) => {
+                  let temp = { ...inspectionTemplate };
+                  temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.required =
+                    e.target.checked;
+                  setinspectionTemplate(temp);
+                }}
+              >
+                Required
+              </Checkbox>
+            </Col>
+            <Col span={3} className="flex w-full justify-around ">
+              <Checkbox
+                defaultChecked
+                className="mr-2"
+                checked={question.responseType.date}
+                onChange={(e) => {
+                  let temp = { ...inspectionTemplate };
+                  temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.date =
+                    e.target.checked;
+                  setinspectionTemplate(temp);
+                }}
+              >
+                Date
+              </Checkbox>
+            </Col>
+            <Col span={3} className="flex w-full justify-around ">
+              <Checkbox
+                defaultChecked
+                className="mr-2"
+                checked={question.responseType.time}
+                onChange={(e) => {
+                  let temp = { ...inspectionTemplate };
+                  temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.time =
+                    e.target.checked;
+                  setinspectionTemplate(temp);
+                }}
+              >
+                Time
+              </Checkbox>
             </Col>
           </div>
         );
-
       case "media":
         return (
-          <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={6} className="flex justify-around ">
-              <div className="flex flex-row">
-                <Checkbox defaultChecked className="mr-2" />
-                <h1>Required</h1>
-              </div>
-            </Col>
-          </div>
-        );
-      case "slider":
-        return (
-          <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={6} className="flex justify-around ">
-              <div className="flex flex-row">
-                <Checkbox defaultChecked className="mr-2" />
-                <h1>Required</h1>
-              </div>
+          <div className="flex flex-row w-full divide-x-2  py-2">
+            <Col span={4} className="flex w-full justify-around ">
+              <Checkbox
+                defaultChecked
+                className="mr-2"
+                checked={question.responseType.required}
+                onChange={(e) => {
+                  let temp = { ...inspectionTemplate };
+                  temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.required =
+                    e.target.checked;
+                  setinspectionTemplate(temp);
+                }}
+              >
+                Required
+              </Checkbox>
             </Col>
           </div>
         );
@@ -1303,8 +1336,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
   const addQuestion = () => {
     const newTemplate = { ...inspectionTemplate };
     const lastPageIndex = newTemplate.pages.length - 1;
-    const lastSectionIndex =
-      newTemplate.pages[lastPageIndex].sections.length - 1;
+    const lastSectionIndex = newTemplate.pages[lastPageIndex].sections.length - 1;
     newTemplate.pages[lastPageIndex].sections[lastSectionIndex].questions.push({
       questionTitle: "this is the question title",
       responseType: {
@@ -1394,9 +1426,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
               </div>
             ) : (
               <div className="flex">
-                <h1 className="text-2xl font-semi bold onClick">
-                  {inspectionTemplate.title}
-                </h1>
+                <h1 className="text-2xl font-semi bold onClick">{inspectionTemplate.title}</h1>
                 <button
                   onClick={() => {
                     setisNameEditEnabled(!isNameEditEnabled);
@@ -1448,13 +1478,10 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                 </div>
                 {index == 0 ? (
                   <h1 className="ml-3 text-[#7E8A9C]">
-                    The Title Page is the first page of your inspection report.
-                    You can customize the Title Page above.
+                    The Title Page is the first page of your inspection report. You can customize the Title Page above.
                   </h1>
                 ) : (
-                  <h1 className="ml-3 text-[#7E8A9C]">
-                    You can customize the Title Page above.
-                  </h1>
+                  <h1 className="ml-3 text-[#7E8A9C]">You can customize the Title Page above.</h1>
                 )}
                 {/* <EnterOutlined /> */}
                 {page.sections.map((section, sectionIndex) => (
@@ -1467,8 +1494,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         placeholder="Click here to enter the section title"
                         onChange={(e) => {
                           let temp = { ...inspectionTemplate };
-                          temp.pages[index].sections[sectionIndex].sectionName =
-                            e.target.value;
+                          temp.pages[index].sections[sectionIndex].sectionName = e.target.value;
                           setinspectionTemplate(temp);
                         }}
                       />
@@ -1477,10 +1503,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         disabled={index === 0 || sectionIndex === 0}
                         onClick={() => {
                           const newTemplate = { ...inspectionTemplate };
-                          newTemplate.pages[index].sections.splice(
-                            sectionIndex,
-                            1
-                          );
+                          newTemplate.pages[index].sections.splice(sectionIndex, 1);
                           setinspectionTemplate(newTemplate);
                         }}
                       >
@@ -1493,14 +1516,10 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         <div className="w-[90%]">
                           <Row className="bg-white ">
                             <Col span={18} className=" border p-2">
-                              <h1 className="text-[#7E8A9C] font-semibold">
-                                Question
-                              </h1>
+                              <h1 className="text-[#7E8A9C] font-semibold">Question</h1>
                             </Col>
                             <Col span={6} className=" border p-2">
-                              <h1 className="text-[#7E8A9C] text-base">
-                                Type of the response
-                              </h1>
+                              <h1 className="text-[#7E8A9C] text-base">Type of the response</h1>
                             </Col>
                           </Row>
                           <Row className="bg-white ">
@@ -1508,17 +1527,14 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                               <Input
                                 bordered={false}
                                 value={
-                                  inspectionTemplate.pages[index].sections[
-                                    sectionIndex
-                                  ].questions[questionIndex].questionTitle
+                                  inspectionTemplate.pages[index].sections[sectionIndex].questions[questionIndex]
+                                    .questionTitle
                                 }
                                 className="text-[14px] font-semi bold "
                                 placeholder="* Type question"
                                 onChange={(e) => {
                                   let copy = { ...inspectionTemplate };
-                                  copy.pages[index].sections[
-                                    sectionIndex
-                                  ].questions[questionIndex].questionTitle =
+                                  copy.pages[index].sections[sectionIndex].questions[questionIndex].questionTitle =
                                     e.target.value;
                                   setinspectionTemplate(copy);
                                 }}
@@ -1527,22 +1543,16 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                             <Col span={6} className=" border p-2">
                               <Select
                                 value={
-                                  inspectionTemplate.pages[index].sections[
-                                    sectionIndex
-                                  ].questions[questionIndex].responseType.type
+                                  inspectionTemplate.pages[index].sections[sectionIndex].questions[questionIndex]
+                                    .responseType.type
                                 }
                                 defaultValue="text"
                                 onChange={(e) => {
                                   let copy = { ...inspectionTemplate };
-                                  copy.pages[index].sections[
-                                    sectionIndex
-                                  ].questions[questionIndex].responseType.type =
+                                  copy.pages[index].sections[sectionIndex].questions[questionIndex].responseType.type =
                                     e;
-                                  copy.pages[index].sections[
-                                    sectionIndex
-                                  ].questions[
-                                    questionIndex
-                                  ].responseType.logic = [];
+                                  copy.pages[index].sections[sectionIndex].questions[questionIndex].responseType.logic =
+                                    [];
                                   setinspectionTemplate(copy);
                                 }}
                                 bordered={false}
@@ -1563,9 +1573,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                         <p className="text-sm">T</p>
                                       </Avatar>
                                     </Space>
-                                    <h1 className="text-[#828282] ml-2  ">
-                                      Text
-                                    </h1>
+                                    <h1 className="text-[#828282] ml-2  ">Text</h1>
                                   </div>
                                 </Option>
 
@@ -1586,9 +1594,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                         </p>
                                       </Avatar>
                                     </Space>
-                                    <h1 className="text-[#828282] ml-2  ">
-                                      Number
-                                    </h1>
+                                    <h1 className="text-[#828282] ml-2  ">Number</h1>
                                   </div>
                                 </Option>
 
@@ -1609,9 +1615,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                         </p>
                                       </Avatar>
                                     </Space>
-                                    <h1 className="text-[#828282] ml-2  ">
-                                      Checkbox
-                                    </h1>
+                                    <h1 className="text-[#828282] ml-2  ">Checkbox</h1>
                                   </div>
                                 </Option>
 
@@ -1632,9 +1636,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                         </p>
                                       </Avatar>
                                     </Space>
-                                    <h1 className="text-[#828282] ml-2  ">
-                                      Multiple Choice
-                                    </h1>
+                                    <h1 className="text-[#828282] ml-2  ">Multiple Choice</h1>
                                   </div>
                                 </Option>
 
@@ -1655,9 +1657,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                         </p>
                                       </Avatar>
                                     </Space>
-                                    <h1 className="text-[#828282] ml-2  ">
-                                      Date & Time
-                                    </h1>
+                                    <h1 className="text-[#828282] ml-2  ">Date & Time</h1>
                                   </div>
                                 </Option>
                                 {/* Media dropdown */}
@@ -1677,9 +1677,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                         </p>
                                       </Avatar>
                                     </Space>
-                                    <h1 className="text-[#828282] ml-2  ">
-                                      Media
-                                    </h1>
+                                    <h1 className="text-[#828282] ml-2  ">Media</h1>
                                   </div>
                                 </Option>
                                 {/* slider dropdown */}
@@ -1699,9 +1697,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                         </p>
                                       </Avatar>
                                     </Space>
-                                    <h1 className="text-[#828282] ml-2  ">
-                                      Slider
-                                    </h1>
+                                    <h1 className="text-[#828282] ml-2  ">Slider</h1>
                                   </div>
                                 </Option>
                                 {/* Annotate dropdown */}
@@ -1721,9 +1717,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                         </p>
                                       </Avatar>
                                     </Space>
-                                    <h1 className="text-[#828282] ml-2  ">
-                                      Annotate
-                                    </h1>
+                                    <h1 className="text-[#828282] ml-2  ">Annotate</h1>
                                   </div>
                                 </Option>
 
@@ -1744,9 +1738,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                         </p>
                                       </Avatar>
                                     </Space>
-                                    <h1 className="text-[#828282] ml-2  ">
-                                      Instructions
-                                    </h1>
+                                    <h1 className="text-[#828282] ml-2  ">Instructions</h1>
                                   </div>
                                 </Option>
                                 {/* Location dropdown */}
@@ -1766,9 +1758,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                         </p>
                                       </Avatar>
                                     </Space>
-                                    <h1 className="text-[#828282] ml-2  ">
-                                      Location
-                                    </h1>
+                                    <h1 className="text-[#828282] ml-2  ">Location</h1>
                                   </div>
                                 </Option>
                                 {/* signature dropdown */}
@@ -1788,9 +1778,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                         </p>
                                       </Avatar>
                                     </Space>
-                                    <h1 className="text-[#828282] ml-2  ">
-                                      Signature
-                                    </h1>
+                                    <h1 className="text-[#828282] ml-2  ">Signature</h1>
                                   </div>
                                 </Option>
                                 {/* site dropdown */}
@@ -1810,9 +1798,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                         </p>
                                       </Avatar>
                                     </Space>
-                                    <h1 className="text-[#828282] ml-2  ">
-                                      Site
-                                    </h1>
+                                    <h1 className="text-[#828282] ml-2  ">Site</h1>
                                   </div>
                                 </Option>
                               </Select>
@@ -1821,9 +1807,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
 
                           <Row className="bg-white ">
                             {renderColumnsForOption(
-                              page.sections[sectionIndex].questions[
-                                questionIndex
-                              ],
+                              page.sections[sectionIndex].questions[questionIndex],
                               index,
                               sectionIndex,
                               questionIndex
@@ -1836,9 +1820,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                             type="text"
                             onClick={() => {
                               const newTemplate = { ...inspectionTemplate };
-                              newTemplate.pages[index].sections[
-                                sectionIndex
-                              ].questions.splice(questionIndex, 1);
+                              newTemplate.pages[index].sections[sectionIndex].questions.splice(questionIndex, 1);
                               setinspectionTemplate(newTemplate);
                             }}
                           >
@@ -1854,23 +1836,14 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
           })}
         </div>
         <div className="flex flex-row mt-5  w-1/4 mb-10">
-          <Button
-            className="bg-white text-[#2F80ED] ml-10 border-[#CED3DE]"
-            onClick={addQuestion}
-          >
+          <Button className="bg-white text-[#2F80ED] ml-10 border-[#CED3DE]" onClick={addQuestion}>
             + Add question
           </Button>
 
-          <Button
-            className="bg-white text-[#2F80ED] ml-2 border-[#CED3DE]"
-            onClick={addPage}
-          >
+          <Button className="bg-white text-[#2F80ED] ml-2 border-[#CED3DE]" onClick={addPage}>
             + Add page
           </Button>
-          <Button
-            className="bg-white text-[#2F80ED] ml-2 border-[#CED3DE]"
-            onClick={addSection}
-          >
+          <Button className="bg-white text-[#2F80ED] ml-2 border-[#CED3DE]" onClick={addSection}>
             + Add section
           </Button>
         </div>

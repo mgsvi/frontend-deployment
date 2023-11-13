@@ -24,7 +24,7 @@ function CreateTemplate({ params }) {
           color: "#111",
         },
         {
-          optionName: "sampel1",
+          optionName: "sampel2",
           flagged: true,
           color: "#111",
         },
