@@ -11,7 +11,7 @@ const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const Templatetable = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { data, error, isLoading } = useSWR(`https://digifield.onrender.com/inspections/get-inspection-template-by-title/${params.create}`, fetcher);
+  
 
 
   const columns = [
@@ -34,7 +34,7 @@ const Templatetable = () => {
       title: 'Access',
       dataIndex: 'access',
       key: 'access',
-      render: 
+      
     },
     {
       title: 'Action',
@@ -51,7 +51,7 @@ const Templatetable = () => {
 
   return (
     <div>
-      <Table columns={columns} dataSource={data} />
+      <Table columns={columns}  />
     </div>
   );
 };
