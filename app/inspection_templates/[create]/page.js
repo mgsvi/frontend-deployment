@@ -11,6 +11,7 @@ import useSWR from "swr";
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 function CreateTemplate({ params }) {
+  const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
   const [savePressed, setsavePressed] = useState(false);
   const [templateAlreadyExists, settemplateAlreadyExists] = useState(false);
@@ -87,7 +88,6 @@ function CreateTemplate({ params }) {
     return <div>error occured</div>;
   }
 
-  const router = useRouter();
   const onChange = (key) => {
     console.log(key);
   };

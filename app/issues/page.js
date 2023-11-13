@@ -1,37 +1,23 @@
 "use client";
 import { React, useState } from "react";
 import Link from "next/link";
-import {
-  Button,
-  ConfigProvider,
-  Tabs,
-  Card,
-  Col,
-  Row,
-  Modal,
-  Input,
-  message,
-} from "antd";
+import { Button, ConfigProvider, Tabs, Card, Col, Row, Modal, Input, message } from "antd";
 import theme from "../themeConfig";
 import { LoadingOutlined } from "@ant-design/icons";
 import IssueTable from "./IssueTable";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
-import dynamic from 'next/dynamic';
-
-const Mapview = dynamic(() => import('./Mapview'), { ssr: false });
-
-const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
+import dynamic from "next/dynamic";
+import LoadingIndicator from "../loadingIndicator";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const Page = () => {
+  const Mapview = dynamic(() => import("./Mapview"), { ssr: false });
   const [messageApi, contextHolder] = message.useMessage();
-  const { data, error, isLoading } = useSWR(
-    "https://digifield.onrender.com/issues/get-all-issues",
-    fetcher,
-    { refreshInterval: 1000 }
-  );
+  const { data, error, isLoading } = useSWR("https://digifield.onrender.com/issues/get-all-issues", fetcher, {
+    refreshInterval: 1000,
+  });
 
   const [modal2Open, setModal2Open] = useState(false);
   const [selectedTab, setSelectedTab] = useState("2");
@@ -43,12 +29,8 @@ const Page = () => {
     setSelectedTab(key);
   };
 
-  if (isLoading)
-    return (
-      <div className="flex h-full w-full justify-center items-center">
-        <LoadingOutlined />
-      </div>
-    );
+  if (isLoading) return <LoadingIndicator />;
+  if (error) return <div>error</div>;
 
   return (
     <ConfigProvider theme={theme}>
@@ -62,11 +44,7 @@ const Page = () => {
               <Button>Manage categories</Button>
             </Link>
 
-            <Button
-              type="primary"
-              className="ml-5"
-              onClick={() => setModal2Open(true)}
-            >
+            <Button type="primary" className="ml-5" onClick={() => setModal2Open(true)}>
               Report Issue
             </Button>
             <Modal
@@ -122,11 +100,7 @@ const Page = () => {
         )}
 
         <div className="w-full h-full">
-          <Tabs
-            tabBarStyle={{ borderBottom: "1px solid #ced3de" }}
-            defaultActiveKey="2"
-            onChange={onChange}
-          >
+          <Tabs tabBarStyle={{ borderBottom: "1px solid #ced3de" }} defaultActiveKey="2" onChange={onChange}>
             <Tabs.TabPane key="1" tab="Dashboard">
               {
                 <div className="w-full mb-4">

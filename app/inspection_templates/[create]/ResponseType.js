@@ -129,6 +129,7 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
         {MultipleChoiceResponse.map((row, index) => {
           return (
             <button
+            key={index}
               className="flex flex-row w-full justify-start items-center flex-wrap bg-transparent hover:bg-[#dee1e8] rounded"
               onClick={() => {
                 setmMultipleChoiceIndex(index);

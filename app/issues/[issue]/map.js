@@ -11,7 +11,7 @@ import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import Image from "next/image";
 import { Input } from "antd";
-function map({latLng, setLatLng}) {
+function Map({latLng, setLatLng}) {
   const [mode, setMode] = useState(false);
 
   const UpdateMapPosition = () => {
@@ -117,4 +117,4 @@ function map({latLng, setLatLng}) {
   );
 }
 
-export default map;
+export default Map;

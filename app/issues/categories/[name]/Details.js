@@ -84,7 +84,7 @@ function Details({ moveToTab, setissueCategory, issueCategory }) {
         <div className="flex flex-col">
           {issueCategory.questions.map((question, index) => {
             return (
-              <div className="flex flex-row w-1/2 mb-2">
+              <div className="flex flex-row w-1/2 mb-2" key={index}>
                 <Input
                   value={issueCategory.questions[index]}
                   placeholder="Add your question"
