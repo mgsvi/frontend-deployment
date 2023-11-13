@@ -22,15 +22,9 @@ import { BsFillBookmarkFill } from "react-icons/bs";
 import { BiSolidUser } from "react-icons/bi";
 import { PiFolderOpenFill } from "react-icons/pi";
 import { MdDeleteOutline } from "react-icons/md";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  useMapEvents,
-} from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
-
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
@@ -265,9 +259,6 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                   <textarea
                     value={editedRow.description}
                     onChange={(e) => {
-                      form.setFieldsValue({
-                        description: e.target.value,
-                      });
                       setEditedRow({
                         ...editedRow,
                         description: e.target.value,
@@ -476,9 +467,9 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                 <div>
                   <div>
                     <h1 className="font-semibold text-xl">
-                      {selectedRow.remarks}
+                      {editedRow.remarks}
                     </h1>
-                    <p className="pt-2 pr-5">{selectedRow.description}</p>
+                    <p className="pt-2 pr-5">{editedRow.description}</p>
                   </div>
                 </div>
               </div>
@@ -503,7 +494,7 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                       : ""
                   }`}
                 />
-                <p className="ml-2">{selectedRow.priority}</p>
+                <p className="ml-2">{editedRow.priority}</p>
               </div>
               <Divider />
               <div className="flex items-center">
@@ -513,7 +504,7 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
               <Divider />
               <div className="flex flex-row justify-between">
                 <Select
-                  defaultValue={selectedRow.status}
+                  defaultValue={editedRow.status}
                   style={{ width: 120 }}
                   options={[
                     { value: "open", label: "open" },
@@ -525,7 +516,7 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
               <Divider />
               <div className="flex items-center">
                 <BiSolidUser className="text-2xl fill-[#8596A0]" />
-                <p className="ml-2">{selectedRow.assigned_to}</p>
+                <p className="ml-2">{editedRow.assigned_to}</p>
               </div>
               <Divider />
               <div>
@@ -552,7 +543,7 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
           )}
         </div>
         <div className="flex bg-[#E9EDF6] w-[55%] h-full overflow-y-auto">
-          <Chat issue={selectedRow} />
+          <Chat issue={editedRow} />
         </div>
       </div>
     </Drawer>

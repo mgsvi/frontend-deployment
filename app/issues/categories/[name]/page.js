@@ -40,7 +40,7 @@ function CategoryCreate({ params }) {
 
   const [activeKey, setactiveKey] = useState("1");
   useEffect(() => {
-    fetch(`https://digifield.onrender.com/assets/get-asset-type/${params.name}`)
+    fetch(`https://digifield.onrender.com/issues/get-issue-category/${params.name}`)
       .then((res) => res.json())
       .then((data) => {
         if (data == null) {
