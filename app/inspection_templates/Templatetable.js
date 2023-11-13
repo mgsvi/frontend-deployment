@@ -34,7 +34,6 @@ const Templatetable = () => {
       title: 'Access',
       dataIndex: 'access',
       key: 'access',
-      render: 
     },
     {
       title: 'Action',

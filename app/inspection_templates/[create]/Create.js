@@ -1709,7 +1709,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
 
                                     case "asset":
                                       responseType = {
-                                        type: "site",
+                                        type: "asset",
                                         required: true,
                                       };
                                       break;
