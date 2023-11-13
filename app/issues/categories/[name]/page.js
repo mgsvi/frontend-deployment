@@ -9,12 +9,25 @@ import { EllipsisOutlined } from "@ant-design/icons";
 import { Menu, Dropdown, Popconfirm } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 
-
 function CategoryCreate({ params }) {
-  const name = params.name;
+  const [Name, setName] = useState(params.name);
+  const [updatePressed, setupdatePressed] = useState(false);
+  const [issueCategoryExist, setissueCategoryExist] = useState(false);
+  const [issueCategory, setissueCategory] = useState({
+    name: Name,
+    notify: [],
+    questions: ["", ""],
+    access: [
+      {
+        reportedBy: "one person",
+        accessibleTo: ["some person"],
+      },
+    ],
+  });
+
   const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
-  
+
   const onChange = (key) => {
     console.log(key);
   };
@@ -25,68 +38,33 @@ function CategoryCreate({ params }) {
     }
   };
 
-  const [formData, setFormData] = useState([]);
   const [activeKey, setactiveKey] = useState("1");
-
-  const updateDetailsData = (data) => {
-    setFormData({ ...formData, questions: data.questions, name: data.name });
-  };
-
-  // useEffect(() => {
-  //   fetch(`https://digifield.onrender.com/issues/get-issue-category/${name}`)
-  
-  // }, [])
-  
- 
+  useEffect(() => {
+    fetch(`https://digifield.onrender.com/assets/get-asset-type/${params.name}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data == null) {
+          setissueCategoryExist(false);
+        } else {
+          console.log(data);
+          setissueCategoryExist(true);
+          setissueCategory(data);
+          console.log(issueCategoryExist);
+          console.log(data);
+          
+        }
+        console.log(issueCategoryExist);
+      });
+  }, []);
   const menu = (
     <Menu onClick={onClick}>
       <Menu.Item key="1">Delete</Menu.Item>
     </Menu>
   );
 
-  const updateAccessData = (data) => {
-    setFormData({ ...formData, updatecategory: true });
-  };
+  console.log(JSON.stringify(issueCategory));
 
-  console.log(formData);
-
-  const handleSubmit = () => {
-    const category = {
-      name: formData.name,
-      notify: [],
-      questions: formData.questions,
-      access: [],
-    };
-    console.log(JSON.stringify(category));
-
-    fetch("https://digifield.onrender.com/issues/create-issue-category", {
-      method: "POST",
-      mode: "cors",
-      cache: "no-cache",
-      headers: {
-        accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(category),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          console.error("Response:", res);
-          return res.text();
-        }
-        return res.json();
-      })
-      .then((data) => {
-        if (data.acknowledge) {
-          success("Category has been created");
-          
-        } else {
-        }
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  };
+  
 
   const success = (msg) => {
     messageApi.open({
@@ -103,13 +81,6 @@ function CategoryCreate({ params }) {
   };
 
 
-  useEffect(() => {
-    if (formData.updatecategory) {
-      console.log(formData.updatecategory + "new");
-      handleSubmit();
-    }
-  }, [formData]);
-
   const items = [
     {
       key: "1",
@@ -117,8 +88,8 @@ function CategoryCreate({ params }) {
       children: (
         <div className="mt-10 flex flex-col justify-center items-center">
           <Details
-            name={name}
-            onDataUpdate={updateDetailsData}
+            setissueCategory={setissueCategory}
+            issueCategory={issueCategory}
             moveToTab={setactiveKey}
           />
         </div>
@@ -129,7 +100,13 @@ function CategoryCreate({ params }) {
       label: "Access",
       children: (
         <div className="mt-10 flex flex-col justify-center items-center">
-          <Access onDataUpdate={updateAccessData} moveToTab={setactiveKey} />
+          <Access
+            updatePressed={updatePressed}
+            setupdatePressed={setupdatePressed}
+            moveToTab={setactiveKey}
+            issueCategoryExist ={issueCategoryExist}
+            issueCategory={issueCategory}
+          />
         </div>
       ),
     },
@@ -150,32 +127,32 @@ function CategoryCreate({ params }) {
             Create issue category{" "}
           </h1>
           <Popconfirm
-                title="Delete the asset type"
-                description="Performing this action will remove the Issue category type, are you sure?"
-                okText="Yes"
-                cancelText="No"
-                onConfirm={() => {
-                  fetch(
-                    `https://digifield.onrender.com/issues/delete-issue_category/${name}`,
-                    {
-                      method: "DELETE",
-                    }
-                  )
-                    .then((res) => res.json())
-                    .then((data) => {
-                      if (data.acknowledge) {
-                        success("Issue Category has been deleted");
-                        router.push("/issues/categories");
-                      } else {
-                        warning(data.description);
-                      }
-                    });
-                }}
-              >
-                <button className="text-[#040303] bg-transparent hover:text-black text-lg">
-                  <EllipsisOutlined rotate={90} />
-                </button>
-              </Popconfirm>
+            title="Delete the asset type"
+            description="Performing this action will remove the Issue category type, are you sure?"
+            okText="Yes"
+            cancelText="No"
+            onConfirm={() => {
+              fetch(
+                `https://digifield.onrender.com/issues/delete-issue_category/${name}`,
+                {
+                  method: "DELETE",
+                }
+              )
+                .then((res) => res.json())
+                .then((data) => {
+                  if (data.acknowledge) {
+                    success("Issue Category has been deleted");
+                    router.push("/issues/categories");
+                  } else {
+                    warning(data.description);
+                  }
+                });
+            }}
+          >
+            <button className="text-[#040303] bg-transparent hover:text-black text-lg justify-end">
+              <EllipsisOutlined rotate={90} />
+            </button>
+          </Popconfirm>
         </div>
         <div className="pt-5">
           <Tabs

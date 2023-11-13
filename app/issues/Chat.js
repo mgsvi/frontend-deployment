@@ -48,7 +48,6 @@ export default function App({ issue }) {
         <LoadingIndicator />
       </div>
     );
-
   return (
     <Chat theme="messaing light" client={client}>
       <Channel channel={channel}>

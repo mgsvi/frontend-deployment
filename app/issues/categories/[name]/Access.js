@@ -3,16 +3,8 @@ import { Input, Divider, Button, Form, Space } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 
-
-function Access({ onDataUpdate }) {
-  const [accessData, setAccessData] = useState({});
+function Access({ updatePressed, setupdatePressed, issueCategoryExist }) {
   const router = useRouter();
-  const [updatecategory, setupdatecategory] = useState(false);
-  console.log(updatecategory);
-  const onFinish = () => {
-    setAccessData({});
-    onDataUpdate(accessData);
-  };
 
   return (
     <div className="w-[700px]">
@@ -43,11 +35,90 @@ function Access({ onDataUpdate }) {
         </Button>
       </div>
 
-      <Button type="primary" className="mr-5 w-[20%] mt-5" onClick={()=>{
-           ({updatecategory : true})
-          setupdatecategory(true)
+      {/* <Button
+        type="primary"
+        className="mr-5 w-[20%] mt-5"
+        onClick={() => {
+          setUpdateData(true);
+          console.log(UpdateData);
           router.push("/issues/categories");
-      }}>Save and Apply</Button>
+        }}
+      >
+        Save and Apply
+      </Button> */}
+      <Button
+        loading={updatePressed}
+        type="primary"
+        className="mb-3 mr-2"
+        onClick={() => {
+          setupdatePressed(true);
+          console.log(JSON.stringify(assetType));
+
+          if (issueCategoryExist) {
+            fetch(
+              "https://digifield.onrender.com/issues/create-issue-category",
+              {
+                method: "POST",
+                mode: "cors",
+                cache: "no-cache",
+                headers: {
+                  accept: "application/json",
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(issueCategory),
+              }
+            )
+              .then((res) => {
+                if (!res.ok) {
+                  console.error("Response:", res);
+                  return res.text();
+                }
+                return res.json();
+              })
+              .then((data) => {
+                if (data.acknowledge) {
+                  success("Category has been created");
+                } else {
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
+          } else {
+            fetch(
+              "https://digifield.onrender.com/issues/create-issue-category",
+              {
+                method: "POST",
+                mode: "cors",
+                cache: "no-cache",
+                headers: {
+                  accept: "application/json",
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(issueCategory),
+              }
+            )
+              .then((res) => {
+                if (!res.ok) {
+                  console.error("Response:", res);
+                  return res.text();
+                }
+                return res.json();
+              })
+              .then((data) => {
+                if (data.acknowledge) {
+                  success("Category has been created");
+                } else {
+                }
+              })
+              .catch((error) => {
+                console.error("Error:", error);
+              });
+          }
+        }}
+      >
+        {issueCategoryExist == true ? "Update and Apply" : "Create and Apply"}
+      </Button>
 
       <Button
         type="primary"

@@ -340,12 +340,7 @@ function ReportIssue({ params }) {
                 </Form.Item>
                 <Form.Item
                   name="images"
-                  // rules={[
-                  //   {
-                  //     required: true,
-                  //     message: "Please type the asset name",
-                  //   },
-                  // ]}
+                 
                 >
                   <div className="mt-5 flex flex-row ">
                     <div>
@@ -405,12 +400,7 @@ function ReportIssue({ params }) {
                 </Form.Item>
                 <Form.Item
                   name="location"
-                  // rules={[
-                  //   {
-                  //     required: true,
-                  //     message: "Please type the asset name",
-                  //   },
-                  // ]}
+                 
                 >
                   <div>
                     <div
