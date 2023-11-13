@@ -3,7 +3,7 @@ import { Input, Divider, Button, Form, Space } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 
-function Access({ updatePressed, setupdatePressed, issueCategoryExist }) {
+function Access({ updatePressed, setupdatePressed, issueCategoryExist, issueCategory }) {
   const router = useRouter();
 
   return (
@@ -52,7 +52,7 @@ function Access({ updatePressed, setupdatePressed, issueCategoryExist }) {
         className="mb-3 mr-2"
         onClick={() => {
           setupdatePressed(true);
-          console.log(JSON.stringify(assetType));
+          
 
           if (issueCategoryExist) {
             fetch(
@@ -69,11 +69,14 @@ function Access({ updatePressed, setupdatePressed, issueCategoryExist }) {
               }
             )
               .then((res) => {
+                setupdatePressed(false)
                 if (!res.ok) {
                   console.error("Response:", res);
                   return res.text();
                 }
+                
                 return res.json();
+                
               })
               .then((data) => {
                 if (data.acknowledge) {
