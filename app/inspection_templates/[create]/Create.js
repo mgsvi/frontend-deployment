@@ -74,11 +74,6 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
   const { v4: uuidv4 } = require("uuid");
   const uniqueId = uuidv4();
 
-  // useEffect(() => {
-  //   console.log(inspectionTemplate.pages[0].sections[0].questions[0].responseType.logic[0].condition);
-  //   console.log(inspectionTemplate.pages[0].sections[0].questions[0].responseType.logic[0].condition == "isSelected");
-  // }, [inspectionTemplate]);
-
   const objectsEqual = (o1, o2) =>
     typeof o1 === "object" && Object.keys(o1).length > 0
       ? Object.keys(o1).length === Object.keys(o2).length && Object.keys(o1).every((p) => objectsEqual(o1[p], o2[p]))
@@ -120,8 +115,6 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
       temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic.push(newLogic);
       setinspectionTemplate(temp);
     };
-
-    
 
     switch (question.responseType.type) {
       case "text":
@@ -942,7 +935,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                 >
                   <Typography.Link>
                     {inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType
-                      .options != null ? (
+                      .options != undefined ? (
                       <div className="flex items-center w-full overflow-x-auto">
                         {inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[
                           questionIndex
@@ -1202,7 +1195,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
             </div>
           </div>
         );
-      case "date":
+      case "datetime":
         return (
           <div className="flex flex-row w-full divide-x-2  py-2 items-center">
             <Col span={4} className="flex w-full justify-around ">
@@ -1272,70 +1265,143 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
             </Col>
           </div>
         );
-      case "annotate":
+      case "annotation":
         return (
-          <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={6} className="flex justify-around ">
-              <div className="flex flex-row">
-                <Checkbox defaultChecked className="mr-2" />
-                <h1>Required</h1>
-              </div>
+          <div className="flex flex-row w-full divide-x-2  py-2">
+            <Col span={4} className="flex w-full justify-around ">
+              <Checkbox
+                defaultChecked
+                className="mr-2"
+                checked={question.responseType.required}
+                onChange={(e) => {
+                  let temp = { ...inspectionTemplate };
+                  temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.required =
+                    e.target.checked;
+                  setinspectionTemplate(temp);
+                }}
+              >
+                Required
+              </Checkbox>
             </Col>
           </div>
         );
       case "location":
         return (
-          <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={6} className="flex justify-around ">
-              <div className="flex flex-row">
-                <Checkbox defaultChecked className="mr-2" />
-                <h1>Required</h1>
-              </div>
+          <div className="flex flex-row w-full divide-x-2  py-2">
+            <Col span={4} className="flex w-full justify-around ">
+              <Checkbox
+                defaultChecked
+                className="mr-2"
+                checked={question.responseType.required}
+                onChange={(e) => {
+                  let temp = { ...inspectionTemplate };
+                  temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.required =
+                    e.target.checked;
+                  setinspectionTemplate(temp);
+                }}
+              >
+                Required
+              </Checkbox>
             </Col>
           </div>
         );
-
       case "signature":
         return (
-          <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={6} className="flex justify-around ">
-              <div className="flex flex-row">
-                <Checkbox defaultChecked className="mr-2" />
-                <h1>Required</h1>
-              </div>
+          <div className="flex flex-row w-full divide-x-2  py-2">
+            <Col span={4} className="flex w-full justify-around ">
+              <Checkbox
+                defaultChecked
+                className="mr-2"
+                checked={question.responseType.required}
+                onChange={(e) => {
+                  let temp = { ...inspectionTemplate };
+                  temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.required =
+                    e.target.checked;
+                  setinspectionTemplate(temp);
+                }}
+              >
+                Required
+              </Checkbox>
             </Col>
           </div>
         );
-      case "instructions":
+      case "instruction":
         return (
-          <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={6} className="flex justify-around ">
-              <div className="flex flex-row">
-                <Checkbox defaultChecked className="mr-2" />
-                <h1>Required</h1>
-              </div>
+          <div className="flex flex-row w-full divide-x-2  py-2 items-center">
+            <Col span={4} className="flex w-full justify-around ">
+              <Checkbox
+                defaultChecked
+                className="mr-2"
+                checked={question.responseType.required}
+                onChange={(e) => {
+                  let temp = { ...inspectionTemplate };
+                  temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.required =
+                    e.target.checked;
+                  setinspectionTemplate(temp);
+                }}
+              >
+                Required
+              </Checkbox>
+            </Col>
+            <Col span={4} className="flex justify-center">
+              <Button type="link" icon={<MdOutlineAttachFile />}>
+                Add attachment
+              </Button>
             </Col>
           </div>
         );
       case "site":
         return (
-          <div className="flex flex-row w-[60%] divide-x-2  py-2">
-            <Col span={6} className="flex justify-around ">
-              <div className="flex flex-row">
-                <Checkbox defaultChecked className="mr-2" />
-                <h1>Required</h1>
-              </div>
+          <div className="flex flex-row w-full divide-x-2  py-2">
+            <Col span={4} className="flex w-full justify-around ">
+              <Checkbox
+                defaultChecked
+                className="mr-2"
+                checked={question.responseType.required}
+                onChange={(e) => {
+                  let temp = { ...inspectionTemplate };
+                  temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.required =
+                    e.target.checked;
+                  setinspectionTemplate(temp);
+                }}
+              >
+                Required
+              </Checkbox>
             </Col>
           </div>
         );
+      case "asset":
+        return (
+          <div className="flex flex-row w-full divide-x-2  py-2">
+            <Col span={4} className="flex w-full justify-around ">
+              <Checkbox
+                defaultChecked
+                className="mr-2"
+                checked={question.responseType.required}
+                onChange={(e) => {
+                  let temp = { ...inspectionTemplate };
+                  temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.required =
+                    e.target.checked;
+                  setinspectionTemplate(temp);
+                }}
+              >
+                Required
+              </Checkbox>
+            </Col>
+          </div>
+        );
+
       default:
-        return null;
+        return <div></div>;
     }
   };
 
   const addQuestion = () => {
     const newTemplate = { ...inspectionTemplate };
     const lastPageIndex = newTemplate.pages.length - 1;
+    if (newTemplate.pages[lastPageIndex].sections.length == 0) {
+      addSection();
+    }
     const lastSectionIndex = newTemplate.pages[lastPageIndex].sections.length - 1;
     newTemplate.pages[lastPageIndex].sections[lastSectionIndex].questions.push({
       questionTitle: "this is the question title",
@@ -1375,7 +1441,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
   };
 
   return (
-    <div className="flex flex-row w-full h-full">
+    <div className="flex flex-row w-full h-full overflow-y-auto">
       <div className="w-full mt-10">
         <div className="flex flex-row">
           <div>
@@ -1439,6 +1505,13 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
             )}
 
             <TextArea
+              value={inspectionTemplate.description}
+              onChange={(e) => {
+                setinspectionTemplate({
+                  ...inspectionTemplate,
+                  description: e.target.value,
+                });
+              }}
               rows={1}
               placeholder="A brief description about the inspection template"
               maxLength={150}
@@ -1500,7 +1573,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                       />
                       <Button
                         type="text"
-                        disabled={index === 0 || sectionIndex === 0}
+                        disabled={index === 0}
                         onClick={() => {
                           const newTemplate = { ...inspectionTemplate };
                           newTemplate.pages[index].sections.splice(sectionIndex, 1);
@@ -1549,10 +1622,101 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                 defaultValue="text"
                                 onChange={(e) => {
                                   let copy = { ...inspectionTemplate };
+                                  let responseType = {};
                                   copy.pages[index].sections[sectionIndex].questions[questionIndex].responseType.type =
                                     e;
-                                  copy.pages[index].sections[sectionIndex].questions[questionIndex].responseType.logic =
-                                    [];
+                                  switch (e) {
+                                    case "text":
+                                      responseType = {
+                                        type: "text",
+                                        required: true,
+                                        logic: [],
+                                        format: "shortAnswer",
+                                        image: "",
+                                      };
+                                      break;
+                                    case "number":
+                                      responseType = {
+                                        type: "number",
+                                        required: true,
+                                        logic: [],
+                                        image: "",
+                                      };
+                                      break;
+                                    case "checkbox":
+                                      responseType = {
+                                        type: "checkbox",
+                                        required: true,
+                                        logic: [],
+                                        image: "",
+                                      };
+                                      break;
+                                    case "multiplechoice":
+                                      responseType = {
+                                        type: "multiplechoice",
+                                        multipleSelection: false,
+                                        flaggedResponses: false,
+                                        required: true,
+                                        logic: [],
+                                        options: null,
+                                      };
+                                      break;
+                                    case "datetime":
+                                      responseType = {
+                                        type: "datetime",
+                                        required: true,
+                                        date: false,
+                                        time: true,
+                                      };
+                                      break;
+                                    case "media":
+                                      responseType = {
+                                        type: "media",
+                                        required: true,
+                                      };
+                                      break;
+                                    case "annotation":
+                                      responseType = {
+                                        type: "annotation",
+                                        required: true,
+                                      };
+                                      break;
+                                    case "signature":
+                                      responseType = {
+                                        type: "signature",
+                                        required: true,
+                                      };
+                                      break;
+                                    case "location":
+                                      responseType = {
+                                        type: "location",
+                                        required: true,
+                                      };
+                                      break;
+                                    case "instruction":
+                                      responseType = {
+                                        type: "instruction",
+                                        url: "www.google.com",
+                                        required: true,
+                                      };
+                                      break;
+                                    case "site":
+                                      responseType = {
+                                        type: "site",
+                                        required: true,
+                                      };
+                                      break;
+
+                                    case "asset":
+                                      responseType = {
+                                        type: "site",
+                                        required: true,
+                                      };
+                                      break;
+                                  }
+                                  copy.pages[index].sections[sectionIndex].questions[questionIndex].responseType =
+                                    responseType;
+
                                   setinspectionTemplate(copy);
                                 }}
                                 bordered={false}
@@ -1641,7 +1805,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                 </Option>
 
                                 {/* date dropdown */}
-                                <Option value="date">
+                                <Option value="datetime">
                                   <div className="flex justify-start">
                                     <Space wrap>
                                       <Avatar
@@ -1680,28 +1844,9 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                     <h1 className="text-[#828282] ml-2  ">Media</h1>
                                   </div>
                                 </Option>
-                                {/* slider dropdown */}
-                                <Option value="slider">
-                                  <div className="flex justify-start">
-                                    <Space wrap>
-                                      <Avatar
-                                        size={21}
-                                        style={{
-                                          backgroundColor: "#fde3cf",
-                                          color: "#f56a00",
-                                          fontSize: "12px",
-                                        }}
-                                      >
-                                        <p className="text-sm">
-                                          <SlidersOutlined />
-                                        </p>
-                                      </Avatar>
-                                    </Space>
-                                    <h1 className="text-[#828282] ml-2  ">Slider</h1>
-                                  </div>
-                                </Option>
+
                                 {/* Annotate dropdown */}
-                                <Option value="annotate">
+                                <Option value="annotation">
                                   <div className="flex justify-start ">
                                     <Space wrap>
                                       <Avatar
@@ -1722,7 +1867,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                 </Option>
 
                                 {/* Instructions dropdown */}
-                                <Option value="instructions">
+                                <Option value="instruction">
                                   <div className="flex justify-start">
                                     <Space wrap>
                                       <Avatar
@@ -1799,6 +1944,26 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                                       </Avatar>
                                     </Space>
                                     <h1 className="text-[#828282] ml-2  ">Site</h1>
+                                  </div>
+                                </Option>
+                                {/* asset dropdown */}
+                                <Option value="asset">
+                                  <div className="flex justify-start">
+                                    <Space wrap>
+                                      <Avatar
+                                        size={21}
+                                        style={{
+                                          backgroundColor: "#E0F7FF",
+                                          color: "#56CCF2",
+                                          fontSize: "12px",
+                                        }}
+                                      >
+                                        <p className="text-sm">
+                                          <EditOutlined />
+                                        </p>
+                                      </Avatar>
+                                    </Space>
+                                    <h1 className="text-[#828282] ml-2  ">Asset</h1>
                                   </div>
                                 </Option>
                               </Select>

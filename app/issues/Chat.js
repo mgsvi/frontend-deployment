@@ -49,15 +49,12 @@ export default function App({ issue }) {
       </div>
     );
   return (
-    <Chat theme="messaing light" client={client}>
-      <Channel channel={channel}>
-        <Window>
-          <ChannelHeader />
-          <MessageList />
-          <MessageInput />
-        </Window>
-        <Thread />
-      </Channel>
-    </Chat>
+    <div>
+    {converse.initialize({
+        bosh_service_url: 'https://conversejs.org/http-bind/', // Please use this connection manager only for testing purposes
+        view_mode: 'fullscreen'
+    })}
+    </div>
+   
   );
 }
