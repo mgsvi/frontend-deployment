@@ -48,7 +48,6 @@ export default function App({ issue }) {
         <LoadingIndicator />
       </div>
     );
-
   return (
     <div>
     {converse.initialize({
