@@ -26,6 +26,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
+
 function ReportIssue({ params }) {
   const router = useRouter();
   const handleChange = (value) => {

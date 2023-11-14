@@ -1,17 +1,5 @@
 import { React, useState, useEffect } from "react";
-import {
-  Button,
-  Space,
-  Avatar,
-  Table,
-  Modal,
-  Drawer,
-  Input,
-  ColorPicker,
-  Checkbox,
-  Divider,
-  message,
-} from "antd";
+import { Button, Space, Avatar, Table, Modal, Drawer, Input, ColorPicker, Checkbox, Divider, message } from "antd";
 import {
   NumberOutlined,
   TagsOutlined,
@@ -69,7 +57,7 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
       render: (row) => (
         <div className="flex items-center bg-white line-clamp-1 truncate text-black">
           {row.map((item, itemIndex) => (
-            <p
+            <span
               key={itemIndex}
               style={{
                 backgroundColor: item.color,
@@ -78,7 +66,7 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
               className="rounded-full mx-2 p-2 text-white"
             >
               {item.optionName}
-            </p>
+            </span>
           ))}
         </div>
       ),
@@ -123,214 +111,47 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
       setexpand([...expand, index]);
     }
   };
-  const responseTypes = [
-    "Text",
-    "Number",
-    "Checkbox",
-    "Date",
-    "Media",
-    "Slider",
-    "Annotate",
-    "Location",
-    "Signature",
-    "Instructions",
-    "Site",
-  ];
-  function getTypeIcon(val) {
-    switch (val) {
-      case "Text":
-        return (
-          <Avatar
-            size={21}
-            style={{
-              backgroundColor: "#fde3cf",
-              color: "#f56a00",
-              fontSize: "12px",
-            }}
-          >
-            T
-          </Avatar>
-        );
-      case "Number":
-        return (
-          <Avatar
-            size={21}
-            style={{
-              backgroundColor: "#fde3cf",
-              color: "#f56a00",
-              fontSize: "12px",
-            }}
-          >
-            <NumberOutlined />
-          </Avatar>
-        );
-      case "Checkbox":
-        return (
-          <Avatar
-            size={21}
-            style={{
-              backgroundColor: "#ECF4FF",
-              color: "#2F80ED",
-              fontSize: "12px",
-            }}
-          >
-            <CheckSquareOutlined />
-          </Avatar>
-        );
-      case "Date":
-        return (
-          <Avatar
-            size={21}
-            style={{
-              backgroundColor: "#D2FFE5",
-              color: "#219653",
-              fontSize: "12px",
-            }}
-          >
-            <CalendarOutlined />
-          </Avatar>
-        );
-      case "Media":
-        return (
-          <Avatar
-            size={21}
-            style={{
-              backgroundColor: "#EFDEFF",
-              color: "#9B51E0",
-              fontSize: "12px",
-            }}
-          >
-            <FileImageOutlined />
-          </Avatar>
-        );
-      case "Slider":
-        return (
-          <Avatar
-            size={21}
-            style={{
-              backgroundColor: "#fde3cf",
-              color: "#f56a00",
-              fontSize: "12px",
-            }}
-          >
-            <SlidersOutlined />
-          </Avatar>
-        );
-      case "Annotate":
-        return (
-          <Avatar
-            size={21}
-            style={{
-              backgroundColor: "#E4E4E4",
-              color: "#4F4F4F",
-              fontSize: "12px",
-            }}
-          >
-            <HighlightOutlined />
-          </Avatar>
-        );
-      case "Location":
-        return (
-          <Avatar
-            size={21}
-            style={{
-              backgroundColor: "#D2FFE5",
-              color: "#219653",
-              fontSize: "12px",
-            }}
-          >
-            <EnvironmentOutlined />
-          </Avatar>
-        );
-      case "Signature":
-        return (
-          <Avatar
-            size={21}
-            style={{
-              backgroundColor: "#E0F7FF",
-              color: "#56CCF2",
-              fontSize: "12px",
-            }}
-          >
-            <FaSignature />
-          </Avatar>
-        );
-      case "Instructions":
-        return (
-          <Avatar
-            size={21}
-            style={{
-              backgroundColor: "#EFDEFF",
-              color: "#9B51E0",
-              fontSize: "12px",
-            }}
-          >
-            <MessageOutlined />
-          </Avatar>
-        );
-      case "Site":
-        return (
-          <Avatar
-            size={21}
-            style={{
-              backgroundColor: "#E0F7FF",
-              color: "#56CCF2",
-              fontSize: "12px",
-            }}
-          >
-            <TagsOutlined />
-          </Avatar>
-        );
-      default:
-        return null;
-    }
-  }
-
-  const columns = [
-    {
-      dataIndex: "type",
-      key: "type",
-      render: (text) => (
-        <Space wrap className="ml-3">
-          {getTypeIcon(text)}
-          <span className="text-[#7E8A9C] ml-2 text-[15px]">{text}</span>
-        </Space>
-      ),
-    },
-  ];
-
-  const dataSource = responseTypes.map((type) => ({
-    type,
-  }));
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-full">
       {contextHolder}
-      <div className="p-5">
-        <h1 className="font-bold text-xl bold mb-2">Type of response</h1>
-        <p className="text-[#828282]">
-          Choose from response templates or create your own
-        </p>
-      </div>
-      <div>
-        <Table
-          columns={columns}
-          dataSource={dataSource}
-          size="small"
-          pagination={false}
-          className="bg-[#F8F9FC]"
-        />
-      </div>
-      <div className="flex  flex-row p-5 justify-between">
-        <p className="text-[#828282] font-semibold pt-1">
-          Multiple choice responses
-        </p>
+      <div className="flex flex-row justify-between h-fit mb-4">
+        <p className="text-[#828282] text-xl font-semibold pt-1">Multiple choice responses</p>
         <Button type="link" onClick={showDrawer}>
           + Create responses
         </Button>
       </div>
-      <div className="flex flex-col ">
-        <Table
+      <p className="text-[#828282] h-fit pt-1">
+        Edit and manage multiple choice responses. Once done, they can be added to multiple choice response type
+        questions by selecting the options button
+      </p>
+      <div className="flex flex-col w-full items-start divide-y-2 text-sm mt-3 overflow-y-auto h-full">
+        {MultipleChoiceResponse.map((row, index) => {
+          return (
+            <button
+            key={index}
+              className="flex flex-row w-full justify-start items-center flex-wrap bg-transparent hover:bg-[#dee1e8] rounded"
+              onClick={() => {
+                setmMultipleChoiceIndex(index);
+                setMultipleChoice(MultipleChoiceResponse[index]);
+                setOpen(true);
+              }}
+            >
+              {row.map((item, itemIndex) => (
+                <span
+                  key={itemIndex}
+                  style={{
+                    backgroundColor: item.color,
+                  }}
+                  className="rounded-full m-2 px-2 py-1 text-white"
+                >
+                  {item.optionName}
+                </span>
+              ))}
+            </button>
+          );
+        })}
+        {/* <Table
           dataSource={dataSource1}
           columns={columns1}
           pagination={false}
@@ -348,32 +169,18 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
           }}
           rowClassName="hover: cursor-pointer"
           size="small"
-        />
+        /> */}
       </div>
       {/* creating Multiple choice responses  */}
-      <Drawer
-        title="Multiple choice responses"
-        placement="right"
-        onClose={onClose}
-        open={open}
-        width={450}
-      >
+      <Drawer title="Multiple choice responses" placement="right" onClose={onClose} open={open} width={450}>
         <DragDropContext onDragEnd={onDragEnd}>
           <Droppable droppableId="options">
             {(provided) => (
               <div {...provided.droppableProps} ref={provided.innerRef}>
                 {MultipleChoice.map((option, index) => (
-                  <Draggable
-                    key={index}
-                    draggableId={String(index)}
-                    index={index}
-                  >
+                  <Draggable key={index} draggableId={String(index)} index={index}>
                     {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
+                      <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
                         <div className="border">
                           <div
                             className="flex flex-row  p-2 items-center"
@@ -381,10 +188,7 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
                             onClick={() => toggleOptionExpansion(index)}
                           >
                             <div {...provided.dragHandleProps}>
-                              <RiDraggable
-                                size={20}
-                                className="text-[#7E8A9C]"
-                              />
+                              <RiDraggable size={20} className="text-[#7E8A9C]" />
                             </div>
                             <Input
                               bordered={false}
@@ -466,13 +270,8 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
                                     setMultipleChoice(temp);
                                   }}
                                 />
-                                <h1 className="text-[15px] text-[#7E8A9C]">
-                                  Mark as Flagged
-                                </h1>
-                                <Divider
-                                  type="vertical"
-                                  className=" justify-center bg-[#7E8A9C]"
-                                />
+                                <h1 className="text-[15px] text-[#7E8A9C]">Mark as Flagged</h1>
+                                <Divider type="vertical" className=" justify-center bg-[#7E8A9C]" />
                                 <DeleteOutlined
                                   className="text-[#7E8A9C]"
                                   onClick={() => {
@@ -501,10 +300,10 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
             + Add response
           </Button>
         </div>
-        <div className="w-full ">
+        <div className="w-full flex justify-between mt-9">
+          <div className="flex gap-3">
           <Button
             type="primary"
-            className="  mt-10 mb-10 mr-5"
             htmlType="submit"
             onClick={() => {
               const validateOptions = () => {
@@ -519,13 +318,13 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
                 setMultipleChoice(MultipleChoiceResponse[MultipleChoiceIndex]);
                 if (validateOptions()) {
                   const clone = MultipleChoice.map((option) => ({ ...option }));
-                  const newChoicelist = MultipleChoiceResponse.map((val,i)=>{
-                    if(i==MultipleChoiceIndex) {
-                      return clone
+                  const newChoicelist = MultipleChoiceResponse.map((val, i) => {
+                    if (i == MultipleChoiceIndex) {
+                      return clone;
                     } else {
-                      return val
+                      return val;
                     }
-                  })
+                  });
                   setMultipleChoiceResponse(newChoicelist);
                 } else {
                   messageApi.open({
@@ -558,7 +357,6 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
           <Button
             type="primary"
             ghost
-            className="mr-5 w-[20%] mt-5"
             style={{ background: "white" }}
             onClick={() => {
               setmMultipleChoiceIndex(null);
@@ -567,6 +365,23 @@ function ResponseType({ MultipleChoiceResponse, setMultipleChoiceResponse }) {
             }}
           >
             Cancel
+          </Button>
+          </div>
+          <Button
+            type="primary"
+            icon={<DeleteOutlined />}
+            danger
+            ghost
+            style={{ background: "white" }}
+            onClick={() => {
+              setMultipleChoice([...defaultChoiceList]);
+              const temp = MultipleChoiceResponse.filter((item, index)=> index != MultipleChoiceIndex)
+              setmMultipleChoiceIndex(null);
+              setMultipleChoiceResponse(temp)
+              setOpen(false);
+            }}
+          >
+            Delete
           </Button>
         </div>
       </Drawer>

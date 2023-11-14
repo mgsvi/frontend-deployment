@@ -33,6 +33,7 @@ import {
   Menu,
   Dropdown,
   Typography,
+  Drawer,
 } from "antd";
 import { BiSolidImageAdd, BiSolidMessageDetail } from "react-icons/bi";
 import { TbChartDots3 } from "react-icons/tb";
@@ -70,6 +71,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
   const [textEditEnabled, settextEditEnabled] = useState(-1);
   const [numberEditEnabled, setnumberEditEnabled] = useState(-1);
   const [selectedOption, setSelectedOption] = useState("text");
+  const [responseTypeOpen, setresponseTypeOpen] = useState(false);
   const [form] = Form.useForm();
   const { v4: uuidv4 } = require("uuid");
   const uniqueId = uuidv4();
@@ -686,14 +688,14 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         menu={{
                           items: [
                             { label: "checked ", key: "checked" },
-                            { label: "not checked ", key: "notchecked" },
+                            { label: "not checked ", key: "notChecked" },
                           ],
                           selectable: true,
                           selectedKeys: [
                             inspectionTemplate.pages[pageIndex].sections[sectionIndex].questions[questionIndex]
                               .responseType.logic[ind].condition,
                           ],
-                          defaultSelectedKeys: ["Checked"],
+                          defaultSelectedKeys: ["checked"],
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
                             temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
@@ -701,7 +703,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                             ].condition = e.key;
                             temp.pages[pageIndex].sections[sectionIndex].questions[questionIndex].responseType.logic[
                               ind
-                            ].condition = e.key == "checked" ? true : false;
+                            ].value = e.key == "checked" ? true : false;
                             setinspectionTemplate(temp);
                           },
                         }}
@@ -830,7 +832,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
         return (
           <div className="flex flex-col w-full">
             <div className="flex flex-row justify-start w-full divide-x-2  py-2 items-center gap-1 bg-[#F8F9FC] border-b-2 overflow-x-clip">
-              <Col span={3} className="flex justify-center">
+              <Col span={2} className="flex justify-center">
                 <div className="flex flex-row">
                   <Button
                     icon={<TbChartDots3 />}
@@ -847,7 +849,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                   </Button>
                 </div>
               </Col>
-              <Col span={3} className="flex justify-center">
+              <Col span={2} className="flex justify-center">
                 <div className="flex flex-row">
                   <Checkbox
                     checked={question.responseType.required}
@@ -862,7 +864,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                   <h1>Required</h1>
                 </div>
               </Col>
-              <Col span={5} className="flex justify-center">
+              <Col span={3} className="flex justify-center">
                 <div className="flex flex-row">
                   <Checkbox
                     checked={question.multipleSelection}
@@ -877,13 +879,19 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                   <h1>Multiple selection</h1>
                 </div>
               </Col>
-              <Col span={3} className="flex justify-center">
+              <Col span={2} className="flex justify-center">
                 <Button type="link" icon={<MdOutlineAttachFile />}>
                   Add image
                 </Button>
               </Col>
+              <Col span={3} className="flex justify-center">
+                <Button type="link" onClick={() => setresponseTypeOpen(true)}>
+                  Manage choices
+                </Button>
+              </Col>
               <Col span={9} className="flex justify-start items-center">
                 <Dropdown
+                  placement="bottom"
                   className="ml-2"
                   menu={{
                     items: inspectionTemplate.multipleChoiceResponse.map((val, i) => ({
@@ -1113,7 +1121,8 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                           switch (trigger) {
                             case "reportIssue":
                               return (
-                                <div className="flex flex-row flex-none px-2 bg-[#FFE5C6] rounded-lg gap-2 items-center">
+                                <div className="flex flex-row flex-none px-2 bg-[#FFE5C6] ml-1 rounded-lg gap-2 items-center">
+                                  <MdLibraryAddCheck />
                                   <p>report issue</p>{" "}
                                   <button className="bg-[#FFE5C6]" onClick={deleteAction}>
                                     x
@@ -1123,6 +1132,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                             case "requireEvidence":
                               return (
                                 <div className="flex flex-row flex-none px-2 bg-[#c6ffca] ml-1 rounded-lg gap-2 items-center">
+                                  <FaImages />
                                   <p>require evidence</p>{" "}
                                   <button className="bg-[#c6ffca]" onClick={deleteAction}>
                                     x
@@ -1132,6 +1142,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                             case "notify":
                               return (
                                 <div className="flex flex-row flex-none px-2 bg-[#c6dcff] ml-1 rounded-lg gap-2 items-center">
+                                  <BsFillBellFill />
                                   <p>notify</p>{" "}
                                   <button className="bg-[#c6dcff]" onClick={deleteAction}>
                                     x
@@ -1141,6 +1152,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                             case "askQuestions":
                               return (
                                 <div className="flex flex-row flex-none px-2 bg-[#dac6ff] ml-1 rounded-lg gap-2 items-center">
+                                  <BiSolidMessageDetail />
                                   <p>ask questions</p>{" "}
                                   <button className="bg-[#dac6ff]" onClick={deleteAction}>
                                     x
@@ -1151,16 +1163,29 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                         })}
                       </div>
                       <Dropdown
-                        className="pl-1 flex-none"
+                        className="flex-none"
                         menu={{
                           items: [
-                            { label: "Report Issue", key: "reportIssue" },
+                            {
+                              label: "Report Issue",
+                              key: "reportIssue",
+                              icon: <MdLibraryAddCheck />,
+                            },
                             {
                               label: "Require Evidence",
                               key: "requireEvidence",
+                              icon: <FaImages />,
                             },
-                            { label: "Notify", key: "notify" },
-                            { label: "Ask Questions", key: "askQuestions" },
+                            {
+                              label: "Notify",
+                              key: "notify",
+                              icon: <BsFillBellFill />,
+                            },
+                            {
+                              label: "Ask Questions",
+                              key: "askQuestions",
+                              icon: <BiSolidMessageDetail />,
+                            },
                           ],
                           onClick: (e) => {
                             let temp = { ...inspectionTemplate };
@@ -1353,7 +1378,7 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
       case "site":
         return (
           <div className="flex flex-row w-full divide-x-2  py-2">
-            <Col span={4} className="flex w-full justify-around ">
+            <Col span={3} className="flex w-full justify-around ">
               <Checkbox
                 defaultChecked
                 className="mr-2"
@@ -1368,12 +1393,15 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
                 Required
               </Checkbox>
             </Col>
+            <Col span={3} className="flex w-full justify-around ">
+              <Button type="link">Manage sites</Button>
+            </Col>
           </div>
         );
       case "asset":
         return (
           <div className="flex flex-row w-full divide-x-2  py-2">
-            <Col span={4} className="flex w-full justify-around ">
+            <Col span={3} className="flex w-full justify-around ">
               <Checkbox
                 defaultChecked
                 className="mr-2"
@@ -2013,11 +2041,13 @@ function Create({ inspectionTemplate, setinspectionTemplate, templateName }) {
           </Button>
         </div>
       </div>
-      <div className="flex flex-col  bg-[#F8F9FC] w-[35%]">
-        <ResponseType
-          MultipleChoiceResponse={inspectionTemplate.multipleChoiceResponse}
-          setMultipleChoiceResponse={setMultipleChoiceResponse}
-        />
+      <div>
+        <Drawer width={520} closable={false} open={responseTypeOpen} onClose={() => setresponseTypeOpen(false)}>
+          <ResponseType
+            MultipleChoiceResponse={inspectionTemplate.multipleChoiceResponse}
+            setMultipleChoiceResponse={setMultipleChoiceResponse}
+          />
+        </Drawer>
       </div>
     </div>
   );

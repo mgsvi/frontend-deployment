@@ -20,13 +20,15 @@ function Template() {
       key: '1',
       label: 'Templates',
       children: (<div>
-        <Templatetable />
+        <Templatetable archived={false}/>
       </div>),
     },
     {
       key: '2',
       label: 'Archive',
-      children: 'Content of Tab Pane 2',
+      children: (<div>
+        <Templatetable archived={true}/>
+      </div>),
     },
   ];
   return (

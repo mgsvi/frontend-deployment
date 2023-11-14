@@ -6,21 +6,23 @@ import { LeftOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import Create from "./Create";
 import LoadingIndicator from "@/app/loadingIndicator";
-import useSWR from "swr"
+import useSWR from "swr";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 function CreateTemplate({ params }) {
+  const router = useRouter();
   const [messageApi, contextHolder] = message.useMessage();
   const [savePressed, setsavePressed] = useState(false);
   const [templateAlreadyExists, settemplateAlreadyExists] = useState(false);
+  const date = Date.now()
   const [inspectionTemplate, setinspectionTemplate] = useState({
-    title: params.create,
+    title: decodeURI(params.create),
     description: "this is a sample description",
     image: "http://example.com/url-of-image",
     assets: ["asset1", "asset2"],
     enforeAssetZone: true,
-    createdAt: 19332489798,
+    createdAt: date,
     archived: false,
     access: ["Shraddha@blunav.in", "sussy_sushma@blunav.in"],
     multipleChoiceResponse: [
@@ -66,24 +68,26 @@ function CreateTemplate({ params }) {
       },
     ],
   });
-  const { data, error, isLoading } = useSWR(`https://digifield.onrender.com/inspections/get-inspection-template-by-title/${params.create}`, fetcher);
+  const { data, error, isLoading } = useSWR(
+    `https://digifield.onrender.com/inspections/get-inspection-template-by-title/${params.create}`,
+    fetcher
+  );
 
   useEffect(() => {
-    if(data != null) {
-      setinspectionTemplate(data)
-      settemplateAlreadyExists(true)
+    if (data != null) {
+      setinspectionTemplate(data);
+      settemplateAlreadyExists(true);
     }
-  }, [data])
+  }, [data]);
 
-  if(isLoading) {
-    return <LoadingIndicator/>
+  if (isLoading) {
+    return <LoadingIndicator />;
   }
 
-  if(error) {
-    return <div>error occured</div>
+  if (error) {
+    return <div>error occured</div>;
   }
-  
-  const router = useRouter();
+
   const onChange = (key) => {
     console.log(key);
   };
@@ -132,12 +136,19 @@ function CreateTemplate({ params }) {
               content: "Template has been created",
             });
           } else {
+            console.log(data)
             messageApi.open({
               type: "error",
               content: data.description,
             });
           }
-        });
+        })
+        .catch(e=>{
+          messageApi.open({
+            type: "error",
+            content: e,
+          });
+        })
     } else {
       fetch(`https://digifield.onrender.com/inspections/update-inspection-template/${params.create}`, {
         method: "PUT",
