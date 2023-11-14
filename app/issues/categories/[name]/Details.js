@@ -93,7 +93,8 @@ function Details({ moveToTab, setissueCategory, issueCategory }) {
 
                 <DeleteOutlined
                   onClick={() => removeQuestion(index)}
-                  className="ml-2 "
+                  size={18}
+                  className="ml-2 text-[#737272] "
                 />
               </div>
             );
@@ -108,7 +109,7 @@ function Details({ moveToTab, setissueCategory, issueCategory }) {
             >
               Add Questions
             </Button>
-            <p className="mt-3">You can upload a maximum of 5 questions</p>
+            <p className="mt-3 text-sm">You can upload a maximum of 5 questions</p>
           </div>
         </div>
       </div>

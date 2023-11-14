@@ -1,13 +1,25 @@
 import { React, useState } from "react";
-import { Input, Divider, Button, Form, Space } from "antd";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { Input, Divider, Button, Form, Space, message } from "antd";
 import { useRouter } from "next/navigation";
 
-function Access({ updatePressed, setupdatePressed, issueCategoryExist, issueCategory }) {
+function Access({
+  updatePressed,
+  setupdatePressed,
+  issueCategoryExist,
+  issueCategory,
+}) {
+  const [messageApi, contextHolder] = message.useMessage();
   const router = useRouter();
+  const success = (msg) => {
+    messageApi.open({
+      type: "success",
+      content: msg,
+    });
+  };
 
   return (
     <div className="w-[700px]">
+      {contextHolder}
       <div className="bg-white p-6 rounded-lg  ">
         <p className="mb-2 text-[#333] text-sm ">
           {" "}
@@ -35,30 +47,18 @@ function Access({ updatePressed, setupdatePressed, issueCategoryExist, issueCate
         </Button>
       </div>
 
-      {/* <Button
-        type="primary"
-        className="mr-5 w-[20%] mt-5"
-        onClick={() => {
-          setUpdateData(true);
-          console.log(UpdateData);
-          router.push("/issues/categories");
-        }}
-      >
-        Save and Apply
-      </Button> */}
       <Button
         loading={updatePressed}
         type="primary"
         className="mb-3 mr-2"
         onClick={() => {
           setupdatePressed(true);
-          
 
           if (issueCategoryExist) {
             fetch(
-              "https://digifield.onrender.com/issues/create-issue-category",
+              `https://digifield.onrender.com/issues/update-issue-category/${issueCategory.name}`,
               {
-                method: "POST",
+                method: "PUT",
                 mode: "cors",
                 cache: "no-cache",
                 headers: {
@@ -69,18 +69,18 @@ function Access({ updatePressed, setupdatePressed, issueCategoryExist, issueCate
               }
             )
               .then((res) => {
-                setupdatePressed(false)
+                setupdatePressed(false);
                 if (!res.ok) {
                   console.error("Response:", res);
                   return res.text();
                 }
-                
+
                 return res.json();
-                
               })
               .then((data) => {
                 if (data.acknowledge) {
-                  success("Category has been created");
+                  success("Category has been Updated");
+                  router.push("/issues/categories");
                 } else {
                 }
               })
