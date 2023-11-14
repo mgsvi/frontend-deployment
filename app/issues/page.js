@@ -4,16 +4,16 @@ import Link from "next/link";
 import { Button, ConfigProvider, Tabs, Card, Col, Row, Modal, Input, message } from "antd";
 import theme from "../themeConfig";
 import { LoadingOutlined } from "@ant-design/icons";
-import IssueTable from "./IssueTable";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import LoadingIndicator from "../loadingIndicator";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
+const Mapview = dynamic(() => import("./Mapview"), { ssr: false });
+const IssueTable = dynamic(() => import("./IssueTable"), { ssr: false });
 
 const Page = () => {
-  const Mapview = dynamic(() => import("./Mapview"), { ssr: false });
   const [messageApi, contextHolder] = message.useMessage();
   const { data, error, isLoading } = useSWR("https://digifield.onrender.com/issues/get-all-issues", fetcher, {
     refreshInterval: 1000,
@@ -33,107 +33,107 @@ const Page = () => {
   if (error) return <div>error</div>;
 
   return (
-    <ConfigProvider theme={theme}>
+    // <ConfigProvider theme={theme}>
+    <div className="flex flex-col h-full w-full p-4">
       {contextHolder}
-      <div className="flex flex-col h-full w-full p-4">
-        <div className="flex flex-row mb-4 w-full justify-between">
-          <h1 className="text-xl font-semi font-semibold mb-5">Issues</h1>
-          <div className="flex flex-row justify-end">
-            <Link href="/issues/categories">
-              {" "}
-              <Button>Manage categories</Button>
-            </Link>
+      <div className="flex flex-row mb-4 w-full justify-between">
+        <h1 className="text-xl font-semi font-semibold mb-5">Issues</h1>
+        <div className="flex flex-row justify-end">
+          <Link href="/issues/categories">
+            {" "}
+            <Button>Manage categories</Button>
+          </Link>
 
-            <Button type="primary" className="ml-5" onClick={() => setModal2Open(true)}>
-              Report Issue
-            </Button>
-            <Modal
-              title="Create new category"
-              centered
-              open={modal2Open}
-              onOk={() => {
-                if (issueName != "") {
-                  setModal2Open(false);
-                  router.push(`/issues/${issueName}`);
-                } else {
-                  messageApi.open({
-                    type: "warning",
-                    content: "Issue name cannot be empty",
-                  });
-                }
-              }}
-              onCancel={() => setModal2Open(false)}
-            >
-              <p className="mt-3">Name of issue</p>
-              <Input
-                placeholder=""
-                value={issueName}
-                onChange={(e) => {
-                  setissueName(e.target.value);
-                }}
-              />
-            </Modal>
-          </div>
-        </div>
-
-        {/* Conditionally render the dashboard cards */}
-        {selectedTab !== "1" && (
-          <div className="w-full mb-4">
-            <Row gutter={10}>
-              <Col span={4}>
-                <Card title="Unassigned High Priority" bordered={true}>
-                  {data ? data.length : <LoadingOutlined />}
-                </Card>
-              </Col>
-              <Col span={4}>
-                <Card title="No Updates for 3 Days" bordered={true}>
-                  2
-                </Card>
-              </Col>
-              <Col span={4}>
-                <Card title="High Priority Open" bordered={true}>
-                  1
-                </Card>
-              </Col>
-            </Row>
-          </div>
-        )}
-
-        <div className="w-full h-full">
-          <Tabs tabBarStyle={{ borderBottom: "1px solid #ced3de" }} defaultActiveKey="2" onChange={onChange}>
-            <Tabs.TabPane key="1" tab="Dashboard">
-              {
-                <div className="w-full mb-4">
-                  <Row gutter={10}>
-                    <Col span={4}>
-                      <Card title="Unassigned High Priority" bordered={true}>
-                        {data ? data.length : <LoadingOutlined />}
-                      </Card>
-                    </Col>
-                    <Col span={4}>
-                      <Card title="No Updates for 3 Days" bordered={true}>
-                        2
-                      </Card>
-                    </Col>
-                    <Col span={4}>
-                      <Card title="High Priority Open" bordered={true}>
-                        3
-                      </Card>
-                    </Col>
-                  </Row>
-                </div>
+          <Button type="primary" className="ml-5" onClick={() => setModal2Open(true)}>
+            Report Issue
+          </Button>
+          <Modal
+            title="Create new category"
+            centered
+            open={modal2Open}
+            onOk={() => {
+              if (issueName != "") {
+                setModal2Open(false);
+                router.push(`/issues/${issueName}`);
+              } else {
+                messageApi.open({
+                  type: "warning",
+                  content: "Issue name cannot be empty",
+                });
               }
-            </Tabs.TabPane>
-            <Tabs.TabPane key="2" tab="Table view">
-              <IssueTable />
-            </Tabs.TabPane>
-            <Tabs.TabPane key="3" tab="Mapview">
-              <Mapview />
-            </Tabs.TabPane>
-          </Tabs>
+            }}
+            onCancel={() => setModal2Open(false)}
+          >
+            <p className="mt-3">Name of issue</p>
+            <Input
+              placeholder=""
+              value={issueName}
+              onChange={(e) => {
+                setissueName(e.target.value);
+              }}
+            />
+          </Modal>
         </div>
       </div>
-    </ConfigProvider>
+
+      {/* Conditionally render the dashboard cards */}
+      {selectedTab !== "1" && (
+        <div className="w-full mb-4">
+          <Row gutter={10}>
+            <Col span={4}>
+              <Card title="Unassigned High Priority" bordered={true}>
+                {data ? data.length : <LoadingOutlined />}
+              </Card>
+            </Col>
+            <Col span={4}>
+              <Card title="No Updates for 3 Days" bordered={true}>
+                2
+              </Card>
+            </Col>
+            <Col span={4}>
+              <Card title="High Priority Open" bordered={true}>
+                1
+              </Card>
+            </Col>
+          </Row>
+        </div>
+      )}
+
+      <div className="w-full h-full">
+        <Tabs tabBarStyle={{ borderBottom: "1px solid #ced3de" }} defaultActiveKey="2" onChange={onChange}>
+          <Tabs.TabPane key="1" tab="Dashboard">
+            {
+              <div className="w-full mb-4">
+                <Row gutter={10}>
+                  <Col span={4}>
+                    <Card title="Unassigned High Priority" bordered={true}>
+                      {data ? data.length : <LoadingOutlined />}
+                    </Card>
+                  </Col>
+                  <Col span={4}>
+                    <Card title="No Updates for 3 Days" bordered={true}>
+                      2
+                    </Card>
+                  </Col>
+                  <Col span={4}>
+                    <Card title="High Priority Open" bordered={true}>
+                      3
+                    </Card>
+                  </Col>
+                </Row>
+              </div>
+            }
+          </Tabs.TabPane>
+          <Tabs.TabPane key="2" tab="Table view">
+            {IssueTable ? <IssueTable /> : <LoadingIndicator />}
+          </Tabs.TabPane>
+          <Tabs.TabPane key="3" tab="Mapview">
+            {Mapview ? <Mapview /> : <LoadingIndicator />}
+          </Tabs.TabPane>
+        </Tabs>
+      </div>
+    </div>
+    //  </ConfigProvider>
   );
 };
 

@@ -1,12 +1,6 @@
 import { React, useState } from "react";
 import dynamic from "next/dynamic";
-import {
-  MapContainer,
-  Marker,
-  Popup,
-  TileLayer,
-  useMapEvents,
-} from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
@@ -47,28 +41,14 @@ function Map({ latLng, setLatLng }) {
           onClick={() => setMode(!mode)}
         >
           {mode ? (
-            <Image
-              src="/normal.png"
-              className="border"
-              width={100}
-              height={100}
-              alt="Satellite View"
-            />
+            <Image src="/normal.png" className="border" width={100} height={100} alt="Satellite View" />
           ) : (
-            <Image
-              src="/satellite.png"
-              className="border"
-              width={100}
-              height={100}
-              alt="Normal View"
-            />
+            <Image src="/satellite.png" className="border" width={100} height={100} alt="Normal View" />
           )}
         </div>
         <Marker
           position={
-            latLng.lat != null && latLng.lng != null
-              ? [latLng.lat, latLng.lng]
-              : [12.99097225692328, 80.17281532287599]
+            latLng.lat != null && latLng.lng != null ? [latLng.lat, latLng.lng] : [12.99097225692328, 80.17281532287599]
           }
         ></Marker>
         <UpdateMapPosition setLatLng={setLatLng} />
