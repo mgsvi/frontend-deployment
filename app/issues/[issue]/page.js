@@ -1,31 +1,18 @@
 "use client";
 import { React, useState, useEffect } from "react";
-import {
-  Divider,
-  Form,
-  Input,
-  Button,
-  Select,
-  Upload,
-  Modal,
-  message,
-} from "antd";
+import { Divider, Form, Input, Button, Select, Upload, Modal, message } from "antd";
 import { PlusOutlined, LeftOutlined } from "@ant-design/icons";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  useMapEvents,
-  useMap,
-} from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import "leaflet/dist/leaflet.css";
 import useSWR from "swr";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
+const Map = dynamic(() => import("./map"), { ssr: false });
 
 function ReportIssue({ params }) {
   const router = useRouter();
@@ -66,14 +53,14 @@ function ReportIssue({ params }) {
   const [latLng, setLatLng] = useState([12.99097225692328, 80.17281532287599]);
   const [messageApi, contextHolder] = message.useMessage();
 
-  const UpdatePosition = () => {
-    const map = useMapEvents({
-      moveend: () => {
-        setPosition([map.getCenter().lat, map.getCenter().lng]);
-      },
-    });
-    return null;
-  };
+  // const UpdatePosition = () => {
+  //   const map = useMapEvents({
+  //     moveend: () => {
+  //       setPosition([map.getCenter().lat, map.getCenter().lng]);
+  //     },
+  //   });
+  //   return null;
+  // };
   const [fileList, setFileList] = useState([
     {
       uid: "-1",
@@ -87,8 +74,7 @@ function ReportIssue({ params }) {
     console.log("search:", value);
   };
 
-  const filterOption = (input, option) =>
-    (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+  const filterOption = (input, option) => (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
 
   const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
@@ -96,18 +82,16 @@ function ReportIssue({ params }) {
     }
     setPreviewImage(file.url || file.preview);
     setPreviewOpen(true);
-    setPreviewTitle(
-      file.name || file.url.substring(file.url.lastIndexOf("/") + 1)
-    );
+    setPreviewTitle(file.name || file.url.substring(file.url.lastIndexOf("/") + 1));
   };
-  function UpdateMapPosition({ setLatLng }) {
-    const map = useMap();
-    map.on("click", function (e) {
-      const { lat, lng } = e.latlng;
-      setLatLng([lat, lng]);
-    });
-    return null;
-  }
+  // function UpdateMapPosition({ setLatLng }) {
+  //   const map = useMap();
+  //   map.on("click", function (e) {
+  //     const { lat, lng } = e.latlng;
+  //     setLatLng([lat, lng]);
+  //   });
+  //   return null;
+  // }
 
   const handleChange1 = ({ fileList: newFileList }) => setFileList(newFileList);
   const uploadButton = (
@@ -142,8 +126,7 @@ function ReportIssue({ params }) {
         issue.remarks = value[key];
       } else if (key === "description") {
         issue.description = value[key];
-      }
-      else if (key === "location") {
+      } else if (key === "location") {
         issue.location = value[key];
       } else {
         temp[`${key}`] = value[key];
@@ -168,7 +151,7 @@ function ReportIssue({ params }) {
       mode: "cors",
       cache: "no-cache",
       headers: {
-       "Content-Type": "application/json",
+        "Content-Type": "application/json",
         accept: "application/json",
       },
       body: JSON.stringify(issue),
@@ -219,12 +202,7 @@ function ReportIssue({ params }) {
       <div className="px-10 pt-10 ">
         <div className="flex justify-between">
           <div className="flex gap-2">
-            <Button
-              type="text"
-              ghost
-              icon={<LeftOutlined />}
-              onClick={() => router.push(`/issues`)}
-            ></Button>
+            <Button type="text" ghost icon={<LeftOutlined />} onClick={() => router.push(`/issues`)}></Button>
 
             <h1 className="text-xl font-semi font-medium">Report issue</h1>
           </div>
@@ -339,10 +317,7 @@ function ReportIssue({ params }) {
                     />
                   </div>
                 </Form.Item>
-                <Form.Item
-                  name="images"
-                 
-                >
+                <Form.Item name="images">
                   <div className="mt-5 flex flex-row ">
                     <div>
                       <Upload
@@ -354,12 +329,7 @@ function ReportIssue({ params }) {
                       >
                         {fileList.length >= 8 ? null : uploadButton}
                       </Upload>
-                      <Modal
-                        open={previewOpen}
-                        title={previewTitle}
-                        footer={null}
-                        onCancel={handleCancel}
-                      >
+                      <Modal open={previewOpen} title={previewTitle} footer={null} onCancel={handleCancel}>
                         <img
                           alt="example"
                           style={{
@@ -399,11 +369,7 @@ function ReportIssue({ params }) {
                     />
                   </div>
                 </Form.Item>
-                <Form.Item
-                  name="location"
-                 
-                >
-                  <div>
+                <Form.Item name="location">
                     <div
                       style={{
                         display: "flex",
@@ -424,6 +390,7 @@ function ReportIssue({ params }) {
                           name="latitude"
                           value={latLng[0]}
                           onChange={(e) => {
+                            console.log(latLng)
                             const newLat = e.target.value
                               ? parseFloat(e.target.value)
                               : null;
@@ -458,7 +425,7 @@ function ReportIssue({ params }) {
                         />
                       </div>
                     </div>
-                    <MapContainer
+                  {/* <MapContainer
                       center={[12.99097225692328, 80.17281532287599]}
                       zoom={13}
                       style={{ width: "100%", height: "300px" }}
@@ -506,8 +473,9 @@ function ReportIssue({ params }) {
                       ></Marker>
 
                       <UpdateMapPosition setLatLng={setLatLng} />
-                    </MapContainer>
-                  </div>
+                    </MapContainer> */}
+                  {/* </div> */}
+                  <Map latLng={latLng} setLatLng={setLatLng} />
                 </Form.Item>
                 <Form.Item
                   name="site"
@@ -534,12 +502,7 @@ function ReportIssue({ params }) {
                   </div>
                 </Form.Item>
                 <div className=" flex justify-end">
-                  <Button
-                    type="primary"
-                    ghost
-                    className="mr-5 w-[20%] mt-5"
-                    style={{ background: "white" }}
-                  >
+                  <Button type="primary" ghost className="mr-5 w-[20%] mt-5" style={{ background: "white" }}>
                     Cancel
                   </Button>
                   <Button

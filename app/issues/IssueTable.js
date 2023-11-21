@@ -1,25 +1,24 @@
+"use client"
 import React, { useState, useEffect, useRef } from "react";
 import { Divider, Table, Input, Space, Button, Result } from "antd";
 import useSWR from "swr";
 import IssueDrawer from "./IssueDrawer";
 import { SearchOutlined, DownloadOutlined } from "@ant-design/icons";
 import { Excel } from "antd-table-saveas-excel";
-import { FloatButton } from "antd";
 import Highlighter from "react-highlight-words";
 import { Modal } from "antd";
-
 
 const fetcher = (...args) => fetch(...args).then((res) => res.json());
 
 const App = () => {
   const searchInput = useRef(null);
   const [searchText, setSearchText] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState('');
+  const [searchedColumn, setSearchedColumn] = useState("");
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex)
+    setSearchedColumn(dataIndex);
   };
   const handleReset = (clearFilters, confirm) => {
     clearFilters();
@@ -28,13 +27,7 @@ const App = () => {
   };
 
   const getColumnSearchProps = (dataIndex) => ({
-    filterDropdown: ({
-      setSelectedKeys,
-      selectedKeys,
-      confirm,
-      clearFilters,
-      close,
-    }) => (
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
       <div
         style={{
           padding: 8,
@@ -45,9 +38,7 @@ const App = () => {
           ref={searchInput}
           placeholder={`Search ${dataIndex}`}
           value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
-          }
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
           onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
           style={{
             marginBottom: 8,
@@ -94,8 +85,7 @@ const App = () => {
         }}
       />
     ),
-    onFilter: (value, record) =>
-      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    onFilter: (value, record) => record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
     onFilterDropdownOpenChange: (visible) => {
       if (visible) {
         setTimeout(() => searchInput.current?.select(), 100);
@@ -105,23 +95,23 @@ const App = () => {
       searchedColumn === dataIndex ? (
         <Highlighter
           highlightStyle={{
-            backgroundColor: '#ffc069',
+            backgroundColor: "#ffc069",
             padding: 0,
           }}
           searchWords={[searchText]}
           autoEscape
-          textToHighlight={text ? text.toString() : ''}
+          textToHighlight={text ? text.toString() : ""}
         />
       ) : (
         <Highlighter
-        highlightStyle={{
-          backgroundColor: '#ffc069',
-          padding: 0,
-        }}
-        searchWords={[searchQuery]}
-        autoEscape
-        textToHighlight={text ? text.toString() : ''}
-      />
+          highlightStyle={{
+            backgroundColor: "#ffc069",
+            padding: 0,
+          }}
+          searchWords={[searchQuery]}
+          autoEscape
+          textToHighlight={text ? text.toString() : ""}
+        />
       ),
   });
 
@@ -162,17 +152,12 @@ const App = () => {
       dataIndex: "reported_time",
       render: (text) => {
         const reportedTime = new Date(text);
-        const formattedDate = `${
-          reportedTime.getMonth() + 1
-        }/${reportedTime.getDate()}/${reportedTime.getFullYear()}`;
+        const formattedDate = `${reportedTime.getMonth() + 1}/${reportedTime.getDate()}/${reportedTime.getFullYear()}`;
         const hours = reportedTime.getHours();
         const amPm = hours >= 12 ? "PM" : "AM";
-        const formattedTime = `${hours % 12 || 12}:${String(
-          reportedTime.getMinutes()
-        ).padStart(2, "0")}:${String(reportedTime.getSeconds()).padStart(
-          2,
-          "0"
-        )} ${amPm}`;
+        const formattedTime = `${hours % 12 || 12}:${String(reportedTime.getMinutes()).padStart(2, "0")}:${String(
+          reportedTime.getSeconds()
+        ).padStart(2, "0")} ${amPm}`;
         return `${formattedDate} ${formattedTime}`;
       },
       width: 120,
@@ -220,12 +205,9 @@ const App = () => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [showDrawer, setShowDrawer] = useState(false);
 
-  const { data, error, isLoading } = useSWR(
-    "https://digifield.onrender.com/issues/get-all-issues",
-    fetcher,
-    { refreshInterval: 1000 }
-  );
-
+  const { data, error, isLoading } = useSWR("https://digifield.onrender.com/issues/get-all-issues", fetcher, {
+    refreshInterval: 1000,
+  });
 
   const openDrawer = (record) => {
     setSelectedRow(record);
@@ -268,20 +250,12 @@ const App = () => {
   };
 
   if (error)
-  return (
-    <div>
-      <Result
-        status="warning"
-        title="There are some problems with loading the fields."
-      />
-    </div>
-  );
-if (isLoading)
-  return (
-    <div>
-      loading
-    </div>
-  );
+    return (
+      <div>
+        <Result status="warning" title="There are some problems with loading the fields." />
+      </div>
+    );
+  if (isLoading) return <div>loading</div>;
 
   return (
     <div>
@@ -300,12 +274,7 @@ if (isLoading)
             setSearchQuery(e.target.value);
           }}
         />
-        <Button
-          type="primary"
-          shape="round"
-          icon={<DownloadOutlined />}
-          onClick={showDownloadModal}
-        ></Button>
+        <Button type="primary" shape="round" icon={<DownloadOutlined />} onClick={showDownloadModal}></Button>
         <Modal
           title="Download Confirmation"
           visible={isDownloadModalVisible}
@@ -326,30 +295,24 @@ if (isLoading)
         }}
         columns={columns}
         dataSource={data.filter((val) => {
-              return (
-                searchQuery === "" ||
-                val.issue_id.toLowerCase().includes(searchQuery) ||
-                val.priority.toLowerCase().includes(searchQuery) ||
-                val.reported_time.toLowerCase().includes(searchQuery) ||
-                val.reported_by.toLowerCase().includes(searchQuery) ||
-                val.description.toLowerCase().includes(searchQuery) ||
-                val.status.toLowerCase().includes(searchQuery) ||
-                val.assigned_to.toLowerCase().includes(searchQuery)
-              );
-            })}
+          return (
+            searchQuery === "" ||
+            val.issue_id.toLowerCase().includes(searchQuery) ||
+            val.priority.toLowerCase().includes(searchQuery) ||
+            val.reported_time.toLowerCase().includes(searchQuery) ||
+            val.reported_by.toLowerCase().includes(searchQuery) ||
+            val.description.toLowerCase().includes(searchQuery) ||
+            val.status.toLowerCase().includes(searchQuery) ||
+            val.assigned_to.toLowerCase().includes(searchQuery)
+          );
+        })}
         onChange={onChange}
         size="small"
         sticky
         rowClassName={"hover: cursor-pointer"}
       />
 
-      {selectedRow && (
-        <IssueDrawer
-          open={showDrawer}
-          onClose={closeDrawer}
-          selectedRow={selectedRow}
-        />
-      )}
+      {selectedRow && <IssueDrawer open={showDrawer} onClose={closeDrawer} selectedRow={selectedRow} />}
     </div>
   );
 };

@@ -13,23 +13,21 @@ import {
   Form,
   Input,
 } from "antd";
+import "leaflet/dist/leaflet.css";
+import "leaflet-defaulticon-compatibility";
+import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import Chat from "./Chat";
 import { MdLocationPin } from "react-icons/md";
 import { BsFillBookmarkFill } from "react-icons/bs";
 import { BiSolidUser } from "react-icons/bi";
 import { PiFolderOpenFill } from "react-icons/pi";
 import { MdDeleteOutline } from "react-icons/md";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
-import dynamic from "next/dynamic";
-const Map = dynamic(() => import("./Editmap"), { ssr: false });
 
-const fetcher = (...args) => fetch(...args).then((res) => res.json());
+const Map = dynamic(() => import("./[issue]/map"), { ssr: false });
 
-const onClick = ({ key }) => {
-  message.info(`Click on item ${key}`);
-  selectedRow.status === key;
-};
 
 const temp = [
   "https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png",
@@ -47,6 +45,18 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
     editedRow.location[1],
   ]);
 
+  const UpdateMapPosition = () => {
+    const map = useMapEvents({
+      click(e) {
+        setLatLng(e.latlng);
+        setEditedRow({
+          ...editedRow,
+          location: [e.latlng.lat, e.latlng.lng],
+        });
+      },
+    });
+    return null;
+  };
   console.log(editedRow.location);
   const [mode, setMode] = useState(true);
 
@@ -56,22 +66,10 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
 
   const handleCloseMapModal = () => {
     setmapModalOpen(false);
-    setEditedRow({ ...editedRow, location: [latLng.lat, latLng.lng] });
   };
 
-  const router = useRouter();
-
-  const { data, error, isLoading } = useSWR(
-    "https://digifield.onrender.com/issues/get-all-issues",
-    fetcher,
-    { refreshInterval: 10000 }
-  );
-
   const [messageApi, contextHolder] = message.useMessage();
-  const [selectedPriority, setSelectedPriority] = useState(
-    selectedRow.priority
-  );
-  let issue = {};
+  const [selectedPriority, setSelectedPriority] = useState(selectedRow.priority);
   const uniqueId = self.crypto.randomUUID();
   const [form] = Form.useForm();
   form.setFieldsValue({ "Unique Id": uniqueId });
@@ -117,19 +115,16 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
   const handleUpdate = () => {
     selectedRow = editedRow;
     toggleEditMode();
-    fetch(
-      `https://digifield.onrender.com/issues/update-issue/${selectedRow.issue_id}`,
-      {
-        method: "PUT",
-        mode: "cors",
-        cache: "no-cache",
-        headers: {
-          "Content-Type": "application/json",
-          accept: "application/json",
-        },
-        body: JSON.stringify(editedRow),
-      }
-    )
+    fetch(`https://digifield.onrender.com/issues/update-issue/${selectedRow.issue_id}`, {
+      method: "PUT",
+      mode: "cors",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json",
+        accept: "application/json",
+      },
+      body: JSON.stringify(editedRow),
+    })
       .then((res) => res.json())
       .then((data) => {
         if (data.acknowledge) {
@@ -146,18 +141,15 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
   };
   const handleConfirmDelete = () => {
     console.log("Deleting issue...");
-    fetch(
-      `https://digifield.onrender.com/issues/delete-issue/${selectedRow.issue_id}`,
-      {
-        method: "DELETE",
-        mode: "cors",
-        cache: "no-cache",
-        headers: {
-          "Content-Type": "application/json",
-          accept: "application/json",
-        },
-      }
-    )
+    fetch(`https://digifield.onrender.com/issues/delete-issue/${selectedRow.issue_id}`, {
+      method: "DELETE",
+      mode: "cors",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json",
+        accept: "application/json",
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         if (data.acknowledge) {
@@ -175,18 +167,15 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
   };
 
   const reportedTime = new Date(selectedRow.reported_time);
-  const formattedDate = `${
-    reportedTime.getMonth() + 1
-  }/${reportedTime.getDate()}/${reportedTime.getFullYear()}`;
+  const formattedDate = `${reportedTime.getMonth() + 1}/${reportedTime.getDate()}/${reportedTime.getFullYear()}`;
   let hours = reportedTime.getHours();
   const amPm = hours >= 12 ? "PM" : "AM";
   if (hours > 12) {
     hours -= 12;
   }
-  const formattedTime = `${hours}:${String(reportedTime.getMinutes()).padStart(
-    2,
-    "0"
-  )}:${String(reportedTime.getSeconds()).padStart(2, "0")} ${amPm}`;
+  const formattedTime = `${hours}:${String(reportedTime.getMinutes()).padStart(2, "0")}:${String(
+    reportedTime.getSeconds()
+  ).padStart(2, "0")} ${amPm}`;
 
   return (
     <Drawer
@@ -259,27 +248,127 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                 <p className="text-sm text-gray-500 mt-2">
                   {formattedDate} {formattedTime}
                 </p>
-                <Button
-                  type="default"
-                  className="p-1"
-                  onClick={() => setmapModalOpen(true)}
-                >
+                <Button type="default" className="p-1" onClick={() => setmapModalOpen(true)}>
                   <MdLocationPin className="text-2xl mb-2 text-red-600" />
                 </Button>
                 {mapModalOpen ? (
-                  
-                    <Map
-                      setLatLng={setLatLng}
-                      latLng={latLng}
-                      mapModalOpen={mapModalOpen}
-                      setmapModalOpen={setmapModalOpen}
-                      handleOpenMapModal={handleOpenMapModal}
-                      handleCloseMapModal={handleCloseMapModal}
-                      editedRow={editedRow}
-                      setEditedRow={setEditedRow}
-                      mode={mode}
-                      setMode={setMode}
-                    />
+                  <div>
+                    <Modal
+                      title="Change Coordinates"
+                      centered
+                      visible={mapModalOpen}
+                      onOk={handleCloseMapModal}
+                      onCancel={handleCloseMapModal}
+                      className="w-1/2"
+                    >
+                      <div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                          className="mb-5"
+                        >
+                          <div style={{ flex: 1, marginRight: "10px" }}>
+                            <label htmlFor="latitude" className="mb-2 text-[#333] font-light">
+                              Latitude:
+                            </label>
+                            <Input
+                              type="number"
+                              id="latitude"
+                              name="latitude"
+                              value={editedRow.location[0]}
+                              onChange={(e) => {
+                                const newLat = e.target.value ? parseFloat(e.target.value) : null;
+                                setLatLng([newLat, latLng[1]]);
+                                setEditedRow({
+                                  ...editedRow,
+                                  location: [newLat, latLng[1]],
+                                });
+                              }}
+                            />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <label htmlFor="longitude" className="text-[#333] font-light mb-2">
+                              Longitude:
+                            </label>
+                            <Input
+                              type="number"
+                              id="longitude"
+                              name="longitude"
+                              value={editedRow.location[1]}
+                              onChange={(e) => {
+                                const newLng = e.target.value ? parseFloat(e.target.value) : null;
+                                setLatLng([latLng[0], newLng]);
+                                setEditedRow({
+                                  ...editedRow,
+                                  location: [latLng[0], newLng],
+                                });
+                              }}
+                            />
+                          </div>
+                        </div>
+                        {/* <MapContainer
+                          center={latLng}
+                          zoom={13}
+                          style={{ width: "100%", height: "300px" }}
+                        >
+                          {mode ? (
+                            <TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
+                          ) : (
+                            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                          )}
+
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "10px",
+                              right: "10px",
+                              zIndex: 1000, // to make sure it's above the map layers
+                            }}
+                            onClick={() => setMode(!mode)}
+                          >
+                            {mode ? (
+                              <Image
+                                src="/normal.png"
+                                className="border"
+                                width={100}
+                                height={100}
+                                alt="Satellite View"
+                              />
+                            ) : (
+                              <Image
+                                src="/satellite.png"
+                                className="border"
+                                width={100}
+                                height={100}
+                                alt="Normal View"
+                              />
+                            )}
+                          </div>
+                          <Marker
+                            draggable={true}
+                            position={
+                              latLng[0] !== null && latLng[1] !== null
+                                ? latLng
+                                : [12.99097225692328, 80.17281532287599]
+                            }
+                          ></Marker>
+
+                          <UpdateMapPosition setLatLng={setLatLng} />
+                        </MapContainer> */}
+                        <Map
+                          latLng={editedRow.location}
+                          setLatLng={(newLatLng) => {
+                            setEditedRow({
+                              ...editedRow,
+                              location: newLatLng,
+                            });
+                          }}
+                        />
+                      </div>
+                    </Modal>
+                  </div>
                 ) : (
                   ""
                 )}
@@ -325,9 +414,7 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                 <h1>Media,Links and docs</h1>
                 <div className="bg-white rounded p-3 h-[200px] overflow-hidden">
                   <Carousel
-                    prevArrow={
-                      <Button className="carousel-arrow">Previous</Button>
-                    }
+                    prevArrow={<Button className="carousel-arrow">Previous</Button>}
                     nextArrow={<Button className="carousel-arrow">Next</Button>}
                   >
                     {temp.map((i, index) => {
@@ -347,9 +434,7 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
               <div className="flex flex-row">
                 <div>
                   <div>
-                    <h1 className="font-semibold text-xl">
-                      {editedRow.remarks}
-                    </h1>
+                    <h1 className="font-semibold text-xl">{editedRow.remarks}</h1>
                     <p className="pt-2 pr-5">{editedRow.description}</p>
                   </div>
                 </div>
@@ -404,9 +489,7 @@ const IssueDrawer = ({ open, onClose, selectedRow }) => {
                 <h1>Media,Links and docs</h1>
                 <div className="bg-white rounded p-3 h-[200px] overflow-hidden">
                   <Carousel
-                    prevArrow={
-                      <Button className="carousel-arrow">Previous</Button>
-                    }
+                    prevArrow={<Button className="carousel-arrow">Previous</Button>}
                     nextArrow={<Button className="carousel-arrow">Next</Button>}
                   >
                     {temp.map((i, index) => {
