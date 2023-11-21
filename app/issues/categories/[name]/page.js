@@ -10,6 +10,7 @@ import { Menu, Dropdown, Popconfirm } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 
 function CategoryCreate({ params }) {
+  
   const [Name, setName] = useState(params.name);
   const [updatePressed, setupdatePressed] = useState(false);
   const [issueCategoryExist, setissueCategoryExist] = useState(false);
@@ -115,14 +116,14 @@ function CategoryCreate({ params }) {
     <div className="flex flex-col">
       {contextHolder}
       <div className="px-10 pt-10 ">
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-normal">
           <Button
             type="text"
             ghost
             icon={<LeftOutlined />}
             onClick={() => router.push(`/issues/categories`)}
           ></Button>
-
+    
           <h1 className="text-xl font-semi font-medium">
             Create issue category{" "}
           </h1>
@@ -149,7 +150,7 @@ function CategoryCreate({ params }) {
                 });
             }}
           >
-            <button className="text-[#040303] bg-transparent hover:text-black text-lg justify-end">
+            <button className="flex text-[#040303] bg-transparent hover:text-black text-lg">
               <EllipsisOutlined rotate={90} />
             </button>
           </Popconfirm>

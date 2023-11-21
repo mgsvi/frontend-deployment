@@ -53,6 +53,7 @@ function Details({ moveToTab, setissueCategory, issueCategory }) {
               value={issueCategory.name}
               onChange={(e) => {
                 setissueCategory({ ...issueCategory, name: e.target.value });
+                console.log(issueCategory)
               }}
             />
           </div>

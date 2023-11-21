@@ -28,6 +28,10 @@ const AssetTable = () => {
     setSearchText("");
     confirm();
   };
+  const handleChange=(value)=>{
+
+  };
+
 
   useEffect(() => {
     fetch("https://digifield.onrender.com/assets/get-all-assets")
@@ -74,8 +78,7 @@ const AssetTable = () => {
           ref={searchInput}
           placeholder={`Search ${dataIndex}`}
           value={selectedKeys[0]}
-          onChange={(e) =>
-            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          onChange={handleChange
           }
           onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
           style={{

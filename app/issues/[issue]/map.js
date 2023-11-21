@@ -11,6 +11,7 @@ import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 import Image from "next/image";
 import { Input } from "antd";
+
 function Map({latLng, setLatLng}) {
   const [mode, setMode] = useState(false);
 
