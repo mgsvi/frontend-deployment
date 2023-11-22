@@ -18,15 +18,16 @@ const Missedinspectable = ({ archived }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const router = useRouter();
-  const { data, error, isLoading } = useSWR(
-    `https://digifield.onrender.com/schedule/get-all-schedules`,
-    fetcher,
-    { refreshInterval: 1000 }
-  );
+  const { data, error, isLoading } = useSWR(`https://digifield.onrender.com/schedule/get-all-schedules`, fetcher, {
+    refreshInterval: 1000,
+  });
   const [columData, setcolumData] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
+
+
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -127,26 +128,30 @@ const Missedinspectable = ({ archived }) => {
       ...getColumnSearchProps("title"),
     },
     {
-      title: "Assigned To",
+      title: "Template",
+      dataIndex: "template",
+      key: "template",
+      ...getColumnSearchProps("template"),
+    },
+    {
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      ...getColumnSearchProps("createdAt"),
+    },
+    {
+      title: "Assigned to",
       dataIndex: "assignedTo",
       key: "assignedTo",
       ...getColumnSearchProps("assignedTo"),
     },
     {
-        title: "Status",
-        dataIndex: "assignedTo",
-        key: "assignedTo",
-        ...getColumnSearchProps("assignedTo"),
-    },
-    {
-        title: "NextDue",
-        dataIndex: "assignedTo",
-        key: "assignedTo",
-        ...getColumnSearchProps("assignedTo"),
+      title: "Is paused",
+      dataIndex: "isPaused",
+      key: "isPaused",
+      ...getColumnSearchProps("isPaused"),
     },
   ];
-
-  
 
   if (isLoading) return <LoadingIndicator />;
 

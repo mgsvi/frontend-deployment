@@ -18,17 +18,21 @@ const ManageShedtable = ({ archived }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const router = useRouter();
-  const { data, error, isLoading } = useSWR(
-    `https://digifield.onrender.com/schedule/get-all-schedules`,
-    fetcher,
-    { refreshInterval: 1000 }
-  );
+  const { data, error, isLoading } = useSWR(`https://digifield.onrender.com/schedule/get-all-schedules`, fetcher, {
+    refreshInterval: 1000,
+  });
   const [columData, setcolumData] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
 
-  
+  useEffect(() => {
+    if (data != null) {
+      const temp = data.map((item, index) => ({ ...item, key: index }));
+      setcolumData(temp);
+    }
+  }, [data]);
+
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -121,6 +125,7 @@ const ManageShedtable = ({ archived }) => {
         text
       ),
   });
+  
   const columns = [
     {
       title: "Title",
@@ -129,26 +134,42 @@ const ManageShedtable = ({ archived }) => {
       ...getColumnSearchProps("title"),
     },
     {
-      title: "Assigned To",
+      title: "Template",
+      dataIndex: "template",
+      key: "template",
+      ...getColumnSearchProps("template"),
+    },
+    {
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (text) => {
+        const reportedTime = new Date(text);
+        const formattedDate = `${reportedTime.getMonth() + 1}/${reportedTime.getDate()}/${reportedTime.getFullYear()}`;
+        const hours = reportedTime.getHours();
+        const amPm = hours >= 12 ? "PM" : "AM";
+        const formattedTime = `${hours % 12 || 12}:${String(reportedTime.getMinutes()).padStart(2, "0")}:${String(
+          reportedTime.getSeconds()
+        ).padStart(2, "0")} ${amPm}`;
+        return `${formattedDate} ${formattedTime}`;
+      },
+      sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+    },
+    {
+      title: "Assigned to",
       dataIndex: "assignedTo",
       key: "assignedTo",
       ...getColumnSearchProps("assignedTo"),
     },
     {
-        title: "Status",
-        dataIndex: "assignedTo",
-        key: "assignedTo",
-        ...getColumnSearchProps("assignedTo"),
-    },
-    {
-        title: "NextDue",
-        dataIndex: "assignedTo",
-        key: "assignedTo",
-        ...getColumnSearchProps("assignedTo"),
+      title: "Paused Status",
+      dataIndex: "isPaused",
+      key: "isPaused",
+      render: (condition) => {
+        return condition ? "Paused" : "Active"
+      }
     },
   ];
-
-  
 
   if (isLoading) return <LoadingIndicator />;
 

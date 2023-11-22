@@ -1,0 +1,39 @@
+.custom-input {
+    border-radius: 8px;
+    border: 1px #b6b8b9 solid;
+    padding: 16px 8px;
+    background-color: white;
+    height: 22px;
+  }
+  
+  .custom-input:focus {
+    outline: none;
+    border-radius: 8px;
+    border: 1px solid #1677ff;
+    box-shadow: rgba(5, 145, 255, 0.1);
+  }
+
+  .custom-input:hover {
+    border-radius: 8px;
+    border: 1px solid #4096ff;
+  }
+
+  .custom-input:disabled {
+    border-radius: 8px;
+    border: 1px solid #b6b8b9;
+    background-color: #eaeded;
+    cursor: not-allowed;
+  }
+
+  .custom-calendar.rmdp-wrapper,
+.rmdp-container .custom-calendar.ep-arrow::after {
+  background-color: rgb(255, 255, 255);
+}
+
+.rmdp-container .custom-calendar.ep-arrow[direction="bottom"] {
+  border-top: 1px solid rgb(239, 239, 239);
+}
+
+.rmdp-container .custom-calendar.ep-arrow[direction="top"] {
+  border-bottom: 1px solid rgb(255, 255, 255);
+}

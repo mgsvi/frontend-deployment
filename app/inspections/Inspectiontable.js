@@ -124,17 +124,7 @@ const Inspectiontable = () => {
     </div>
   );
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  const data = [
+   const data = [
     {
       key: '1',
       date: '14 Feb',
