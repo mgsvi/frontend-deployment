@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { FileExclamationOutlined, FileDoneOutlined, SmileOutlined } from "@ant-design/icons";
+import {
+  FileExclamationOutlined,
+  FileDoneOutlined,
+  SmileOutlined,
+  BellOutlined,
+} from "@ant-design/icons";
 import { SearchOutlined } from "@ant-design/icons";
 import { RightOutlined } from "@ant-design/icons";
-import { Drawer, Button, Result } from "antd";
+import { Drawer, Button, Result, Divider } from "antd";
 import LoadingIndicator from "../loadingIndicator";
 
 function MySchedule({ inspections }) {
   const [groupedInspections, setgroupedInspections] = useState(null);
+  const [drawerData, setDrawerData] = useState([]);
 
   useEffect(() => {
     let grouped = inspections.reduce((groups, inspection) => {
@@ -19,14 +25,16 @@ function MySchedule({ inspections }) {
     }, {});
     setgroupedInspections(grouped);
   }, [inspections]);
-
+  console.log(inspections);
   const [drawerVisible, setDrawerVisible] = useState(false);
 
   const formatTime = (time) => {
     const reportedTime = new Date(time);
     const hours = reportedTime.getHours();
     const amPm = hours >= 12 ? "PM" : "AM";
-    const formattedTime = `${hours % 12 || 12}:${String(reportedTime.getMinutes()).padStart(2, "0")} ${amPm}`;
+    const formattedTime = `${hours % 12 || 12}:${String(
+      reportedTime.getMinutes()
+    ).padStart(2, "0")} ${amPm}`;
     return `${formattedTime}`;
   };
 
@@ -49,25 +57,40 @@ function MySchedule({ inspections }) {
     const date = new Date(inspection.assignedAt);
     const today = new Date();
 
-    const handleCardClick = () => {
+    const handleCardClick = (inspection) => {
       setDrawerVisible(true);
+      console.log(inspection);
+      setDrawerData(inspection);
     };
 
     return (
       <Button
         className="flex flex-row w-full h-fit bg-white p-3 rounded-lg items-center justify-between"
-        onClick={handleCardClick}
+        onClick={() => handleCardClick(inspection)}
       >
         <div className="flex flex-row w-full h-fit gap-3 justify-start">
           {date < today ? (
-            <FileDoneOutlined className={inspection.status === "completed" ? "text-[#219653]" : "text-[#C62F35]"} />
+            <FileDoneOutlined
+              className={
+                inspection.status === "completed"
+                  ? "text-[#219653]"
+                  : "text-[#C62F35]"
+              }
+            />
           ) : (
-            <FileDoneOutlined className={inspection.status === "completed" ? "text-[#219653]" : "text-[#FE8B0F]"} />
+            <FileDoneOutlined
+              className={
+                inspection.status === "completed"
+                  ? "text-[#219653]"
+                  : "text-[#FE8B0F]"
+              }
+            />
           )}
           <div className="flex flex-col w-full h-fit items-start">
-            <p className="text-[#183348]">{inspection.title}</p>
+            <p className="text-[#183348] gap-2">{inspection.title}</p>
             <div className="text-sm text-gray-500">
-              {formatTime(inspection.startTime)} - {formatTime(inspection.endTime)}
+              {formatTime(inspection.startTime)} -{" "}
+              {formatTime(inspection.endTime)}
             </div>
           </div>
         </div>
@@ -75,7 +98,8 @@ function MySchedule({ inspections }) {
           {(() => {
             if (inspection.status !== "completed" && date < today)
               return <p className="text-[#C62F35] text-sm">Overdue</p>;
-            else if (inspection.status === "completed") return <p className="text-[#2F80ED] text-sm">Done</p>;
+            else if (inspection.status === "completed")
+              return <p className="text-[#2F80ED] text-sm">Done</p>;
             else if (inspection.status !== "completed" && date > today)
               return <p className="text-[#FE8B0F] text-sm">Upcoming</p>;
             else return <p className="text-[#183348] text-xs">Due today</p>;
@@ -84,7 +108,8 @@ function MySchedule({ inspections }) {
       </Button>
     );
   };
-
+  const date = new Date(drawerData.assignedAt);
+  const today = new Date();
   return (
     <div className="flex flex-col w-full h-full ">
       {Object.keys(groupedInspections).map((key) => {
@@ -108,18 +133,62 @@ function MySchedule({ inspections }) {
         );
       })}
       <Drawer
-        title={
-          <div className="flex items-center justify-between">
-            <span>Completed Inspection</span>
-          </div>
-        }
+        title={(() => {
+          if (drawerData.status !== "completed" && date < today)
+            return <p className=" text-sm ">Overdue Inspection</p>;
+          else if (drawerData.status === "completed")
+            return <p className="text-sm ">Completed Inspection</p>;
+          else if (drawerData.status !== "completed" && date > today)
+            return (
+              <p className="text-[#FE8B0F] text-sm">Upcoming Inspection</p>
+            );
+          else return <p className="text-[#183348] text-xs">Due today</p>;
+        })()}
         placement="right"
+        className="bg-[#CED3DE]"
         closable={true}
-        onClose={() => setDrawerVisible(false)}
+        onClose={() => {
+          setDrawerVisible(false);
+          setDrawerData(null);
+        }}
         visible={drawerVisible}
         width={450}
       >
-        {drawerContent}
+        {drawerData !== null && (
+          <div>
+            <div className="bg-white">
+              <div className=" font-semibold">{drawerData.title}</div>
+              <div className="pt-5">
+                <p className="text-sm text-gray-500">Schedule Window</p>
+                <div className=" text-sm">
+                  {formatTime(drawerData.startTime)} -{" "}
+                  {formatTime(drawerData.endTime)}
+                </div>
+              </div>
+              <div className="pt-5">
+                <p className="text-sm text-gray-500">Assigned By</p>
+                <div>{drawerData.assignedTo}</div>
+              </div>
+              <div className="pt-5">
+                <p className="text-sm text-gray-500">Assets</p>
+                <div>New Assets</div>
+              </div>
+            </div>
+            <Divider />
+            <div className="m-5 rounded-lg bg-white border py-3 px-3">
+              <div className="pt-5">
+                <p className="text-sm text-gray-500">Assigned To</p>
+                <div>{drawerData.assignedTo}</div>
+              </div>
+              <div>
+                <Button type="primary" className="my-3 w-full">Start Inspection</Button>
+              </div>
+              <div>
+                <Button danger className="my-3 w-full">Skip Inspection</Button>
+              </div>
+            </div>
+          </div>
+        )}
       </Drawer>
     </div>
   );
