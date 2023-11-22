@@ -165,6 +165,17 @@ const ManageShedtable = ({ archived }) => {
       title: "Paused Status",
       dataIndex: "isPaused",
       key: "isPaused",
+      filters: [
+        {
+          text: 'Active',
+          value: false,
+        },
+        {
+          text: 'Paused',
+          value: true,
+        },
+      ],
+      onFilter: (value, record) => record.isPaused === value,
       render: (condition) => {
         return condition ? "Paused" : "Active"
       }
