@@ -1,6 +1,6 @@
 "use client";
 import { React, useState, useEffect } from "react";
-import { Button, Input, Select, Checkbox, message, TimePicker, DatePicker } from "antd";
+import { Button, Input, Select, Checkbox, message, TimePicker, DatePicker, Popconfirm } from "antd";
 import { LeftOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
@@ -23,6 +23,7 @@ function Page({ params }) {
   const [Name, setName] = useState(params.name);
   const [Assets, setAssets] = useState("");
   const [submitPressed, setsubmitPressed] = useState(false);
+  const [deletePressed, setdeletePressed] = useState(false)
   const router = useRouter();
   const [repeatAtFrequency, setrepeatAtFrequency] = useState(null);
   const [messageApi, contextHolder] = message.useMessage();
@@ -159,6 +160,7 @@ function Page({ params }) {
         body: JSON.stringify(ScheduleInspection),
       })
         .then((res) => {
+          setsubmitPressed(false);
           if (!res.ok) {
             throw new Error(`Request failed with status ${res.status}`);
           }
@@ -192,6 +194,7 @@ function Page({ params }) {
         body: JSON.stringify(ScheduleInspection),
       })
         .then((res) => {
+          setsubmitPressed(false);
           if (!res.ok) {
             throw new Error(`Request failed with status ${res.status}`);
           }
@@ -412,7 +415,7 @@ function Page({ params }) {
                   multiple
                   plugins={[<DatePanel key={"1"} position="left" />]}
                   minDate={ScheduleInspection.frequency.startDate ?? dayjs().valueOf()}
-                  maxDate={dayjs(ScheduleInspection.frequency.endDate).add(1, "day").valueOf}
+                  maxDate={dayjs(ScheduleInspection.frequency.endDate).valueOf()}
                 />
               </div>
             )}
@@ -475,7 +478,30 @@ function Page({ params }) {
               </Button>
             </div>
             <div className="flex flex-row gap-3">
-              <Button danger>Delete</Button>
+              <Popconfirm
+                title="Delete the schedule"
+                description="Are you sure to delete this schedule?"
+                onConfirm={() => {
+                  setdeletePressed(true)
+                  fetch(`https://digifield.onrender.com/schedule/delete-schedule/${Name}`, { method: "DELETE" })
+                    .then((res) => res.json())
+                    .then((data) => {
+                      if (!data.acknowledge) {
+                        setdeletePressed(false)
+                        err("Unable to delete the schedule");
+                      } else {
+                        success(`${decodeURI(Name)} schedule has been deleted`)
+                        setTimeout(() => {
+                          router.push('/schedule');
+                      }, 1000);
+                      }
+                    });
+                }}
+                okText="Yes"
+                cancelText="No"
+              >
+                <Button disabled={deletePressed} loading={deletePressed} danger>Delete</Button>
+              </Popconfirm>
             </div>
           </div>
         </div>
